@@ -32,7 +32,7 @@ Success: the user switches to `stardew` and it reads as a cozy farm-game window 
 
 ## Anti-goals
 
-- Nothing from Stardew Valley itself: no sprites, characters, UI, logo or fonts from the game. The farmer portrait is original. This rule from the first spec still holds.
+- Nothing from Stardew Valley itself: no sprites, characters, UI, logo or fonts from the game. The portrait is the user's own picture of themselves, supplied by them. This rule from the first spec still holds.
 - Nothing may move when day flips to night. Only colors and images swap, so nothing jumps under the mouse.
 - The terminals must stay readable on both scenes; scenery is decoration, not a fight with the text.
 
@@ -46,6 +46,7 @@ Success: the user switches to `stardew` and it reads as a cozy farm-game window 
 | Background | Full scenery: clouds, mountains, field, road at the bottom |
 | Settled tabs | Not in the strip; listed dimmed at the bottom of the "more" popup |
 | "+ space" | Ask for a folder first, then create the space there |
+| Portrait | The user's own pixel portrait, first tile of the supplied grid |
 
 ## The window, top to bottom
 
@@ -79,7 +80,7 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
 
 - Sits on the road. The hotbar block's own background image goes; the main scenery's road continues behind it. If block backgrounds still can't be set separately (see below), the builder picks how the road reaches the hotbar, for example a road strip image on the hotbar block or the scenery extending under it.
 - One wooden box, centered, left to right:
-  - **Portrait**: an original farmer face (straw hat, red band) in a framed square, with a sky-gradient backdrop. Night: same farmer in a nightcap.
+  - **Portrait**: the user's own pixel portrait, the first (top-left, yellow sweater) of the grid in `~/Downloads/Pixel Portrait Grid of a Bearded Farmer.png` (1536x1024, the first tile is roughly x 12 to 503, y 14 to 500; trim the white gutter exactly). Crop it, copy it into the mod as `mods/stardew/art/portrait.png`, and show it in a framed square (user's decision). It replaces the drawn farmer from the mock. Same picture day and night; at night only the frame trim changes to gold (my call; a darkened tint is the builder's option if it looks too bright on the night bar).
   - Divider.
   - **Space slots** as today (click switches, red frame on the active one, tooltip lists agents, ctrl-1..9 key labels), but each slot shows a **crop icon** and its short label, with the status dot in the corner. Crop is picked from a fixed list (sprout, carrot, pumpkin, wheat, berry) by a hash of the space id, so a space keeps its crop when others are closed or moved (my call; two spaces may share a crop).
   - Divider.

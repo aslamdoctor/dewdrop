@@ -252,38 +252,6 @@ function clock() {
     rect(5, 5, w - 10, h - 10, KEY.K) + rect(6, 6, w - 12, h - 12, C.parchment) + rect(split, 6, 2, h - 12, C.wood))];
 }
 
-// Farm, 960x600: grass with tufts, a tilled plot of soil rows, fence posts around the edge.
-function farm() {
-  const W = 960, H = 600, PX = 8;
-  let seed = 7;
-  const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
-  let body = rect(0, 0, W, H, C.grassDark);
-  for (let i = 0; i < 260; i++) {
-    const x = Math.floor(rnd() * (W / PX)) * PX, y = Math.floor(rnd() * (H / PX)) * PX;
-    body += rect(x, y, PX, PX, C.grass) + rect(x + PX, y - PX, PX, PX, C.grass);
-  }
-  // Tilled plot, lower middle.
-  const px0 = 352, py0 = 344, cols = 8, rows = 4;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const x = px0 + c * 32, y = py0 + r * 32;
-      body += rect(x, y, 30, 28, C.soil) + rect(x, y, 30, 4, C.wood);
-      if ((r + c) % 3 === 0) body += rect(x + 12, y + 8, 6, 10, C.grass) + rect(x + 8, y + 10, 4, 4, C.grass);
-    }
-  }
-  // Fence: posts every 64px on all four edges, two rails between them.
-  const post = (x, y) => rect(x, y, 16, 32, C.wood) + rect(x, y, 16, 4, C.woodLight) + rect(x + 14, y, 2, 32, C.soil);
-  for (const y of [8, H - 40]) {
-    body += rect(0, y + 8, W, 4, C.woodLight) + rect(0, y + 20, W, 4, C.woodLight);
-    for (let x = 8; x < W; x += 64) body += post(x, y);
-  }
-  for (const x of [8, W - 24]) {
-    body += rect(x + 4, 0, 4, H, C.woodLight);
-    for (let y = 72; y < H - 64; y += 64) body += post(x, y);
-  }
-  return ["farm", svg(W, H, body)];
-}
-
 mkdirSync(OUT, { recursive: true });
-for (const [name, src] of [...sprites, slot(), plank(), clock(), farm()]) writeFileSync(`${OUT}${name}.svg`, src);
-console.log("drew", sprites.length + 4, "sprites into", OUT);
+for (const [name, src] of [...sprites, slot(), plank(), clock()]) writeFileSync(`${OUT}${name}.svg`, src);
+console.log("drew", sprites.length + 3, "sprites into", OUT);

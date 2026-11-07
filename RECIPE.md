@@ -1,6 +1,6 @@
 # Stardew Herdr
 
-A farm-game look for the Herdr desktop app. A wooden title bar carries a clock box with the day, time and season, and the count of working agents sits where a farm game shows your gold. Terminals are dark soil plots with plank headers on a grass field, every space is an inventory slot in a hotbar along the bottom, and a small chicken in the corner reacts when an agent finishes or gets blocked. All the art is original pixel art drawn for this layout.
+A farm-game look for the Herdr desktop app. A wooden title bar carries a clock box with the day, time and season, and the count of working agents sits where a farm game shows your gold. Terminals are dark soil plots with plank headers on a grass field, every space is an inventory slot in a hotbar along the bottom, and a small chicken in the corner reacts when an agent finishes or gets blocked. The UI art (wood, clock, icons, chicken) is original pixel art drawn for this layout. The farm and hotbar grass come from the free PixelFarm tiles by LushMustache (CC0).
 
 ![Stardew Herdr](preview.png)
 
@@ -14,10 +14,10 @@ Top to bottom:
   - a gold chip, 24px tall, soil fill with a 1px wood-light border, a 16px watering can and the number of working agents in 14px gold;
   - a 176x36 clock box drawn as a parchment panel with a divider at x=120. The left part shows the day and time ("Sat. 7  7:04 pm") in 13px soil, the right part the season ("Fall") in 12px wood.
   The whole bar drags the window.
-- **Field.** The tab area has a farm background (grass with tufts, a tilled plot and a fence, `cover` fit) and 16px padding. Panes are soil `#2b1d14` with a 3px wood border, 3px wood light when focused, square corners, 10px gaps, terminal opacity 1 and 8x4 terminal padding. A lone pane keeps its frame.
+- **Field.** The tab area has a farm background built from PixelFarm tiles (grass, planted fields, trees and bushes along the edges, `cover` fit) and 16px padding. Panes are soil `#2b1d14` with a 3px wood border, 3px wood light when focused, square corners, 10px gaps, terminal opacity 1 and 8x4 terminal padding. A lone pane keeps its frame.
 - **Pane header, 26px, always shown.** A wood plank with a 2px wood-light top line: a 16px status icon, the pane title in 13px (parchment when the pane is focused, soil when not), then 18px zoom and close buttons. The title is the program name, plus the terminal title when it differs ("claude - fix tests"). Shells show the working directory with home written as `~`.
 - **Chicken.** A 32px white chicken floats at the field's bottom-right corner.
-- **Hotbar, 64px.** A centered wood box with a 3px wood-light border holding one 48px slot per space, 4px apart. Each slot shows the space's first four letters in 12px parchment, its number (1 to 9, matching Herdr's `ctrl-1` to `ctrl-9` space shortcuts; slots past 9 get none) at the top-left in 10px wood light, and the space's status icon at 14px top-right. The shown space has a 3px red frame.
+- **Hotbar, 64px.** A strip of PixelFarm grass with planted beds on both sides, and on it a centered wood box with a 3px wood-light border holding one 48px slot per space, 4px apart. Each slot shows the space's first four letters in 12px parchment, its number (1 to 9, matching Herdr's `ctrl-1` to `ctrl-9` space shortcuts; slots past 9 get none) at the top-left in 10px wood light, and the space's status icon at 14px top-right. The shown space has a 3px red frame.
 
 The theme matches: soil background, parchment text, wood chrome, dark wood `#3a2718` surfaces, grass accent.
 
@@ -45,13 +45,14 @@ Layout `layouts/stardew.json`, a column:
   { "id": "titlebar", "type": "block", "size": { "px": 40 }, "window_drag": true,
     "content": { "mod": "stardew", "props": { "role": "titlebar" } } },
   { "id": "main", "type": "block", "padding": [16, 16],
-    "background": { "image": "mods/stardew/art/farm.svg", "fit": "cover" },
+    "background": { "image": "mods/stardew/art/farm.png", "fit": "cover" },
     "content": { "tab": "active", "pane": {
       "gap": 10, "radius": 0, "background": "#2b1d14",
       "border": { "width": 3, "color": "#8a5a2b" }, "focus": { "width": 3, "color": "#c58b4e" }, "lone": true,
       "header": { "content": { "mod": "stardew", "props": { "role": "header" } }, "height": 26, "position": "top", "reveal": "always" } } },
     "floating": [{ "id": "chicken", "content": { "mod": "stardew", "props": { "role": "chicken" } }, "edge": "right", "align": "end" }] },
   { "id": "hotbar", "type": "block", "size": { "px": 64 },
+    "background": { "image": "mods/stardew/art/hotbar-field.png", "fit": "cover" },
     "content": { "mod": "stardew", "props": { "role": "hotbar" } } } ],
   "theme": "stardew", "font": "Geist Mono", "font_size": 14, "ui_font": "Pixelify Sans",
   "terminal_padding": [8, 4], "terminal_opacity": 1, "background": "#2b1d14",
@@ -71,9 +72,9 @@ One mod, `mods/stardew/`, drawn by role (`props.role`):
 | `chicken.js` | chicken; `agents()`, `cx.timer.after(4000)`, runs `agent.focus {terminal}` |
 | `logic.js` | pure helpers (clock text, season, status looks, slot labels, tooltip text, header title, chicken mood), tested with `bun test` |
 | `palette.js` | the only place the hex values live |
-| `art.js` | `art(name)` gives `mods/stardew/art/<name>.svg` |
+| `art.js` | `art(name)` gives `mods/stardew/art/<name>.svg`, `png(name)` the `.png` |
 
-Art: 14 SVGs in `mods/stardew/art/`, all `shape-rendering="crispEdges"` and palette colors only (plus black and white): `can-0`, `can-1`, `bang`, `star`, `zzz`, `heart`, `chicken-0` (standing), `chicken-1` (pecking), `btn-zoom`, `btn-close`, `slot`, `plank`, `clock` (176x36) and `farm` (960x600). `scripts/draw-art.js` generates them all; rerun with `bun scripts/draw-art.js`. The font is `mods/stardew/fonts/PixelifySans.ttf` with its `OFL.txt`; fonts in a mod's `fonts/` folder load on their own.
+Art: 13 SVGs in `mods/stardew/art/`, all `shape-rendering="crispEdges"` and palette colors only (plus black and white): `can-0`, `can-1`, `bang`, `star`, `zzz`, `heart`, `chicken-0` (standing), `chicken-1` (pecking), `btn-zoom`, `btn-close`, `slot`, `plank` and `clock` (176x36). `scripts/draw-art.js` generates them; rerun with `bun scripts/draw-art.js`. Two PNGs, `farm.png` (960x608) and `hotbar-field.png` (1920x64), come from `scripts/compose-farm.js`, which crops 16px tiles out of the PixelFarm sheets in `assets/pixelfarm/` with ImageMagick and scales them 2x with point filtering; rerun with `bun scripts/compose-farm.js`. `mods/stardew/art/CREDITS.md` names the source and license. The font is `mods/stardew/fonts/PixelifySans.ttf` with its `OFL.txt`; fonts in a mod's `fonts/` folder load on their own.
 
 No shipped mods. It runs no programs, makes no network calls and reads no files outside its own folder.
 
@@ -82,7 +83,8 @@ No shipped mods. It runs no programs, makes no network calls and reads no files 
 - Install by copying, not symlinking: Herdr 0.1.13 doesn't hot-reload files behind a symlink. `scripts/install.sh` copies the layout, preview, theme and mod into `~/.config/herdr-app/` (`--remove` takes them out). Rerun it after each edit.
 - `h_flex` and `v_flex` come from `"gpui-base"`, not `"gpui-kit"`. `div` and `image` come from `"gpui-kit"`.
 - `.frames()` takes strings only. Animate images with `.loop("opacity" | "top", { from, to, period })` instead.
-- gpui-kit can't tile an image, so the farm is one 960x600 picture with `fit: "cover"`.
+- gpui-kit can't tile an image, so the farm is one 960x608 picture and the hotbar one 1920x64 strip, both `fit: "cover"`. Cover crops the strip's ends on narrow windows, so its planted beds sit between 320 and 1600 (at 2x) where a 1280px window still shows them.
+- The PixelFarm grass is a teal green, not the palette's `#6ab04c`; the asset palette test only checks the SVGs.
 - With the app in front, a finished agent goes straight from working to idle and never reports done. Count working to idle as finished, or the heart never shows.
 - The title bar must be 40px. At 36px the 36px clock box and the bar's top line get clipped.
 - Floats get Herdr's own rounded frame, so the chicken sits in a small box.

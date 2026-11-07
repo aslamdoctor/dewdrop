@@ -24,7 +24,7 @@
         16
       ],
       "background": {
-        "image": "mods/stardew/art/farm.svg",
+        "image": "mods/stardew/art/farm.png",
         "fit": "cover"
       },
       "content": {
@@ -80,6 +80,10 @@
         "props": {
           "role": "hotbar"
         }
+      },
+      "background": {
+        "image": "mods/stardew/art/hotbar-field.png",
+        "fit": "cover"
       }
     }
   ],

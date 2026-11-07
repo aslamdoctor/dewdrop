@@ -6,8 +6,9 @@
 
 import { View, div } from "gpui-kit";
 import { props } from "herdr";
+import Titlebar from "./titlebar.js";
 
-const ROLES = {};
+const ROLES = { titlebar: Titlebar };
 
 export default class Stardew extends View {
   init(p, cx) {

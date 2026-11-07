@@ -38,7 +38,18 @@
             "width": 3,
             "color": "#c58b4e"
           },
-          "lone": true
+          "lone": true,
+          "header": {
+            "content": {
+              "mod": "stardew",
+              "props": {
+                "role": "header"
+              }
+            },
+            "height": 26,
+            "position": "top",
+            "reveal": "always"
+          }
         }
       }
     },

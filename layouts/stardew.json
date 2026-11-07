@@ -23,7 +23,10 @@
         16,
         16
       ],
-      "background": "#3f6b2a",
+      "background": {
+        "image": "mods/stardew/art/farm.svg",
+        "fit": "cover"
+      },
       "content": {
         "tab": "active",
         "pane": {
@@ -51,7 +54,20 @@
             "reveal": "always"
           }
         }
-      }
+      },
+      "floating": [
+        {
+          "id": "chicken",
+          "content": {
+            "mod": "stardew",
+            "props": {
+              "role": "chicken"
+            }
+          },
+          "edge": "right",
+          "align": "end"
+        }
+      ]
     },
     {
       "id": "hotbar",

@@ -73,3 +73,14 @@ test("chickenMood: blocked wins, repeats and vanished agents ignored", () => {
   const gone = chickenMood(new Map([["t9", "working"]]), []);
   expect([...gone.next.keys()]).toEqual([]);
 });
+
+test("chickenMood: working to idle counts as finishing", () => {
+  expect(chickenMood(new Map([["t1", "working"]]), [{ address: "t1", status: "idle" }])).toMatchObject({ mood: "heart", address: "t1" });
+  expect(chickenMood(new Map([["t1", "done"]]), [{ address: "t1", status: "idle" }]).mood).toBeNull();
+});
+
+test("chickenMood: agents seen for the first time stay quiet", () => {
+  const r = chickenMood(new Map(), [{ address: "t1", status: "done" }, { address: "t2", status: "blocked" }]);
+  expect(r.mood).toBeNull();
+  expect(r.next.get("t2")).toBe("blocked");
+});

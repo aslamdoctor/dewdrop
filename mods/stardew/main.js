@@ -9,8 +9,9 @@ import { props } from "herdr";
 import Titlebar from "./titlebar.js";
 import Header from "./header.js";
 import Hotbar from "./hotbar.js";
+import Chicken from "./chicken.js";
 
-const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar };
+const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar, chicken: Chicken };
 
 export default class Stardew extends View {
   init(p, cx) {

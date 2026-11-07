@@ -68,15 +68,19 @@ export function headerTitle(pane, home) {
 }
 
 // Returns the mood for this poll, the agent that caused it, and the status map to pass next time.
+// Herdr reports a finished agent as "done" only while nobody is looking; with
+// the app in front it goes straight from "working" to "idle", so both count.
+// An agent seen for the first time (a reload, a new terminal) stays quiet.
 export function chickenMood(prev, agents) {
   const next = new Map();
   let alert = null;
   let heart = null;
   for (const a of agents) {
     next.set(a.address, a.status);
-    if (prev.get(a.address) === a.status) continue;
+    const was = prev.get(a.address);
+    if (was === undefined || was === a.status) continue;
     if (a.status === "blocked") alert ??= a.address;
-    else if (a.status === "done") heart ??= a.address;
+    else if (a.status === "done" || (a.status === "idle" && was === "working")) heart ??= a.address;
   }
   if (alert) return { mood: "alert", address: alert, next };
   if (heart) return { mood: "heart", address: heart, next };

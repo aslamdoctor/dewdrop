@@ -35,9 +35,11 @@ export default class Chicken {
     }
 
     const bird = div().id("stardew-chicken").relative().flex_none().w(32).h(32)
-      .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
-      .on_click(() => { if (this.address) run("agent.focus", { terminal: this.address }); })
-      .when(Boolean(this.address), (el) => el.cursor_pointer())
+      // Only swallow the press while a heart or "!" is up and a click means
+      // something; otherwise the press drags the float out of the way.
+      .when(Boolean(this.address), (el) => el.cursor_pointer()
+        .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
+        .on_click(() => run("agent.focus", { terminal: this.address })))
       .child(image(art(this.mood ? "chicken-0" : "chicken-1")).w(32).h(32)
         .when(!this.mood, (el) => el.loop("top", { from: 0, to: 2, period: 900 })));
 

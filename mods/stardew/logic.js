@@ -36,7 +36,8 @@ export function statusLook(status) {
   return LOOKS[status] ?? null;
 }
 
-export const HOTBAR_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="];
+// Herdr binds ctrl-1..ctrl-9 to space.select, so only the first nine slots get a key.
+export const HOTBAR_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 export function slotLabel(name) {
   return (name ?? "").slice(0, 4).trim() || "?";
@@ -85,4 +86,12 @@ export function chickenMood(prev, agents) {
   if (alert) return { mood: "alert", address: alert, next };
   if (heart) return { mood: "heart", address: heart, next };
   return { mood: null, address: null, next };
+}
+
+// Clock box geometry, shared by the title bar and scripts/draw-art.js.
+export const CLOCK = { w: 176, h: 36, split: 120 };
+
+// Delay to 50ms past the next minute, so a tick never lands just before the boundary.
+export function msToNextMinute(now) {
+  return (60 - now.getSeconds()) * 1000 - now.getMilliseconds() + 50;
 }

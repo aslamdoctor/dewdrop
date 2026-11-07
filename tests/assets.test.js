@@ -17,6 +17,7 @@ test("theme uses the palette", () => {
 
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { art, ART } from "../mods/stardew/art.js";
+import { CLOCK } from "../mods/stardew/logic.js";
 
 const ART_DIR = new URL("../mods/stardew/art/", import.meta.url).pathname;
 const FONT_DIR = new URL("../mods/stardew/fonts/", import.meta.url).pathname;
@@ -51,4 +52,14 @@ test("sprites are crisp SVGs in palette colors", () => {
 test("Pixelify Sans and its license are bundled", () => {
   expect(statSync(FONT_DIR + "PixelifySans.ttf").size).toBeGreaterThan(10 * 1024);
   expect(existsSync(FONT_DIR + "OFL.txt")).toBe(true);
+});
+
+test("status icons have a black outline so they read on wood", () => {
+  for (const n of ["can-1", "bang", "star", "zzz"]) {
+    expect(readFileSync(`${ART_DIR}${n}.svg`, "utf8")).toContain("#000000");
+  }
+});
+
+test("clock.svg is as wide as the clock box", () => {
+  expect(readFileSync(`${ART_DIR}clock.svg`, "utf8")).toContain(`width="${CLOCK.w}"`);
 });

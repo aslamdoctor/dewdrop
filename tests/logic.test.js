@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { seasonOf, clockText, workingCount, statusLook, HOTBAR_KEYS, slotLabel, hotbarSlots,
-  slotTooltip, headerTitle, chickenMood } from "../mods/stardew/logic.js";
+  slotTooltip, headerTitle, chickenMood, msToNextMinute, CLOCK } from "../mods/stardew/logic.js";
 
 test("seasonOf flips on month boundaries", () => {
   expect(seasonOf(new Date(2026, 1, 28))).toBe("winter");
@@ -35,14 +35,12 @@ test("slotLabel takes four characters", () => {
   expect(slotLabel("")).toBe("?");
 });
 
-test("hotbarSlots keys the first 12 only", () => {
+test("hotbarSlots handles 0 and 13 spaces", () => {
   expect(hotbarSlots([])).toEqual([]);
   const spaces = Array.from({ length: 13 }, (_, i) => ({ id: `s${i}`, name: `space${i}`, active: i === 0, status: null }));
   const slots = hotbarSlots(spaces);
   expect(slots).toHaveLength(13);
-  expect(HOTBAR_KEYS).toHaveLength(12);
   expect(slots[0]).toEqual({ id: "s0", label: "spac", key: "1", active: true, status: null });
-  expect(slots[11].key).toBe("=");
   expect(slots[12].key).toBeNull();
 });
 
@@ -83,4 +81,23 @@ test("chickenMood: agents seen for the first time stay quiet", () => {
   const r = chickenMood(new Map(), [{ address: "t1", status: "done" }, { address: "t2", status: "blocked" }]);
   expect(r.mood).toBeNull();
   expect(r.next.get("t2")).toBe("blocked");
+});
+
+test("hotbar keys stop at 9, the ctrl-1..ctrl-9 space shortcuts", () => {
+  expect(HOTBAR_KEYS).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9"]);
+  const slots = hotbarSlots(Array.from({ length: 10 }, (_, i) => ({ id: `s${i}`, name: "x", active: false, status: null })));
+  expect(slots[8].key).toBe("9");
+  expect(slots[9].key).toBeNull();
+});
+
+test("msToNextMinute lands just past the next minute boundary", () => {
+  expect(msToNextMinute(new Date(2026, 10, 7, 19, 4, 0, 0))).toBe(60050);
+  expect(msToNextMinute(new Date(2026, 10, 7, 19, 4, 59, 990))).toBe(60);
+  expect(msToNextMinute(new Date(2026, 10, 7, 19, 4, 30, 0))).toBe(30050);
+});
+
+// Widest text in Pixelify Sans: "Wed. 30  12:59 pm" at 13px is 103.1px, "Summer" at 12px is 46.5px.
+test("clock box leaves room for the widest day, time and season", () => {
+  expect(CLOCK.split - 8 - 2).toBeGreaterThanOrEqual(104);
+  expect(CLOCK.w - CLOCK.split - 2 - 6).toBeGreaterThanOrEqual(48);
 });

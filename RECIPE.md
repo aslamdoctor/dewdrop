@@ -12,12 +12,12 @@ Top to bottom:
 
 - **Title bar, 40px.** Flat wood with a 2px wood-light line along the top. It leaves 80px on the left for the traffic lights (placed at 14, 11), then "Stardew Herdr" in 14px parchment. On the right:
   - a gold chip, 24px tall, soil fill with a 1px wood-light border, a 16px watering can and the number of working agents in 14px gold;
-  - a 160x36 clock box drawn as a parchment panel with a divider at x=112. The left part shows the day and time ("Sat. 7  7:04 pm") in 13px soil, the right part the season ("Fall") in 12px wood.
+  - a 176x36 clock box drawn as a parchment panel with a divider at x=120. The left part shows the day and time ("Sat. 7  7:04 pm") in 13px soil, the right part the season ("Fall") in 12px wood.
   The whole bar drags the window.
 - **Field.** The tab area has a farm background (grass with tufts, a tilled plot and a fence, `cover` fit) and 16px padding. Panes are soil `#2b1d14` with a 3px wood border, 3px wood light when focused, square corners, 10px gaps, terminal opacity 1 and 8x4 terminal padding. A lone pane keeps its frame.
 - **Pane header, 26px, always shown.** A wood plank with a 2px wood-light top line: a 16px status icon, the pane title in 13px (parchment when the pane is focused, soil when not), then 18px zoom and close buttons. The title is the program name, plus the terminal title when it differs ("claude - fix tests"). Shells show the working directory with home written as `~`.
 - **Chicken.** A 32px white chicken floats at the field's bottom-right corner.
-- **Hotbar, 64px.** A centered wood box with a 3px wood-light border holding one 48px slot per space, 4px apart. Each slot shows the space's first four letters in 12px parchment, its shortcut key (1 to 9, 0, -, =) at the top-left in 10px wood light, and the space's status icon at 14px top-right. The shown space has a 3px red frame.
+- **Hotbar, 64px.** A centered wood box with a 3px wood-light border holding one 48px slot per space, 4px apart. Each slot shows the space's first four letters in 12px parchment, its number (1 to 9, matching Herdr's `ctrl-1` to `ctrl-9` space shortcuts; slots past 9 get none) at the top-left in 10px wood light, and the space's status icon at 14px top-right. The shown space has a 3px red frame.
 
 The theme matches: soil background, parchment text, wood chrome, dark wood `#3a2718` surfaces, grass accent.
 
@@ -30,11 +30,11 @@ The theme matches: soil background, parchment text, wood chrome, dark wood `#3a2
 | done | star | gold `#f2c14e` |
 | idle | "Zzz" | idle brown `#9c7b5b` |
 
-- The clock updates on the minute. Season comes from the month: March to May spring, June to August summer, September to November fall, the rest winter.
+- The clock updates on the minute, re-aiming at the next minute each tick so it never drifts. Season comes from the month: March to May spring, June to August summer, September to November fall, the rest winter.
 - The gold chip counts agents whose status is working, across all spaces.
 - Header: a click focuses the pane, a double-click zooms it. The zoom button zooms or restores (its tooltip says which), the close button closes the pane.
 - Hotbar: a click switches to that space. Hovering shows the space name and one line per agent ("claude: working"), or "no agents". Past 12 spaces the row scrolls sideways.
-- Chicken: it bobs 2px while it pecks, once every 0.9s. When an agent becomes blocked it stands still with a red "!" above it; when an agent finishes (goes to done, or from working to idle) it shows a heart. Either one floats up and down 4px and lasts 4 seconds, a newer event restarts the 4 seconds, and blocked wins over finished when both happen at once. While a heart or "!" shows, clicking the chicken focuses that agent. Agents it sees for the first time (after a reload, or a new terminal) don't set it off. It plays no sounds, so your own done and blocked sounds stay as they are.
+- Chicken: it bobs 2px while it pecks, once every 0.9s. When an agent becomes blocked it stands still with a red "!" above it; when an agent finishes (goes to done, or from working to idle) it shows a heart. Either one floats up and down 4px and lasts 4 seconds, a newer event restarts the 4 seconds, and blocked wins over finished when both happen at once. While a heart or "!" shows, clicking the chicken focuses that agent; the rest of the time a press on it drags the float aside. Agents it sees for the first time (after a reload, or a new terminal) don't set it off. It plays no sounds, so your own done and blocked sounds stay as they are.
 
 ## Built from
 
@@ -65,7 +65,7 @@ One mod, `mods/stardew/`, drawn by role (`props.role`):
 | File | Role |
 |------|------|
 | `main.js` | picks the role class from `ROLES` |
-| `titlebar.js` | title bar; `agents()`, a minute-aligned `cx.timer.after` then `cx.timer.every(60000)` |
+| `titlebar.js` | title bar; `agents()`, a `cx.timer.after` re-armed each minute to just past the boundary |
 | `header.js` | pane header; `panes()`, `props().pane`, `home()`, runs `pane.focus`, `pane.zoom`, `pane.close` |
 | `hotbar.js` | hotbar; `spaces()`, `agents()`, runs `space.select {id}` |
 | `chicken.js` | chicken; `agents()`, `cx.timer.after(4000)`, runs `agent.focus {terminal}` |
@@ -73,7 +73,7 @@ One mod, `mods/stardew/`, drawn by role (`props.role`):
 | `palette.js` | the only place the hex values live |
 | `art.js` | `art(name)` gives `mods/stardew/art/<name>.svg` |
 
-Art: 14 SVGs in `mods/stardew/art/`, all `shape-rendering="crispEdges"` and palette colors only (plus black and white): `can-0`, `can-1`, `bang`, `star`, `zzz`, `heart`, `chicken-0` (standing), `chicken-1` (pecking), `btn-zoom`, `btn-close`, `slot`, `plank`, `clock` (160x36) and `farm` (960x600). `scripts/draw-art.js` generates them all; rerun with `bun scripts/draw-art.js`. The font is `mods/stardew/fonts/PixelifySans.ttf` with its `OFL.txt`; fonts in a mod's `fonts/` folder load on their own.
+Art: 14 SVGs in `mods/stardew/art/`, all `shape-rendering="crispEdges"` and palette colors only (plus black and white): `can-0`, `can-1`, `bang`, `star`, `zzz`, `heart`, `chicken-0` (standing), `chicken-1` (pecking), `btn-zoom`, `btn-close`, `slot`, `plank`, `clock` (176x36) and `farm` (960x600). `scripts/draw-art.js` generates them all; rerun with `bun scripts/draw-art.js`. The font is `mods/stardew/fonts/PixelifySans.ttf` with its `OFL.txt`; fonts in a mod's `fonts/` folder load on their own.
 
 No shipped mods. It runs no programs, makes no network calls and reads no files outside its own folder.
 
@@ -88,7 +88,10 @@ No shipped mods. It runs no programs, makes no network calls and reads no files 
 - Floats get Herdr's own rounded frame, so the chicken sits in a small box.
 - Tooltips use the theme's surface color (dark wood `#3a2718` with parchment text), not a parchment panel.
 - Controls inside the drag bar or a float need `on_mouse_down("left", (_e, cx) => cx.stop_propagation())`, or the press drags the window instead of clicking.
-- Unfocused header text in idle brown is unreadable on wood; use soil.
+- Unfocused header text in idle brown is unreadable on wood; use soil. For the same reason every status icon, Zzz included, has a black outline.
+- The clock box must be 176px wide with the divider at x=120. Narrower, "Summer" and "Winter" (and the widest dates like "Wed. 30  12:59 pm") get cut off.
+- The chicken float sits 12px in from the field edge, so it covers the bottom-right corner of the bottom-right pane, and clicks there never reach the terminal. It only catches the press while a heart or "!" shows; otherwise dragging it moves it out of the way.
+- Don't use `cx.timer.every(60000)` for the clock. Its interval runs from the end of each call, so it slowly drifts off the minute.
 - Twelve slots fit before the hotbar scrolls. An active slot past 12 isn't scrolled into view.
 
 ## Done when

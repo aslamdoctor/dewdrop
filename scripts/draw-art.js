@@ -2,6 +2,7 @@
 // Every sprite is original: small grids drawn by hand below, scenery drawn by code.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { C } from "../mods/stardew/palette.js";
+import { CLOCK } from "../mods/stardew/logic.js";
 
 const OUT = new URL("../mods/stardew/art/", import.meta.url).pathname;
 const KEY = {
@@ -14,6 +15,16 @@ const svg = (w, h, body) =>
 const rect = (x, y, w, h, c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
 
 // Grid sprite: one string per row, "." is transparent. Runs of a color merge into one rect.
+// Rings every colored pixel with black, so a sprite drawn in one color still reads on wood.
+function outlined(rows) {
+  const at = (x, y) => rows[y]?.[x] ?? ".";
+  return rows.map((row, y) => [...row].map((ch, x) => {
+    if (ch !== ".") return ch;
+    const near = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => ![".", "K"].includes(at(x + dx, y + dy)));
+    return near ? "K" : ".";
+  }).join(""));
+}
+
 function grid(name, rows, scale = 1) {
   const width = rows[0].length;
   let body = "";
@@ -106,7 +117,7 @@ const sprites = [
     "..KKK......KKK..",
     "................",
   ]),
-  grid("zzz", [
+  grid("zzz", outlined([
     "................",
     "........IIIIII..",
     "...........II...",
@@ -123,7 +134,7 @@ const sprites = [
     "...II...........",
     "..IIIIIIII......",
     "................",
-  ]),
+  ])),
   grid("heart", [
     "................",
     "................",
@@ -233,11 +244,12 @@ function plank() {
     rect(3, 6, 2, 2, KEY.K) + rect(59, 6, 2, 2, KEY.K) + rect(62, 2, 2, 12, C.soil))];
 }
 
-// Clock box, 160x36: framed parchment panel with a divider before the season cell.
+// Clock box, CLOCK.w x 36: framed parchment panel with a divider before the season cell.
 function clock() {
-  return ["clock", svg(160, 36,
-    rect(0, 0, 160, 36, KEY.K) + rect(2, 2, 156, 32, C.wood) + rect(2, 2, 156, 2, C.woodLight) +
-    rect(5, 5, 150, 26, KEY.K) + rect(6, 6, 148, 24, C.parchment) + rect(112, 6, 2, 24, C.wood))];
+  const { w, h, split } = CLOCK;
+  return ["clock", svg(w, h,
+    rect(0, 0, w, h, KEY.K) + rect(2, 2, w - 4, h - 4, C.wood) + rect(2, 2, w - 4, 2, C.woodLight) +
+    rect(5, 5, w - 10, h - 10, KEY.K) + rect(6, 6, w - 12, h - 12, C.parchment) + rect(split, 6, 2, h - 12, C.wood))];
 }
 
 // Farm, 960x600: grass with tufts, a tilled plot of soil rows, fence posts around the edge.

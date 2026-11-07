@@ -8,8 +8,9 @@ import { View, div } from "gpui-kit";
 import { props } from "herdr";
 import Titlebar from "./titlebar.js";
 import Header from "./header.js";
+import Hotbar from "./hotbar.js";
 
-const ROLES = { titlebar: Titlebar, header: Header };
+const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar };
 
 export default class Stardew extends View {
   init(p, cx) {

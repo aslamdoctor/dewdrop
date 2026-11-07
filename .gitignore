@@ -1,0 +1,4 @@
+node_modules/
+*.error
+herdr-shot.png
+.superpowers/

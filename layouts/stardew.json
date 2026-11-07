@@ -1,0 +1,46 @@
+{
+  "id": "root",
+  "type": "column",
+  "children": [
+    {
+      "id": "titlebar",
+      "type": "block",
+      "size": { "px": 36 },
+      "window_drag": true,
+      "content": { "mod": "stardew", "props": { "role": "titlebar" } }
+    },
+    {
+      "id": "main",
+      "type": "block",
+      "padding": [16, 16],
+      "background": "#3f6b2a",
+      "content": {
+        "tab": "active",
+        "pane": {
+          "gap": 10,
+          "radius": 0,
+          "background": "#2b1d14",
+          "border": { "width": 3, "color": "#8a5a2b" },
+          "focus": { "width": 3, "color": "#c58b4e" },
+          "lone": true
+        }
+      }
+    },
+    {
+      "id": "hotbar",
+      "type": "block",
+      "size": { "px": 64 },
+      "content": { "mod": "stardew", "props": { "role": "hotbar" } }
+    }
+  ],
+  "theme": "stardew",
+  "font": "Geist Mono",
+  "font_size": 14,
+  "ui_font": "Pixelify Sans",
+  "terminal_padding": [8, 4],
+  "terminal_opacity": 1,
+  "background": "#2b1d14",
+  "titlebar": "none",
+  "traffic_lights": [14, 11],
+  "preview": "layouts/stardew.svg"
+}

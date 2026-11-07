@@ -1,0 +1,6 @@
+{
+  "name": "herdr-layout-stardew",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "bun test" }
+}

@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { seasonOf, clockText, workingCount, statusLook, HOTBAR_KEYS, slotLabel, hotbarSlots,
-  slotTooltip, headerTitle, chickenMood, msToNextMinute, CLOCK, lookOf, tabStrip, agentCounts } from "../mods/dewdrop/logic.js";
+  slotTooltip, cropOf, CROPS, msToNextLook, headerTitle, chickenMood, msToNextMinute, CLOCK, lookOf, tabStrip, agentCounts } from "../mods/dewdrop/logic.js";
 
 test("lookOf flips at 6:00 and 18:00", () => {
   expect(lookOf(new Date(2026, 10, 8, 5, 59))).toBe("night");
@@ -48,7 +48,7 @@ test("hotbarSlots handles 0 and 13 spaces", () => {
   const spaces = Array.from({ length: 13 }, (_, i) => ({ id: `s${i}`, name: `space${i}`, active: i === 0, status: null }));
   const slots = hotbarSlots(spaces);
   expect(slots).toHaveLength(13);
-  expect(slots[0]).toEqual({ id: "s0", label: "spac", key: "1", active: true, status: null });
+  expect(slots[0]).toEqual({ id: "s0", label: "spac", key: "1", active: true, status: null, crop: cropOf("s0") });
   expect(slots[12].key).toBeNull();
 });
 
@@ -139,4 +139,28 @@ test("tabStrip shows an active settled tab", () => {
 
 test("agentCounts counts helpers", () => {
   expect(agentCounts([{ status: "working" }, { status: "blocked" }], [{ status: "working" }])).toEqual({ working: 2, blocked: 1 });
+});
+
+test("slotLabel keeps emoji whole", () => {
+  expect(slotLabel("🚜farm")).toBe("🚜far");
+  expect(slotLabel("農場の仕事")).toBe("農場の仕");
+  expect(slotLabel("aslams-mod")).toBe("asla");
+});
+
+test("cropOf is stable and reaches every crop", () => {
+  expect(cropOf("s1")).toBe(cropOf("s1"));
+  const seen = new Set(Array.from({ length: 200 }, (_, i) => cropOf(`space-${i}`)));
+  expect([...seen].sort()).toEqual([...CROPS].sort());
+});
+
+test("slots past nine say they have no key", () => {
+  expect(slotTooltip({ id: "a", name: "farm" }, [], null).split("\n")[0]).toBe("farm (no ctrl key past nine)");
+  expect(slotTooltip({ id: "a", name: "farm" }, [], "3").split("\n")[0]).toBe("farm");
+});
+
+test("msToNextLook aims 50ms past the next 6:00 or 18:00", () => {
+  expect(msToNextLook(new Date(2026, 10, 8, 5, 0, 0, 0))).toBe(3600 * 1000 + 50);
+  expect(msToNextLook(new Date(2026, 10, 8, 6, 0, 0, 0))).toBe(12 * 3600 * 1000 + 50);
+  expect(msToNextLook(new Date(2026, 10, 8, 18, 0, 0, 0))).toBe(12 * 3600 * 1000 + 50);
+  expect(msToNextLook(new Date(2026, 10, 8, 23, 0, 0, 0))).toBe(7 * 3600 * 1000 + 50);
 });

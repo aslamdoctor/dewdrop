@@ -41,8 +41,21 @@ export function statusLook(status) {
 // Herdr binds ctrl-1..ctrl-9 to space.select, so only the first nine slots get a key.
 export const HOTBAR_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
+// Cut by code points so an emoji or a kanji is never split.
 export function slotLabel(name) {
-  return (name ?? "").slice(0, 4).trim() || "?";
+  return [...(name ?? "")].slice(0, 4).join("").trim() || "?";
+}
+
+export const CROPS = ["carrot", "pumpkin", "wheat", "sprout", "tomato", "corn"];
+
+// FNV-1a 32-bit over the id's UTF-16 code units, so a space keeps its crop.
+export function cropOf(id) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < id.length; i++) {
+    h ^= id.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return CROPS[h % CROPS.length];
 }
 
 export function hotbarSlots(spaces) {
@@ -52,12 +65,14 @@ export function hotbarSlots(spaces) {
     key: HOTBAR_KEYS[i] ?? null,
     active: s.active,
     status: s.status,
+    crop: cropOf(s.id),
   }));
 }
 
-export function slotTooltip(space, agents) {
+export function slotTooltip(space, agents, key) {
   const lines = agents.filter((a) => a.space === space.id).map((a) => `${a.program?.name ?? "agent"}: ${a.status}`);
-  return [space.name, ...(lines.length ? lines : ["no agents"])].join("\n");
+  const head = key === null ? `${space.name} (no ctrl key past nine)` : space.name;
+  return [head, ...(lines.length ? lines : ["no agents"])].join("\n");
 }
 
 export function headerTitle(pane, home) {
@@ -102,6 +117,16 @@ export function msToNextMinute(now) {
 export function lookOf(date) {
   const h = date.getHours();
   return h >= 6 && h < 18 ? "day" : "night";
+}
+
+// Delay to 50ms past the next 6:00 or 18:00 (local time), when the look flips.
+export function msToNextLook(now) {
+  const t = new Date(now);
+  for (const h of [6, 18, 30]) {
+    const at = new Date(t.getFullYear(), t.getMonth(), t.getDate(), h, 0, 0, 0);
+    if (at > t) return at - t + 50;
+  }
+  return 60000;
 }
 
 // The shipped layout and the live swap (Task 6) share these two helpers.

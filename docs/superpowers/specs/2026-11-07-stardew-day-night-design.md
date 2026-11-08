@@ -46,7 +46,12 @@ Success: the user switches to `stardew` and it reads as a cozy farm-game window 
 | Background | Full scenery: clouds, mountains, field, road at the bottom |
 | Settled tabs | Not in the strip; listed dimmed at the bottom of the "more" popup |
 | "+ space" | Ask for a folder first, then create the space there |
-| Portrait | The user's own pixel portrait, first tile of the supplied grid |
+| Portrait | The user's own pixel portrait, first tile of the supplied grid, named "Aslam Doctor" |
+| Picture picker | 25 pictures in a 5x5 grid: the user's own plus 24 drawn farmhands, each with its own scenic background |
+| Picture frames | Warm wood (`#d9a866`) with a dark brown rim (`#4a2e18`), not black; the chosen one glows gold |
+| Pets | Chicken, duck, cat, dog, rabbit, turtle, frog, or none (an empty doghouse) |
+| Agents view | Popup from the working chip: farmhands grouped by tab, helpers nested under them |
+| Busy spaces | Tabs past five fold into "more"; the agents popup scrolls; the hotbar scrolls sideways past nine spaces |
 
 ## The window, top to bottom
 
@@ -84,8 +89,36 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
   - Divider.
   - **Space slots** as today (click switches, red frame on the active one, tooltip lists agents, ctrl-1..9 key labels), but each slot shows a **crop icon** and its short label, with the status dot in the corner. Crop is picked from a fixed list (sprout, carrot, pumpkin, wheat, berry) by a hash of the space id, so a space keeps its crop when others are closed or moved (my call; two spaces may share a crop).
   - Divider.
-  - **Buttons**: "+ tab" (`tab.new`) and "+ space". "+ space" first asks for a folder with `pickFolder()`, then creates the space in it (`space.new` with that folder; check the exact command and args in `herdr.d.ts`). Cancelling the picker does nothing (user's decision). Settings stays out.
+  - **Buttons**: "+ tab" (`tab.new`) and "+ space". "+ space" first asks for a folder with `pickFolder({prompt: "Pick a folder for the new space"})`, then creates the space in it (`space.new {folder}`). Cancelling the picker (it returns `null`) does nothing (user's decision). The new space is shown and its slot appended at the end of the hotbar. Settings stays out.
+  - **Past nine spaces**: slots 10 and up have no ctrl key label (their tooltip says so). The slot strip has a fixed maximum width of nine slots and scrolls sideways (hotbar.js `overflow_x_scrollbar`, a visible thin wood-colored scrollbar); adding a space scrolls it to the end so the new slot is in view.
 - Night: active slot frame is gold instead of red; box trim is gold.
+
+## Pictures, pets and popups
+
+### Picture picker
+
+- Clicking the portrait opens "Pick a picture": a 5x5 grid of 25 pictures. The first is the user's portrait, tooltip "Aslam Doctor" (no "you" anywhere). The other 24 are original drawn farmhands: Wizard, Pirate, Astronaut, Knight, Robot, Chef, Witch, Viking, Fisher, Scientist, Ninja, Punk, Explorer, Alien, Queen, Farmer, Painter, Detective, Firefighter, Sailor, Miner, Musician, Florist, Cowboy. The tooltip is the name.
+- Quality target is the user's portrait: 96x96, painterly shading, a dark outline, and a scenic background per character (valley, meadow, night, space, sea, castle, snow, sunset, city, desert). The preview's `art.js` draws them procedurally; the builder pre-renders them to PNGs in `mods/stardew/art/portraits/` with a script, so the mod does no drawing at run time (my call).
+- Frames everywhere a picture shows (hotbar portrait, picker cells, agents popup rows, pane header): a warm wood border `#d9a866` with a dark brown rim `#4a2e18` (user asked for anything but black). The selected picker cell gets a light border and a gold glow.
+- Pictures are scaled smoothly (not nearest-neighbour), since 96px art is shown at 20 to 64px.
+- The choice persists (`setState`), and agents get the remaining pictures as their farmhand faces, in order.
+
+### Pet chooser
+
+- The pet button opens "Pick a pet": chicken, duck, cat, dog, rabbit, turtle, frog, and "No pet" (an empty doghouse icon). Each has a name and a one-line trait. Sprites are 24x20 drawn at 2x (48x40 on screen), with a walk pair and one action frame (peck, quack, nap, wag, hop, hide, croak). The pet roams the road; dragging and clicking behave as the chicken does today.
+
+### Agents popup
+
+- Opens from the working chip (which shows the working count and a red needs-you count, both counting helpers) or the "N helpers" chip in a pane header.
+- Rows are grouped by tab. An agent row shows its picture, title, app, farmhand name, helper count and status. Clicking it selects that tab and focuses the agent (`agent.focus`).
+- Helpers are terminals an agent started with `hc run` (no pane). They are nested under their agent with a chicken icon. Clicking one opens a peek window with its latest output (`terminal.peek`). "keep" gives it a pane in its tab (`terminal.keep`), after which the row shows "in a pane" and clicking it focuses that pane.
+- The popup has a maximum height (about 450px at 960x600) and scrolls.
+
+### Busy spaces
+
+- Tabs: up to five fit; settled tabs leave the strip, then tabs past the fifth fold into "▾ N more" with small status dots for the hidden live ones. The popup lists hidden live tabs first, then a "settled" group, dimmed. The selected tab always stays in the strip (it replaces the last visible one if needed).
+- Agents: the popup scrolls as above; counts in the working chip update.
+- Spaces: the hotbar scrolls sideways past nine, as above.
 
 ## Day and night swap
 
@@ -118,4 +151,5 @@ Spike option 1 first and confirm with `herdr-app shot`. Whatever works, it must 
 - Exact sizes, pixel art of the new sprites, and colors, within the mock's look.
 - File split inside the mod (new `tabs.js`, palette layout, and so on).
 - Exact `terminal_opacity` value and the overflow popup's size.
+- The script and format used to pre-render the portraits and pet frames, as long as the result matches the preview.
 - Whether to keep the old status sprites (`can`, `bang`, `star`, `zzz`) anywhere; the mock uses dots instead.

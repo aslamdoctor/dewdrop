@@ -5,13 +5,14 @@
 //   art/pets/<pet>-walk-l.webp     each pet's walk cycle facing left (the PNGs face left)
 //   art/pets/<pet>-walk-r.webp     the same, mirrored with -flop
 //   art/pets/<pet>-<f>-r.png       the standing frame and the action frame, mirrored
+//   art/pets/<pet>-do-l.webp       a two-frame action (peck, wag...), and -do-r mirrored
 // Frames are saved at twice the shown size (display scale 2).
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { SPRITE as S } from "../mods/dewdrop/palette.js";
-import { PET_FRAMES, PET_KEYS, PET_WALK } from "../mods/dewdrop/pets.js";
+import { PET_ACTS, PET_FRAMES, PET_KEYS, PET_WALK } from "../mods/dewdrop/pets.js";
 import { encodePNG, scaleNearest } from "./png.js";
 
 const ART = new URL("../mods/dewdrop/art/", import.meta.url).pathname;
@@ -78,6 +79,12 @@ try {
     webp(`${ART}pets/${pet}-walk-r.webp`, frames, PET_WALK[pet].ms, true);
     for (const f of [a, PET_FRAMES[pet][2]]) {
       execFileSync("magick", [`${ART}pets/${pet}-${f}.png`, "-flop", "-strip", `${ART}pets/${pet}-${f}-r.png`]);
+    }
+    const act = PET_ACTS[pet];
+    if (act.frames.length > 1) {
+      const acts = act.frames.map((f) => `${ART}pets/${pet}-${f}.png`);
+      webp(`${ART}pets/${pet}-do-l.webp`, acts, act.ms);
+      webp(`${ART}pets/${pet}-do-r.webp`, acts, act.ms, true);
     }
   }
 } finally {

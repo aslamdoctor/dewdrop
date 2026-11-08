@@ -335,8 +335,8 @@ export function skyFireflies(width) {
 }
 
 // ---- Road pet (roadpet.js) ----
-// The pet walks the hotbar from ROAD_MARGIN to the width minus the sprite, at speed px/s.
-// leg is the ms for one way.
+// The pet roams the hotbar from ROAD_MARGIN to the width minus the sprite, at speed px/s.
+// leg is the ms to walk it end to end.
 export const PET_W = 48, PET_H = 40, ROAD_MARGIN = 8;
 // The road is the whole 64px hotbar block; the pet rests in the middle of it.
 export const ROAD_H = 64, ROAD_TOP = (ROAD_H - PET_H) / 2;
@@ -347,49 +347,42 @@ export function walkPlan(width, speed) {
   return { from, to, leg };
 }
 
-// Where leg n heads and which way the pet faces. Before the first leg (n < 0) it stands
-// at the start facing right; even legs head right to `to`, odd legs head back to `from`.
-export function walkLeg(plan, n) {
-  if (n < 0) return { target: plan.from, right: true };
-  return n % 2 === 0 ? { target: plan.to, right: true } : { target: plan.from, right: false };
+// The pet's day is a run of segments, after the preview: it walks a while, dashes (three
+// times its speed), stands idle, or does its own action (a nap, a peck, a wag). A segment
+// is { state, dir, x0, x1, dur }: dir is 1 for right and -1 for left, and x0 to x1 is the
+// ground it covers in dur ms (the same spot for idle and act).
+//
+// segment makes one, starting at x heading dir for ms. A walk or dash that runs into the
+// end of the road stops there early; one that starts at the end facing it turns round.
+export function segment(state, x, dir, ms, speed, plan) {
+  const x0 = Math.min(plan.to, Math.max(plan.from, Math.round(x)));
+  if (state !== "walk" && state !== "dash") return { state, dir, x0, x1: x0, dur: ms };
+  const v = (state === "dash" ? 3 : 1) * speed;
+  if ((dir > 0 && x0 >= plan.to) || (dir < 0 && x0 <= plan.from)) dir = -dir;
+  const x1 = Math.min(plan.to, Math.max(plan.from, Math.round(x0 + (dir * v * ms) / 1000)));
+  const full = Math.abs(x1 - x0) === Math.round((v * ms) / 1000);
+  return { state, dir, x0, x1, dur: full ? ms : Math.round((Math.abs(x1 - x0) / v) * 1000) };
 }
 
-// Delay to the start of leg n (0 is the first leg), measured from t0, never negative.
-// Timing every turn from t0 keeps the timer's lateness from piling up.
-export function msToLeg(t0, leg, n, now) {
-  return Math.max(0, t0 + n * leg - now);
+// Where the pet is on segment s (with its start time t0) at now.
+export function segX(s, now) {
+  const p = s.dur > 0 ? Math.min(1, Math.max(0, (now - s.t0) / s.dur)) : 1;
+  return Math.round(s.x0 + (s.x1 - s.x0) * p);
 }
 
-// The leg to walk when the turn timer fires, worked out from the clock so a sleep or a
-// forward clock jump skips straight to the current leg (one repaint, not one per missed
-// leg). It always moves on at least one leg. If the clock went back, t0 is re-anchored so
-// the next turn is never more than one leg away.
-export function nextLeg(t0, leg, prevN, now) {
-  const due = Math.floor((now - t0) / leg);
-  const n = Math.max(prevN + 1, due);
-  return due < prevN ? { n, t0: now - n * leg } : { n, t0 };
-}
-
-// Where the pet is on leg n at `now`, from the same clock the turn timer uses. Before the
-// first leg it stands at the start; past the end of a leg it stays at that end.
-export function walkX(plan, n, t0, now) {
-  if (n < 0) return plan.from;
-  const p = Math.min(1, Math.max(0, (now - (t0 + n * plan.leg)) / plan.leg));
-  const span = plan.to - plan.from;
-  return n % 2 === 0 ? plan.from + p * span : plan.to - p * span;
-}
-
-// Picks a walk back up after a drop: the pet is at x (kept on the road) facing right or
-// left, and starts moving at `now`. It walks leg 0 (right) or leg 1 (left) with t0 moved
-// back by the part of the leg already "done", so walkX, msToLeg and nextLeg all hold from
-// here on. dur is what's left of that first leg, at the pet's normal speed.
-export function resumeWalk(plan, x, right, now) {
-  const at = Math.min(plan.to, Math.max(plan.from, Math.round(x)));
-  const span = plan.to - plan.from;
-  const done = Math.round(((right ? at - plan.from : plan.to - at) / span) * plan.leg);
-  const n = right ? 0 : 1;
-  const t0 = now - n * plan.leg - done;
-  return { n, t0, x: at, dur: Math.max(1, plan.leg - done) };
+// The next segment, picked from the pet's mix (acts is its PET_ACTS entry). A new walk or
+// dash turns round about a third of the time. rand returns numbers in [0, 1).
+const SEG_MS = { walk: [1800, 4400], dash: [700, 1300], idle: [900, 2500] };
+export function nextSegment(acts, speed, x, dir, plan, rand) {
+  let r = rand();
+  let state = acts.mix[acts.mix.length - 1][0];
+  for (const [n, w] of acts.mix) {
+    if (r < w) { state = n; break; }
+    r -= w;
+  }
+  if ((state === "walk" || state === "dash") && rand() < 0.35) dir = -dir;
+  const [lo, hi] = state === "act" ? acts.dur : SEG_MS[state];
+  return segment(state, x, dir, Math.round(lo + rand() * (hi - lo)), speed, plan);
 }
 
 // Where a carried pet is drawn: x along the road, y anywhere inside the 64px block.
@@ -413,17 +406,21 @@ export function hopAfterDrop(step, lift = HOP.lift) {
 }
 
 // What a pet does when clicked, after the preview: a heart, a word in a bubble (for
-// sayMs), an action frame, standing still for `still` ms, a jump, turning around.
-// r is a random number in [0, 1); only the cat uses it.
-export function petPoke(pet, r) {
-  const p = { heart: false, say: null, sayMs: 1600, frame: null, still: 0, jump: false, turn: false };
+// sayMs), a jump, turning round, and a segment to switch to (state for dur ms; null keeps
+// what it was doing). r is a random number in [0, 1) and acting is true while it does its
+// action; only the cat uses them: a napping cat wakes and walks off, an awake one purrs
+// six times in ten.
+export function petPoke(pet, r, acting) {
+  const p = { heart: false, say: null, sayMs: 1600, state: null, dur: 0, jump: false, turn: false };
   switch (pet) {
     case "chicken": return { ...p, heart: true };
-    case "duck": return { ...p, say: "quack quack", frame: "act", still: 900 };
-    case "cat": return r < 0.4 ? { ...p, say: "...", turn: true } : { ...p, heart: true, say: "purr", sayMs: 2000, still: 2000 };
-    case "dog": case "rabbit": return { ...p, heart: true, jump: true, still: 1200 };
-    case "turtle": return { ...p, say: "...", frame: "hide", still: 2600 };
-    case "frog": return { ...p, say: "ribbit", jump: true, turn: true, still: 1400 };
+    case "duck": return { ...p, say: "quack quack", state: "act", dur: 900 };
+    case "cat": return acting || r < 0.4
+      ? { ...p, say: "...", turn: true, state: "walk", dur: 1500 }
+      : { ...p, heart: true, say: "purr", sayMs: 2000, state: "idle", dur: 2000 };
+    case "dog": case "rabbit": return { ...p, heart: true, jump: true, state: "idle", dur: 1200 };
+    case "turtle": return { ...p, say: "...", state: "act", dur: 2600 };
+    case "frog": return { ...p, say: "ribbit", jump: true, turn: true, state: "idle", dur: 1400 };
     default: return p;
   }
 }

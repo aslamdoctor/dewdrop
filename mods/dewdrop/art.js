@@ -7,5 +7,7 @@ export const pic = (file) => png(file);
 export const petFrame = (pet, frame) => png(`pets/${pet}-${frame}`);
 // A pet's animated walk, facing "l" or "r" (scripts/draw-motion.js).
 export const petWalk = (pet, dir) => `${ART}/pets/${pet}-walk-${dir}.webp`;
+// A two-frame action, played: dir is "l" or "r".
+export const petDo = (pet, dir) => `${ART}/pets/${pet}-do-${dir}.webp`;
 
 export { PET_FRAMES } from "./pets.js";

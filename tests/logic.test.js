@@ -1,4 +1,5 @@
 import { test, expect } from "bun:test";
+import { PET_ACTS, PET_KEYS } from "../mods/dewdrop/pets.js";
 import { clockText, HOTBAR_KEYS, slotLabel, hotbarSlots,
   slotTooltip, cropOf, CROPS, msToNextLook, headerTitle, chickenMood, msToNextMinute, lookOf, tabStrip, agentCounts, helpersOf, agentGroups } from "../mods/dewdrop/logic.js";
 
@@ -181,7 +182,7 @@ test("agentGroups groups by tab in order", () => {
   expect(agentGroups([], new Map())).toEqual([]);
 });
 
-import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, PET_H, ROAD_MARGIN, ROAD_H, ROAD_TOP, walkX, resumeWalk, heldSpot, hopAfterDrop, HOP, petPoke } from "../mods/dewdrop/logic.js";
+import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, PET_W, PET_H, ROAD_MARGIN, ROAD_H, ROAD_TOP, heldSpot, hopAfterDrop, HOP, petPoke, segment, nextSegment, segX } from "../mods/dewdrop/logic.js";
 
 test("the sky is laid out the same every time and stays in the strip", () => {
   for (const width of [800, 1440, 2560]) {
@@ -249,75 +250,10 @@ test("walkPlan walks the road edge to edge at the pet's speed", () => {
   expect(tiny.leg).toBeGreaterThanOrEqual(50);
 });
 
-test("walkLeg heads right first, then turns back each leg", () => {
-  const plan = walkPlan(1000, 100);
-  expect(walkLeg(plan, -1)).toEqual({ target: 8, right: true });
-  expect(walkLeg(plan, 0)).toEqual({ target: 944, right: true });
-  expect(walkLeg(plan, 1)).toEqual({ target: 8, right: false });
-  expect(walkLeg(plan, 6)).toEqual({ target: 944, right: true });
-});
-
-test("msToLeg times every turn from the start", () => {
-  expect(msToLeg(1000, 500, 1, 1000)).toBe(500);
-  // A timer that fired 40ms late makes the next wait 40ms shorter, not the same.
-  expect(msToLeg(1000, 500, 2, 1540)).toBe(460);
-  expect(msToLeg(1000, 500, 1, 9000)).toBe(0);
-});
-
-test("nextLeg skips missed legs after a sleep and survives a clock going back", () => {
-  // On time: leg 2 fires at t0 + 2 legs.
-  expect(nextLeg(0, 1000, 1, 2000)).toEqual({ n: 2, t0: 0 });
-  // A hair early still moves on one leg.
-  expect(nextLeg(0, 1000, 1, 1999)).toEqual({ n: 2, t0: 0 });
-  // Ten hours asleep: one jump to the current leg, not 36,000 turns.
-  expect(nextLeg(0, 1000, 1, 36_000_500)).toEqual({ n: 36_000, t0: 0 });
-  // Clock went back an hour: move on one leg and re-anchor so the next turn is one leg away.
-  const r = nextLeg(10_000_000, 1000, 50, 6_400_000);
-  expect(r.n).toBe(51);
-  expect(msToLeg(r.t0, 1000, r.n + 1, 6_400_000)).toBe(1000);
-});
-
 test("the road pet rests in the middle of the 64px hotbar block", () => {
   expect(ROAD_H).toBe(64);
   expect(ROAD_TOP).toBe(12);
   expect(ROAD_TOP * 2 + PET_H).toBe(ROAD_H);
-});
-
-test("walkX finds the pet on its leg from the clock", () => {
-  const plan = walkPlan(1000, 100); // 8 to 944, 9360 ms a leg
-  expect(walkX(plan, -1, 5000, 4000)).toBe(8);
-  expect(walkX(plan, 0, 0, 0)).toBe(8);
-  expect(walkX(plan, 0, 0, 4680)).toBe(476);
-  expect(walkX(plan, 0, 0, 9360)).toBe(944);
-  expect(walkX(plan, 1, 0, 9360 + 4680)).toBe(476);
-  // Past the end of the leg it stays at the end, never beyond.
-  expect(walkX(plan, 1, 0, 99_999)).toBe(8);
-});
-
-test("resumeWalk picks up a dropped pet at x, the way it faced", () => {
-  const plan = walkPlan(1000, 100);
-  const now = 50_000;
-  for (const right of [true, false]) {
-    for (const x of [8, 100, 476, 900, 944]) {
-      const r = resumeWalk(plan, x, right, now);
-      expect(r.x).toBe(x);
-      // Same facing, and the walk math puts it at x right now.
-      expect(walkLeg(plan, r.n).right).toBe(right);
-      expect(walkX(plan, r.n, r.t0, now)).toBeCloseTo(x, 0);
-      // The first leg only covers what's left, at the normal speed.
-      const left = right ? plan.to - x : x - plan.from;
-      expect(r.dur).toBeCloseTo((left / 100) * 1000, -1);
-      expect(Math.abs(msToLeg(r.t0, plan.leg, r.n + 1, now) - r.dur)).toBeLessThanOrEqual(1);
-      // At that turn the timer moves on one leg and keeps the anchor.
-      expect(nextLeg(r.t0, plan.leg, r.n, r.t0 + (r.n + 1) * plan.leg)).toEqual({ n: r.n + 1, t0: r.t0 });
-    }
-  }
-  expect(resumeWalk(plan, 476, true, now).n).toBe(0);
-  expect(resumeWalk(plan, 476, false, now).n).toBe(1);
-  // Dropped past the ends: it lands on the road, never off it.
-  expect(resumeWalk(plan, -40, false, now).x).toBe(8);
-  expect(resumeWalk(plan, 5000, true, now).x).toBe(944);
-  expect(resumeWalk(plan, 944, true, now).dur).toBeGreaterThanOrEqual(1);
 });
 
 test("heldSpot keeps a carried pet inside the hotbar strip", () => {
@@ -342,16 +278,57 @@ test("hopAfterDrop takes a taller lift for a jump, a little slower", () => {
   expect(HOP.jump).toBeGreaterThan(HOP.up);
 });
 
+
+const road = walkPlan(1008, 100); // from 8 to 952
+const seq = (...xs) => { let i = 0; return () => xs[i++ % xs.length]; };
+
+test("segment walks at the pet's speed and stops at the edge of the road", () => {
+  expect(road).toMatchObject({ from: 8, to: 952 });
+  expect(segment("walk", 100, 1, 2000, 50, road)).toEqual({ state: "walk", dir: 1, x0: 100, x1: 200, dur: 2000 });
+  expect(segment("dash", 100, -1, 1000, 50, road)).toEqual({ state: "dash", dir: -1, x0: 100, x1: 8, dur: 613 });
+  expect(segment("dash", 300, 1, 1000, 50, road)).toEqual({ state: "dash", dir: 1, x0: 300, x1: 450, dur: 1000 });
+  // It runs into the right edge and stops there, early.
+  expect(segment("walk", 900, 1, 2000, 50, road)).toEqual({ state: "walk", dir: 1, x0: 900, x1: 952, dur: 1040 });
+  // Already at the edge and facing it: it turns around.
+  expect(segment("walk", 952, 1, 2000, 50, road)).toEqual({ state: "walk", dir: -1, x0: 952, x1: 852, dur: 2000 });
+  expect(segment("act", 300, -1, 1500, 50, road)).toEqual({ state: "act", dir: -1, x0: 300, x1: 300, dur: 1500 });
+  expect(segment("idle", 2000, 1, 900, 50, road)).toMatchObject({ x0: 952, x1: 952 });
+});
+
+test("segX finds the pet along its segment", () => {
+  const s = { ...segment("walk", 100, 1, 2000, 50, road), t0: 1000 };
+  expect(segX(s, 500)).toBe(100);
+  expect(segX(s, 2000)).toBe(150);
+  expect(segX(s, 9000)).toBe(200);
+});
+
+test("nextSegment picks from the pet's mix and its time ranges", () => {
+  const cat = PET_ACTS.cat; // walk .35, act .4, idle .15, dash .1
+  // 0.5 lands on "act": a nap of 5 to 9 seconds, here the middle.
+  expect(nextSegment(cat, 50, 300, 1, road, seq(0.5, 0.5))).toEqual(segment("act", 300, 1, 7000, 50, road));
+  // 0.1 is a walk; 0.2 (under 0.35) turns it round; 0 is the shortest walk.
+  expect(nextSegment(cat, 50, 300, 1, road, seq(0.1, 0.2, 0))).toEqual(segment("walk", 300, -1, 1800, 50, road));
+  // 0.95 is a dash, kept going the same way, at its longest.
+  expect(nextSegment(cat, 50, 300, 1, road, seq(0.95, 0.9, 1))).toEqual(segment("dash", 300, 1, 1300, 50, road));
+  expect(nextSegment(cat, 50, 300, 1, road, seq(0.8, 0)).state).toBe("idle");
+  expect(nextSegment(cat, 50, 300, 1, road, seq(0.8, 0)).dur).toBe(900);
+  // The turtle never dashes, and every pet's mix adds up to 1.
+  for (const k of PET_KEYS) expect(PET_ACTS[k].mix.reduce((a, [, w]) => a + w, 0)).toBeCloseTo(1);
+  expect(PET_ACTS.turtle.mix.some(([s]) => s === "dash")).toBe(false);
+});
+
 test("petPoke gives each pet the preview's click reaction", () => {
-  const none = { heart: false, say: null, sayMs: 1600, frame: null, still: 0, jump: false, turn: false };
-  expect(petPoke("chicken", 0.5)).toEqual({ ...none, heart: true });
-  expect(petPoke("duck", 0.5)).toEqual({ ...none, say: "quack quack", frame: "act", still: 900 });
-  expect(petPoke("dog", 0.5)).toEqual({ ...none, heart: true, jump: true, still: 1200 });
-  expect(petPoke("rabbit", 0.5)).toEqual({ ...none, heart: true, jump: true, still: 1200 });
-  expect(petPoke("turtle", 0.5)).toEqual({ ...none, say: "...", frame: "hide", still: 2600 });
-  expect(petPoke("frog", 0.5)).toEqual({ ...none, say: "ribbit", jump: true, turn: true, still: 1400 });
-  // The cat is picky: four times in ten it turns away, otherwise it purrs.
-  expect(petPoke("cat", 0.1)).toEqual({ ...none, say: "...", turn: true });
-  expect(petPoke("cat", 0.5)).toEqual({ ...none, heart: true, say: "purr", sayMs: 2000, still: 2000 });
-  expect(petPoke("nobody", 0.5)).toEqual(none);
+  const none = { heart: false, say: null, sayMs: 1600, state: null, dur: 0, jump: false, turn: false };
+  expect(petPoke("chicken", 0.5, false)).toEqual({ ...none, heart: true });
+  expect(petPoke("duck", 0.5, false)).toEqual({ ...none, say: "quack quack", state: "act", dur: 900 });
+  expect(petPoke("dog", 0.5, false)).toEqual({ ...none, heart: true, jump: true, state: "idle", dur: 1200 });
+  expect(petPoke("rabbit", 0.5, false)).toEqual({ ...none, heart: true, jump: true, state: "idle", dur: 1200 });
+  expect(petPoke("turtle", 0.5, false)).toEqual({ ...none, say: "...", state: "act", dur: 2600 });
+  expect(petPoke("frog", 0.5, false)).toEqual({ ...none, say: "ribbit", jump: true, turn: true, state: "idle", dur: 1400 });
+  // A napping cat wakes up and walks off the other way; awake, it purrs six times in ten.
+  const off = { ...none, say: "...", turn: true, state: "walk", dur: 1500 };
+  expect(petPoke("cat", 0.9, true)).toEqual(off);
+  expect(petPoke("cat", 0.1, false)).toEqual(off);
+  expect(petPoke("cat", 0.5, false)).toEqual({ ...none, heart: true, say: "purr", sayMs: 2000, state: "idle", dur: 2000 });
+  expect(petPoke("nobody", 0.5, false)).toEqual(none);
 });

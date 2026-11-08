@@ -14,6 +14,19 @@ export const PET_WALK = {
   rabbit: { speed: 70, ms: 300 }, turtle: { speed: 14, ms: 300 }, frog: { speed: 60, ms: 300 },
 };
 
+// How each pet spends its time, after the preview: mix is the odds of each segment
+// (logic.js nextSegment), and the action shows frames (a WebP when there are two, made by
+// scripts/draw-motion.js at ms per frame), lasts dur ms and may say a word meanwhile.
+export const PET_ACTS = {
+  chicken: { mix: [["walk", 0.55], ["act", 0.3], ["idle", 0.15]], frames: ["a", "act"], ms: 280, dur: [900, 2500] },
+  duck: { mix: [["walk", 0.6], ["act", 0.15], ["idle", 0.25]], frames: ["a", "act"], ms: 200, dur: [700, 1300], say: "quack" },
+  cat: { mix: [["walk", 0.35], ["act", 0.4], ["idle", 0.15], ["dash", 0.1]], frames: ["nap"], dur: [5000, 9000], say: "z z" },
+  dog: { mix: [["walk", 0.45], ["act", 0.25], ["idle", 0.1], ["dash", 0.2]], frames: ["a", "wag"], ms: 110, dur: [1200, 2500] },
+  rabbit: { mix: [["walk", 0.5], ["act", 0.35], ["idle", 0.15]], frames: ["a", "act"], ms: 300, dur: [1000, 2400] },
+  turtle: { mix: [["walk", 0.7], ["act", 0.1], ["idle", 0.2]], frames: ["hide"], dur: [2500, 4500] },
+  frog: { mix: [["walk", 0.35], ["act", 0.3], ["idle", 0.35]], frames: ["a", "act"], ms: 380, dur: [1400, 2800], say: "ribbit" },
+};
+
 export const PET_KEYS = ["chicken", "duck", "cat", "dog", "rabbit", "turtle", "frog"];
 
 const INFO = {

@@ -164,3 +164,7 @@ test("msToNextLook aims 50ms past the next 6:00 or 18:00", () => {
   expect(msToNextLook(new Date(2026, 10, 8, 18, 0, 0, 0))).toBe(12 * 3600 * 1000 + 50);
   expect(msToNextLook(new Date(2026, 10, 8, 23, 0, 0, 0))).toBe(7 * 3600 * 1000 + 50);
 });
+
+test("cropOf follows FNV-1a (hash of \"a\" is 0xe40c292c)", () => {
+  expect(cropOf("a")).toBe(CROPS[4]);
+});

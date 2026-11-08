@@ -21,6 +21,8 @@ export function dot(status, size = 8) {
 // The tab's name, or its number when it has none. Herdr shows the number as the
 // default name, so the chip never prints both.
 export const tabLabel = (tab) => (tab.name ? tab.name : String(tab.index));
+// The hover text: the whole name, which the chip may cut short.
+export const tabTip = (tab) => (tab.name ? tab.name : `Tab ${tab.index}`);
 
 // A small close button. It takes the press so the chip isn't selected and the title
 // bar doesn't start a window drag.
@@ -43,7 +45,7 @@ export function tabChip(tab, look, onSelect) {
   const [bg, fg] = tab.active ? LOOK[look].tabOn : LOOK[look].tabOff;
   const chip = h_flex().id(`dewdrop-tab-${tab.id}`).relative().flex_shrink(1).w(86).min_w(52).h(28).overflow_hidden()
     .items_center().gap(6).px(7).bg(bg).text_color(fg).text_size(12).border_2().border_color("#000000")
-    .cursor_pointer().whitespace_nowrap();
+    .cursor_pointer().whitespace_nowrap().tooltip(tabTip(tab));
   return bevel(chip, tab.active)
     .on_mouse_down("left", stop).on_click(() => onSelect(tab))
     .child(div().flex_1().min_w(0).truncate().child(tabLabel(tab)))
@@ -69,7 +71,7 @@ export default class TabMore {
     const row = (tab, dim) => {
       const [bg, fg] = L.tabOff;
       return h_flex().id(`dewdrop-more-${tab.id}`).items_center().gap(6).px(6).py(4).mb(3).text_size(12)
-        .bg(bg).text_color(fg).border_2().border_color("#000000").cursor_pointer()
+        .bg(bg).text_color(fg).border_2().border_color("#000000").cursor_pointer().tooltip(tabTip(tab))
         .when(dim, (el) => el.opacity(0.55))
         .on_click(() => pick(tab))
         .child(div().flex_1().min_w(0).truncate().child(tabLabel(tab)))

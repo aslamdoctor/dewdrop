@@ -4,6 +4,7 @@
 //   art/bird.webp                  a front-on bird flapping, two frames (sky strip)
 //   art/pets/<pet>-walk-l.webp     each pet's walk cycle facing left (the PNGs face left)
 //   art/pets/<pet>-walk-r.webp     the same, mirrored with -flop
+//   art/pets/<pet>-<f>-r.png       the standing frame and the action frame, mirrored
 // Frames are saved at twice the shown size (display scale 2).
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -75,8 +76,11 @@ try {
     const frames = [a, b].map((f) => `${ART}pets/${pet}-${f}.png`);
     webp(`${ART}pets/${pet}-walk-l.webp`, frames, PET_WALK[pet].ms);
     webp(`${ART}pets/${pet}-walk-r.webp`, frames, PET_WALK[pet].ms, true);
+    for (const f of [a, PET_FRAMES[pet][2]]) {
+      execFileSync("magick", [`${ART}pets/${pet}-${f}.png`, "-flop", "-strip", `${ART}pets/${pet}-${f}-r.png`]);
+    }
   }
 } finally {
   rmSync(tmp, { recursive: true, force: true });
 }
-console.log("drew bird.webp and", PET_KEYS.length * 2, "pet walks into", ART);
+console.log("drew bird.webp and", PET_KEYS.length * 2, "pet walks and their mirrored stills into", ART);

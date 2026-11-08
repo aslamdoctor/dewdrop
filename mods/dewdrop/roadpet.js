@@ -11,12 +11,16 @@
 // once and stops walking. Let go (or leave the hotbar) and it falls back to the road,
 // hops once and walks on from there, the way it was facing (resumeWalk re-anchors the
 // clock, so the turn timer math still holds).
+//
+// A plain click pokes it and it reacts the way it does in the preview (petPoke): a heart,
+// a word in a bubble, an action frame, a jump, a stop or a turn. While a heart or "!"
+// from an agent shows, a click focuses that agent instead.
 import { div, image } from "gpui-kit";
 import { agents, run, shared } from "herdr";
-import { art, petWalk } from "./art.js";
+import { art, petWalk, petFrame } from "./art.js";
 import {
   chickenMood, walkPlan, walkLeg, msToLeg, nextLeg, resumeWalk, heldSpot, hopAfterDrop, HOP,
-  PET_W, PET_H, ROAD_H,
+  walkX, petPoke, PET_W, PET_H, ROAD_H, ROAD_TOP,
 } from "./logic.js";
 import { savedPet, PET_WALK } from "./pets.js";
 import { C, INK } from "./palette.js";
@@ -32,6 +36,8 @@ const DRAG_SLOP = 3;
 const DROP_QUIET_MS = 150;
 // While held the pet follows the pointer: a 1ms transition is as good as none.
 const SNAP = { duration: 1, easing: "linear" };
+// How long a poke's heart shows.
+const LOVE_MS = 2200;
 
 export default class RoadPet {
   constructor() {
@@ -46,6 +52,13 @@ export default class RoadPet {
     this.hop = 2; // hopAfterDrop step; 2 is resting on the road
     this.hops = 0;
     this.droppedAt = 0;
+    this.lift = HOP.lift; // how high the current hop goes
+    this.pet = null; // the pet drawn last, for pokes
+    this.pose = null; // a still frame shown while it stands after a poke
+    this.loved = false;
+    this.loves = 0;
+    this.said = null;
+    this.says = 0;
   }
 
   // Starts a fresh walk; the old walk's timer sees it is stale and stops.
@@ -104,10 +117,16 @@ export default class RoadPet {
 
   // Mouse up over the hotbar, or the pointer left it: a carried pet is dropped.
   release(cx) {
+    const g = this.grab;
     this.grab = null;
     const h = this.held;
     const w = this.walk;
-    if (!h) return;
+    // A press and release with no carry is a click: a poke, unless the badge's click
+    // is focusing an agent.
+    if (!h) {
+      if (g && !this.address) this.poke(cx);
+      return;
+    }
     this.held = null;
     if (!w) return;
     const now = Date.now();
@@ -116,7 +135,9 @@ export default class RoadPet {
     const r = resumeWalk(w.plan, h.x, h.right, now + HOP.fall);
     const walk = { key: w.key, plan: w.plan, id: w.id, n: r.n, t0: r.t0, dur: r.dur, stand: r.x };
     this.walk = walk;
+    this.pose = null;
     this.hop = 0;
+    this.lift = HOP.lift;
     const hop = ++this.hops;
     cx.timer.after(HOP.fall, (cx) => {
       if (hop !== this.hops) return;
@@ -132,6 +153,61 @@ export default class RoadPet {
         cx.notify();
       });
     });
+    cx.notify();
+  }
+
+  // A click on the pet: it reacts the way petPoke says.
+  poke(cx) {
+    const w = this.walk;
+    if (!w || !this.pet) return;
+    const now = Date.now();
+    const p = petPoke(this.pet, Math.random());
+    if (p.heart) {
+      const n = ++this.loves;
+      this.loved = true;
+      cx.timer.after(LOVE_MS, (cx) => {
+        if (n !== this.loves) return;
+        this.loved = false;
+        cx.notify();
+      });
+    }
+    if (p.say) {
+      const n = ++this.says;
+      this.said = p.say;
+      cx.timer.after(p.sayMs, (cx) => {
+        if (n !== this.says) return;
+        this.said = null;
+        cx.notify();
+      });
+    }
+    if (p.still > 0 || p.turn) {
+      // It stops where it is (facing the other way for a turn), then walks on from there.
+      const x = w.stand ?? walkX(w.plan, w.n, w.t0, now);
+      const right = p.turn ? !walkLeg(w.plan, w.n).right : walkLeg(w.plan, w.n).right;
+      const r = resumeWalk(w.plan, x, right, now + p.still);
+      const walk = { key: w.key, plan: w.plan, id: w.id, n: r.n, t0: r.t0, dur: r.dur, stand: r.x };
+      this.walk = walk;
+      this.pose = p.frame;
+      const go = (cx) => {
+        if (this.walk !== walk) return;
+        walk.stand = null;
+        this.pose = null;
+        this.arm(cx, walk);
+        cx.notify();
+      };
+      if (p.still > 0) cx.timer.after(p.still, go);
+      else go(cx);
+    }
+    if (p.jump) {
+      const hop = ++this.hops;
+      this.lift = ROAD_TOP;
+      this.hop = 1;
+      cx.timer.after(HOP.jump, (cx) => {
+        if (hop !== this.hops) return;
+        this.hop = 2;
+        cx.notify();
+      });
+    }
     cx.notify();
   }
 
@@ -153,6 +229,7 @@ export default class RoadPet {
     }
 
     const pet = savedPet(shared("dewdrop.pet"));
+    this.pet = pet;
     if (!pet) {
       this.walk = null;
       this.grab = null;
@@ -165,7 +242,7 @@ export default class RoadPet {
     const w = this.walk;
     const leg = walkLeg(plan, w.n);
     const h = this.held;
-    const hop = hopAfterDrop(this.hop);
+    const hop = hopAfterDrop(this.hop, this.lift);
 
     // A render with the same target (a mood change, say) leaves the transitions running.
     const left = h ? h.x : (w.stand ?? leg.target);
@@ -175,20 +252,29 @@ export default class RoadPet {
       .transition("top", h ? SNAP : { duration: hop.duration, easing: hop.easing })
       .map((el) => (h ? el.cursor_grabbing() : el.cursor_grab()))
       .on_mouse_down("left", (e) => this.press(e))
-      .child(image(petWalk(pet, right ? "r" : "l")).size_full());
+      // Standing (after a drop or a poke) shows a still frame, walking the walk cycle.
+      .child(image(!h && w.stand !== null
+        ? petFrame(pet, `${this.pose ?? "a"}${right ? "-r" : ""}`)
+        : petWalk(pet, right ? "r" : "l")).size_full());
     const el = div().id(`dewdrop-pet-${w.id}`).absolute().top(0).left(left).w(PET_W).h(ROAD_H)
       .transition("left", xMove)
       .when(Boolean(this.address), (el) => el.cursor_pointer()
         .on_click(() => { if (!this.busy()) run("agent.focus", { terminal: this.address }); }))
       .child(body);
 
-    if (!this.mood) return el;
-    const badge = this.mood === "alert"
+    // A word bubble beside the pet, on the side with more road.
+    const out = this.said ? el.child((left > plan.to - 90 ? div().absolute().right(PET_W + 2) : div().absolute().left(PET_W + 2))
+      .top(ROAD_TOP - 2).px(5).py(2).bg("#f3e2b8").text_color(INK).border_2().border_color("#000000")
+      .font_family(FONT).text_size(11).whitespace_nowrap().child(this.said)) : el;
+
+    const mood = this.mood ?? (this.loved ? "love" : null);
+    if (!mood) return out;
+    const badge = mood === "alert"
       ? div().relative().flex().items_center().justify_center().w(16).h(16).bg(C.red).border_2().border_color(INK)
         .font_family(FONT).text_size(11).text_color("#ffffff").child("!")
       : image(art("heart")).w(16).h(16).relative();
     // The badge bobs between 0 and 3 at the top of the block, over the pet's head, so the
     // block never clips it.
-    return el.child(div().absolute().top(0).left((PET_W - 16) / 2).child(badge.loop("top", { from: 3, to: 0, period: 600 })));
+    return out.child(div().absolute().top(0).left((PET_W - 16) / 2).child(badge.loop("top", { from: 3, to: 0, period: 600 })));
   }
 }

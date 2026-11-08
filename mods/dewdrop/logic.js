@@ -402,9 +402,28 @@ export function heldSpot(plan, x, y) {
 
 // A dropped pet falls back to the road, hops up a little and lands again. Step 0 is the
 // fall (from wherever it was let go), 1 the hop up, 2 and after the landing.
-export const HOP = { fall: 240, up: 110, lift: 4 };
-export function hopAfterDrop(step) {
+// A click's jump uses the same steps with a taller lift (up to the top of the block),
+// which takes a little longer each way.
+export const HOP = { fall: 240, up: 110, lift: 4, jump: 200 };
+export function hopAfterDrop(step, lift = HOP.lift) {
   if (step <= 0) return { top: ROAD_TOP, duration: HOP.fall, easing: "ease-in" };
-  if (step === 1) return { top: ROAD_TOP - HOP.lift, duration: HOP.up, easing: "ease-out" };
-  return { top: ROAD_TOP, duration: HOP.up, easing: "ease-in" };
+  const duration = lift > HOP.lift ? HOP.jump : HOP.up;
+  if (step === 1) return { top: ROAD_TOP - lift, duration, easing: "ease-out" };
+  return { top: ROAD_TOP, duration, easing: "ease-in" };
+}
+
+// What a pet does when clicked, after the preview: a heart, a word in a bubble (for
+// sayMs), an action frame, standing still for `still` ms, a jump, turning around.
+// r is a random number in [0, 1); only the cat uses it.
+export function petPoke(pet, r) {
+  const p = { heart: false, say: null, sayMs: 1600, frame: null, still: 0, jump: false, turn: false };
+  switch (pet) {
+    case "chicken": return { ...p, heart: true };
+    case "duck": return { ...p, say: "quack quack", frame: "act", still: 900 };
+    case "cat": return r < 0.4 ? { ...p, say: "...", turn: true } : { ...p, heart: true, say: "purr", sayMs: 2000, still: 2000 };
+    case "dog": case "rabbit": return { ...p, heart: true, jump: true, still: 1200 };
+    case "turtle": return { ...p, say: "...", frame: "hide", still: 2600 };
+    case "frog": return { ...p, say: "ribbit", jump: true, turn: true, still: 1400 };
+    default: return p;
+  }
 }

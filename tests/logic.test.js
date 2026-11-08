@@ -181,7 +181,7 @@ test("agentGroups groups by tab in order", () => {
   expect(agentGroups([], new Map())).toEqual([]);
 });
 
-import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, PET_H, ROAD_MARGIN, ROAD_H, ROAD_TOP, walkX, resumeWalk, heldSpot, hopAfterDrop, HOP } from "../mods/dewdrop/logic.js";
+import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, PET_H, ROAD_MARGIN, ROAD_H, ROAD_TOP, walkX, resumeWalk, heldSpot, hopAfterDrop, HOP, petPoke } from "../mods/dewdrop/logic.js";
 
 test("the sky is laid out the same every time and stays in the strip", () => {
   for (const width of [800, 1440, 2560]) {
@@ -334,4 +334,24 @@ test("hopAfterDrop falls to the road, bounces once and settles", () => {
   expect(hopAfterDrop(9)).toEqual(hopAfterDrop(2));
   expect(HOP.fall).toBeGreaterThanOrEqual(200);
   expect(HOP.fall).toBeLessThanOrEqual(300);
+});
+
+test("hopAfterDrop takes a taller lift for a jump, a little slower", () => {
+  expect(hopAfterDrop(1, ROAD_TOP)).toEqual({ top: 0, duration: HOP.jump, easing: "ease-out" });
+  expect(hopAfterDrop(2, ROAD_TOP)).toEqual({ top: ROAD_TOP, duration: HOP.jump, easing: "ease-in" });
+  expect(HOP.jump).toBeGreaterThan(HOP.up);
+});
+
+test("petPoke gives each pet the preview's click reaction", () => {
+  const none = { heart: false, say: null, sayMs: 1600, frame: null, still: 0, jump: false, turn: false };
+  expect(petPoke("chicken", 0.5)).toEqual({ ...none, heart: true });
+  expect(petPoke("duck", 0.5)).toEqual({ ...none, say: "quack quack", frame: "act", still: 900 });
+  expect(petPoke("dog", 0.5)).toEqual({ ...none, heart: true, jump: true, still: 1200 });
+  expect(petPoke("rabbit", 0.5)).toEqual({ ...none, heart: true, jump: true, still: 1200 });
+  expect(petPoke("turtle", 0.5)).toEqual({ ...none, say: "...", frame: "hide", still: 2600 });
+  expect(petPoke("frog", 0.5)).toEqual({ ...none, say: "ribbit", jump: true, turn: true, still: 1400 });
+  // The cat is picky: four times in ten it turns away, otherwise it purrs.
+  expect(petPoke("cat", 0.1)).toEqual({ ...none, say: "...", turn: true });
+  expect(petPoke("cat", 0.5)).toEqual({ ...none, heart: true, say: "purr", sayMs: 2000, still: 2000 });
+  expect(petPoke("nobody", 0.5)).toEqual(none);
 });

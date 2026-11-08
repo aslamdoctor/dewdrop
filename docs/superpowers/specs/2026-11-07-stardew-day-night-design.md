@@ -53,6 +53,13 @@ Success: the user switches to `stardew` and it reads as a cozy farm-game window 
 | Agents view | Popup from the working chip: farmhands grouped by tab, helpers nested under them |
 | Busy spaces | Tabs past five fold into "more"; the agents popup scrolls; the hotbar scrolls sideways past nine spaces |
 
+## Name and publishing
+
+- Published name: **Dewdrop** (user's decision). The "dew" nods at Stardew Valley without using the game's name. Repo: `herdr-dewdrop` on GitHub. The Herdr gallery (https://herdr.dev/gallery/) fetches it from there, showing the title, the owner handle, a preview image and an optional description.
+- Gallery description (draft, goes through the humanizer before it is published): "A cozy 16-bit farm layout inspired by Stardew Valley. It follows the time of day, spaces grow as crops on a hotbar, and your agents work as farmhands."
+- Neither the name nor the repo uses "Stardew", or any of the game's place or character names (Pelican Town, Junimo, Stardrop). The description may say "inspired by Stardew Valley".
+- As part of the build, the mod and layout id are renamed from `stardew` to `dewdrop` (folder `mods/dewdrop`, the layout entry, and any user-facing "stardew" text). File paths elsewhere in this spec that say `mods/stardew` mean `mods/dewdrop` (my call, so the shipped id matches the published name). `preview.png` is regenerated from the new look for the gallery card.
+
 ## The window, top to bottom
 
 ### Title bar (40px, unchanged height)

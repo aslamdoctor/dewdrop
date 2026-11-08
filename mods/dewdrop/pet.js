@@ -11,7 +11,9 @@ import { C, INK } from "./palette.js";
 import { FONT } from "./tabs.js";
 
 const SHOW_MS = 4000;
-const STEP_MS = 400;
+// gpui-kit has no native frame swap for images (frames() is text only, loop() swings one
+// property), so the walk is driven from here. A slow step keeps redraws rare.
+const STEP_MS = 1000;
 // Chance per step that the pet starts its action, and how many steps it lasts.
 const ACT_CHANCE = 0.12;
 const ACT_STEPS = { nap: 8, hide: 6 };
@@ -23,6 +25,7 @@ export default class Pet {
     this.address = null;
     this.seq = 0;
     this.step = 0;
+    this.shown = null;
     this.acting = 0;
     const tick = (cx) => {
       cx.timer.after(STEP_MS, tick);
@@ -32,9 +35,17 @@ export default class Pet {
       this.step++;
       if (this.acting > 0) this.acting--;
       else if (Math.random() < ACT_CHANCE) this.acting = ACT_STEPS[PETS[key].frames[2]] ?? 3;
-      cx.notify();
+      // Redraw only when what is on screen would differ.
+      const shown = this.drawn(key);
+      if (shown !== this.shown) cx.notify();
     };
     cx.timer.after(STEP_MS, tick);
+  }
+
+  // The frame to draw: still while a heart or "!" shows, else the action, else the walk pair.
+  drawn(key) {
+    const frames = PETS[key].frames;
+    return this.mood ? frames[0] : this.acting > 0 ? frames[2] : frames[this.step % 2];
   }
 
   render(cx) {
@@ -54,10 +65,12 @@ export default class Pet {
     }
 
     const key = savedPet(shared("dewdrop.pet"));
-    if (!key) return div();
-    const frames = PETS[key].frames;
-    // Still while a heart or "!" shows; otherwise the action, else the walk pair.
-    const frame = this.mood ? frames[0] : this.acting > 0 ? frames[2] : frames[this.step % 2];
+    if (!key) {
+      this.shown = null;
+      return div();
+    }
+    const frame = this.drawn(key);
+    this.shown = frame;
 
     const box = div().id("dewdrop-pet").relative().flex_none().w(56).h(48).flex().items_center().justify_center()
       // Only swallow the press while a heart or "!" is up and a click means

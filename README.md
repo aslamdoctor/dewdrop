@@ -89,6 +89,8 @@ Run `bash scripts/install.sh --remove` to take it out again.
 
 [RECIPE.md](RECIPE.md) describes the layout in enough detail for an agent to rebuild it from an empty folder.
 
+Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, testing and how to send a pull request.
+
 ## License
 
 [MIT](LICENSE)

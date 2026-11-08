@@ -369,3 +369,42 @@ export function nextLeg(t0, leg, prevN, now) {
   const n = Math.max(prevN + 1, due);
   return due < prevN ? { n, t0: now - n * leg } : { n, t0 };
 }
+
+// Where the pet is on leg n at `now`, from the same clock the turn timer uses. Before the
+// first leg it stands at the start; past the end of a leg it stays at that end.
+export function walkX(plan, n, t0, now) {
+  if (n < 0) return plan.from;
+  const p = Math.min(1, Math.max(0, (now - (t0 + n * plan.leg)) / plan.leg));
+  const span = plan.to - plan.from;
+  return n % 2 === 0 ? plan.from + p * span : plan.to - p * span;
+}
+
+// Picks a walk back up after a drop: the pet is at x (kept on the road) facing right or
+// left, and starts moving at `now`. It walks leg 0 (right) or leg 1 (left) with t0 moved
+// back by the part of the leg already "done", so walkX, msToLeg and nextLeg all hold from
+// here on. dur is what's left of that first leg, at the pet's normal speed.
+export function resumeWalk(plan, x, right, now) {
+  const at = Math.min(plan.to, Math.max(plan.from, Math.round(x)));
+  const span = plan.to - plan.from;
+  const done = Math.round(((right ? at - plan.from : plan.to - at) / span) * plan.leg);
+  const n = right ? 0 : 1;
+  const t0 = now - n * plan.leg - done;
+  return { n, t0, x: at, dur: Math.max(1, plan.leg - done) };
+}
+
+// Where a carried pet is drawn: x along the road, y anywhere inside the 64px block.
+export function heldSpot(plan, x, y) {
+  return {
+    x: Math.min(plan.to, Math.max(plan.from, Math.round(x))),
+    y: Math.min(ROAD_H - PET_H, Math.max(0, Math.round(y))),
+  };
+}
+
+// A dropped pet falls back to the road, hops up a little and lands again. Step 0 is the
+// fall (from wherever it was let go), 1 the hop up, 2 and after the landing.
+export const HOP = { fall: 240, up: 110, lift: 4 };
+export function hopAfterDrop(step) {
+  if (step <= 0) return { top: ROAD_TOP, duration: HOP.fall, easing: "ease-in" };
+  if (step === 1) return { top: ROAD_TOP - HOP.lift, duration: HOP.up, easing: "ease-out" };
+  return { top: ROAD_TOP, duration: HOP.up, easing: "ease-in" };
+}

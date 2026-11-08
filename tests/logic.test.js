@@ -181,7 +181,7 @@ test("agentGroups groups by tab in order", () => {
   expect(agentGroups([], new Map())).toEqual([]);
 });
 
-import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, PET_H, ROAD_MARGIN, ROAD_H, ROAD_TOP } from "../mods/dewdrop/logic.js";
+import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, PET_H, ROAD_MARGIN, ROAD_H, ROAD_TOP, walkX, resumeWalk, heldSpot, hopAfterDrop, HOP } from "../mods/dewdrop/logic.js";
 
 test("the sky is laid out the same every time and stays in the strip", () => {
   for (const width of [800, 1440, 2560]) {
@@ -281,4 +281,57 @@ test("the road pet rests in the middle of the 64px hotbar block", () => {
   expect(ROAD_H).toBe(64);
   expect(ROAD_TOP).toBe(12);
   expect(ROAD_TOP * 2 + PET_H).toBe(ROAD_H);
+});
+
+test("walkX finds the pet on its leg from the clock", () => {
+  const plan = walkPlan(1000, 100); // 8 to 944, 9360 ms a leg
+  expect(walkX(plan, -1, 5000, 4000)).toBe(8);
+  expect(walkX(plan, 0, 0, 0)).toBe(8);
+  expect(walkX(plan, 0, 0, 4680)).toBe(476);
+  expect(walkX(plan, 0, 0, 9360)).toBe(944);
+  expect(walkX(plan, 1, 0, 9360 + 4680)).toBe(476);
+  // Past the end of the leg it stays at the end, never beyond.
+  expect(walkX(plan, 1, 0, 99_999)).toBe(8);
+});
+
+test("resumeWalk picks up a dropped pet at x, the way it faced", () => {
+  const plan = walkPlan(1000, 100);
+  const now = 50_000;
+  for (const right of [true, false]) {
+    for (const x of [8, 100, 476, 900, 944]) {
+      const r = resumeWalk(plan, x, right, now);
+      expect(r.x).toBe(x);
+      // Same facing, and the walk math puts it at x right now.
+      expect(walkLeg(plan, r.n).right).toBe(right);
+      expect(walkX(plan, r.n, r.t0, now)).toBeCloseTo(x, 0);
+      // The first leg only covers what's left, at the normal speed.
+      const left = right ? plan.to - x : x - plan.from;
+      expect(r.dur).toBeCloseTo((left / 100) * 1000, -1);
+      expect(Math.abs(msToLeg(r.t0, plan.leg, r.n + 1, now) - r.dur)).toBeLessThanOrEqual(1);
+      // At that turn the timer moves on one leg and keeps the anchor.
+      expect(nextLeg(r.t0, plan.leg, r.n, r.t0 + (r.n + 1) * plan.leg)).toEqual({ n: r.n + 1, t0: r.t0 });
+    }
+  }
+  expect(resumeWalk(plan, 476, true, now).n).toBe(0);
+  expect(resumeWalk(plan, 476, false, now).n).toBe(1);
+  // Dropped past the ends: it lands on the road, never off it.
+  expect(resumeWalk(plan, -40, false, now).x).toBe(8);
+  expect(resumeWalk(plan, 5000, true, now).x).toBe(944);
+  expect(resumeWalk(plan, 944, true, now).dur).toBeGreaterThanOrEqual(1);
+});
+
+test("heldSpot keeps a carried pet inside the hotbar strip", () => {
+  const plan = walkPlan(1000, 100);
+  expect(heldSpot(plan, 300.4, 5.6)).toEqual({ x: 300, y: 6 });
+  expect(heldSpot(plan, -20, -30)).toEqual({ x: 8, y: 0 });
+  expect(heldSpot(plan, 2000, 90)).toEqual({ x: 944, y: ROAD_H - PET_H });
+});
+
+test("hopAfterDrop falls to the road, bounces once and settles", () => {
+  expect(hopAfterDrop(0)).toEqual({ top: ROAD_TOP, duration: HOP.fall, easing: "ease-in" });
+  expect(hopAfterDrop(1)).toEqual({ top: ROAD_TOP - HOP.lift, duration: HOP.up, easing: "ease-out" });
+  expect(hopAfterDrop(2)).toEqual({ top: ROAD_TOP, duration: HOP.up, easing: "ease-in" });
+  expect(hopAfterDrop(9)).toEqual(hopAfterDrop(2));
+  expect(HOP.fall).toBeGreaterThanOrEqual(200);
+  expect(HOP.fall).toBeLessThanOrEqual(300);
 });

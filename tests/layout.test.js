@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import layout from "../layouts/dewdrop.json";
-import { layoutFor, lookOfLayout, needsSwap } from "../mods/dewdrop/logic.js";
+import { layoutFor, lookOfLayout, needsSwap, makeSyncer } from "../mods/dewdrop/logic.js";
 
 const find = (n, id) => n.id === id ? n : (n.children ?? []).map((c) => find(c, id)).find(Boolean);
 
@@ -42,4 +42,39 @@ test("needsSwap writes only when the look changes", () => {
   expect(needsSwap(night, new Date(2026, 10, 9, 6, 0))).toBe("day");
   expect(needsSwap(layout, new Date(2026, 10, 8, 12, 0))).toBeNull();
   expect(needsSwap({ id: "root" }, new Date(2026, 10, 8, 19, 0))).toBeNull();
+});
+
+test("needsSwap flips at 6:00 and 18:00", () => {
+  const night = layoutFor(layout, "night");
+  expect(needsSwap(night, new Date(2026, 10, 8, 5, 59))).toBeNull();
+  expect(needsSwap(night, new Date(2026, 10, 8, 6, 0))).toBe("day");
+  expect(needsSwap(layout, new Date(2026, 10, 8, 17, 59))).toBeNull();
+  expect(needsSwap(layout, new Date(2026, 10, 8, 18, 0))).toBe("night");
+});
+
+test("syncWith writes once for two ticks", () => {
+  const sync = makeSyncer();
+  const writes = [];
+  const t = new Date(2026, 10, 8, 19, 0);
+  sync(t, () => layout, (n) => writes.push(n));
+  sync(t, () => layout, (n) => writes.push(n));
+  expect(writes.length).toBe(1);
+  expect(lookOfLayout(writes[0])).toBe("night");
+});
+
+test("a throwing write releases the guard", () => {
+  const sync = makeSyncer();
+  const t = new Date(2026, 10, 8, 19, 0);
+  expect(() => sync(t, () => layout, () => { throw new Error("x"); })).toThrow();
+  const writes = [];
+  sync(t, () => layout, (n) => writes.push(n));
+  expect(writes.length).toBe(1);
+});
+
+test("a matching look writes nothing", () => {
+  const sync = makeSyncer();
+  let n = 0;
+  sync(new Date(2026, 10, 8, 12, 0), () => layout, () => n++);
+  sync(new Date(2026, 10, 8, 19, 0), () => layoutFor(layout, "night"), () => n++);
+  expect(n).toBe(0);
 });

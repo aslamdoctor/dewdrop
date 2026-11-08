@@ -146,3 +146,27 @@ export function needsSwap(tree, now) {
   const want = lookOf(now);
   return wearing === want ? null : want;
 }
+
+// A look swapper with its own pending guard. read() gives the current layout tree,
+// write(tree) applies one. pending holds the look last written until the layout shows it,
+// so a second tick before the reload doesn't write again. A throwing write frees the guard.
+export function makeSyncer() {
+  let pending = null;
+  return function syncWith(now, read, write) {
+    const tree = read();
+    if (!tree) return;
+    const wearing = lookOfLayout(tree);
+    if (pending && (wearing === pending || wearing === null)) pending = null;
+    const look = needsSwap(tree, now);
+    if (!look || pending === look) return;
+    const next = layoutFor(tree, look);
+    if (!next) return;
+    pending = look;
+    try {
+      write(next);
+    } catch (e) {
+      pending = null;
+      throw e;
+    }
+  };
+}

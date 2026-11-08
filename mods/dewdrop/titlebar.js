@@ -56,8 +56,7 @@ export default class Titlebar {
     const tabs = h_flex().flex_shrink(1).min_w(0).overflow_hidden().items_center().gap(4)
       .children(strip.map((x) => tabChip(x, look, (tab) => run("tab.select", { id: tab.id }))));
 
-    const helpers = [...helpersOf(terminals() ?? [], panes() ?? []).values()].flat();
-    const { working, blocked } = agentCounts(agents() ?? [], helpers);
+    const { working, blocked } = agentCounts(agents() ?? [], helpersOf(terminals() ?? [], panes() ?? []));
     const chip = h_flex().id("dewdrop-working").flex_none().h(28).items_center().gap(6).px(10).whitespace_nowrap()
       .bg(C.soil).border_2().border_color("#000000").text_size(13).text_color(C.gold)
       .cursor_pointer().on_mouse_down("left", stop)

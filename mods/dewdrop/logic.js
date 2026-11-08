@@ -213,9 +213,11 @@ export function tabStrip(tabs, max = MAX_TABS) {
   };
 }
 
-// Working and blocked counts over agents and helpers (helpers count too).
+// Working and blocked counts over agents and their helpers. `helpers` is the map from
+// helpersOf; only helpers under an agent count, since the popup lists no others.
 export function agentCounts(agents, helpers) {
-  const all = [...agents, ...helpers];
+  const all = [...agents];
+  for (const a of agents) all.push(...(helpers.get(a.address) ?? []));
   return {
     working: all.filter((a) => a.status === "working").length,
     blocked: all.filter((a) => a.status === "blocked").length,

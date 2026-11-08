@@ -138,7 +138,15 @@ test("tabStrip shows an active settled tab", () => {
 });
 
 test("agentCounts counts helpers", () => {
-  expect(agentCounts([{ status: "working" }, { status: "blocked" }], [{ status: "working" }])).toEqual({ working: 2, blocked: 1 });
+  const helpers = new Map([["a1", [{ status: "working" }]]]);
+  expect(agentCounts([{ address: "a1", status: "working" }, { address: "a2", status: "blocked" }], helpers))
+    .toEqual({ working: 2, blocked: 1 });
+});
+
+test("agentCounts skips helpers whose parent is not an agent", () => {
+  // The popup lists helpers only under agents, so the chip must not count orphans.
+  const helpers = new Map([["a1", [{ status: "blocked" }]], ["shell-9", [{ status: "working" }, { status: "blocked" }]]]);
+  expect(agentCounts([{ address: "a1", status: "idle" }], helpers)).toEqual({ working: 0, blocked: 1 });
 });
 
 test("slotLabel keeps emoji whole", () => {

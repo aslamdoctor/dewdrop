@@ -5,5 +5,7 @@ export const png = (name) => `${ART}/${name}.png`;
 // A picture from CAST (its `file`, e.g. "portrait" or "cast/07").
 export const pic = (file) => png(file);
 export const petFrame = (pet, frame) => png(`pets/${pet}-${frame}`);
+// A pet's animated walk, facing "l" or "r" (scripts/draw-motion.js).
+export const petWalk = (pet, dir) => `${ART}/pets/${pet}-walk-${dir}.webp`;
 
 export { PET_FRAMES } from "./pets.js";

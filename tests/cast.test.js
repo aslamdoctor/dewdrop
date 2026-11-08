@@ -38,3 +38,16 @@ test("savedPet: unset keeps the default, the word none means no pet", () => {
   expect(savedPet("cat")).toBe("cat");
   expect(savedPet(7)).toBe("chicken");
 });
+
+import { PET_WALK } from "../mods/dewdrop/pets.js";
+
+test("every pet walks, the turtle slowest and the dog quickest", () => {
+  expect(Object.keys(PET_WALK).sort()).toEqual([...PET_KEYS].sort());
+  const speeds = Object.values(PET_WALK).map((w) => w.speed);
+  expect(PET_WALK.turtle.speed).toBe(Math.min(...speeds));
+  expect(PET_WALK.dog.speed).toBe(Math.max(...speeds));
+  for (const w of Object.values(PET_WALK)) {
+    expect(w.speed).toBeLessThanOrEqual(100);
+    expect(w.ms).toBeWithin(250, 301);
+  }
+});

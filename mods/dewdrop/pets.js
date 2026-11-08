@@ -7,7 +7,14 @@ export const PET_FRAMES = {
   rabbit: ["a", "hop", "act"], turtle: ["a", "b", "hide"], frog: ["a", "hop", "act"],
 };
 
-export const PET_KEYS = ["chicken", "duck", "cat", "dog", "rabbit", "turtle", "frog"];
+// How each pet walks the road: speed in px per second and ms per walk frame
+// (art/pets/<pet>-walk-l.webp and -r.webp, made by scripts/draw-motion.js).
+export const PET_WALK = {
+  chicken: { speed: 50, ms: 260 }, duck: { speed: 36, ms: 300 }, cat: { speed: 44, ms: 280 }, dog: { speed: 90, ms: 250 },
+  rabbit: { speed: 70, ms: 300 }, turtle: { speed: 14, ms: 300 }, frog: { speed: 60, ms: 300 },
+};
+
+export const PET_KEYS =["chicken", "duck", "cat", "dog", "rabbit", "turtle", "frog"];
 
 const INFO = {
   chicken: ["Chicken", "Wanders about and pecks. Click for a heart."],

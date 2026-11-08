@@ -1,7 +1,8 @@
 import { test, expect } from "bun:test";
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { C, INK, GOLD_LINE, LOOK, STATUS, SPRITE, dotColor } from "../mods/dewdrop/palette.js";
-import { art, png, pic, petFrame, PET_FRAMES, ART } from "../mods/dewdrop/art.js";
+import { art, png, pic, petFrame, petWalk, PET_FRAMES, ART } from "../mods/dewdrop/art.js";
+import { PET_KEYS } from "../mods/dewdrop/pets.js";
 import { CAST } from "../mods/dewdrop/cast.js";
 import theme from "../themes/dewdrop.json";
 
@@ -35,10 +36,17 @@ test("theme uses the palette", () => {
 const ART_DIR = new URL("../mods/dewdrop/art/", import.meta.url).pathname;
 const FONT_DIR = new URL("../mods/dewdrop/fonts/", import.meta.url).pathname;
 const pngSize = (f) => { const b = readFileSync(f); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
+// An animated WebP: RIFF, WEBP, then a VP8X chunk with the ANIM flag and the canvas size (24-bit, minus one).
+const webpInfo = (f) => {
+  const b = readFileSync(f);
+  expect([b.toString("ascii", 0, 4), b.toString("ascii", 8, 12), b.toString("ascii", 12, 16)]).toEqual(["RIFF", "WEBP", "VP8X"]);
+  return { animated: (b[20] & 0x02) !== 0, size: [b.readUIntLE(24, 3) + 1, b.readUIntLE(27, 3) + 1] };
+};
 
 const SVGS = ["window", "window-night", "sun", "moon",
   "crop-carrot", "crop-pumpkin", "crop-wheat", "crop-sprout", "crop-tomato", "crop-corn",
-  "tool-plus", "tool-folder", "tool-eye", "tool-eye-off", "heart", "btn-zoom", "btn-close"];
+  "tool-plus", "tool-folder", "tool-eye", "tool-eye-off", "heart", "btn-zoom", "btn-close",
+  "cloud-a", "cloud-b", "cloud-c", "star-warm", "star-cool", "star-big", "firefly"];
 const ALLOWED = new Set([...Object.values(C), ...Object.values(SPRITE), ...Object.values(STATUS), INK, GOLD_LINE, "#000000", "#ffffff"]);
 
 test("art helpers build mod-relative paths", () => {
@@ -92,3 +100,11 @@ test("no PixelFarm leftovers", () => {
   expect(existsSync(new URL("../assets/pixelfarm", import.meta.url).pathname)).toBe(false);
   expect(readFileSync(`${ART_DIR}CREDITS.md`, "utf8")).not.toContain("PixelFarm");
 });
+
+test("pet walks are animated WebPs at twice the shown 48x40", () => {
+  expect(petWalk("dog", "r")).toBe("mods/dewdrop/art/pets/dog-walk-r.webp");
+  for (const pet of PET_KEYS) for (const dir of ["l", "r"]) {
+    expect(webpInfo(`${ART_DIR}pets/${pet}-walk-${dir}.webp`)).toEqual({ animated: true, size: [96, 80] });
+  }
+});
+

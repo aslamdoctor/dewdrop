@@ -23,6 +23,11 @@ export const SPRITE = {
   frame: "#000000", glass: C.sky, glassNight: "#8e9ccf", lightRed: C.red, lightGold: C.gold, lightGreen: C.grass, screen: C.soil, text: C.parchment,
   sunRay: C.gold, sunCore: "#f7d774", moon: "#f3ecc8",
   tool: C.parchment,
+  // Sky strip: cloud tones top to bottom, the bird, warm and cool stars, the firefly glow.
+  cloudTop: "#ffffff", cloud: "#f3f8fd", cloudShade: "#d2e5f3", cloudBase: "#b5cfe6",
+  bird: "#2b3a55", birdWing: "#46597d",
+  starWarm: "#fff2c4", starCool: "#dfe6ff", starDim: "#8f98c4",
+  fly: "#f0ff9c", flyGlow: "#9aa85a",
 };
 
 export const STATUS = { working: "#5fa8d3", blocked: "#d9534f", done: "#f2c14e", idle: "#9c7b5b" };

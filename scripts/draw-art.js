@@ -114,7 +114,51 @@ const FOLDER = ["WWW.....", "WWWWWWWW", "W......W", "W......W", "W......W", "WWW
 const EYE = ["..WWWW..", ".W....W.", "W..WW..W", "W..WW..W", ".W....W.", "..WWWW.."];
 const EYE_OFF = ["..WWWW.W", ".W....W.", "W..WWW.W", "W.WWW..W", ".W....W.", "W.WWWW.."];
 
+// Sky strip (sky.js): three clouds, two stars and a firefly, shown at 3px per pixel.
+const CLOUD_KEY = { W: S.cloudTop, L: S.cloud, M: S.cloudShade, S: S.cloudBase };
+const CLOUDS = {
+  "cloud-a": [
+    ".......WWWW.......",
+    ".....WWLLLLW.WWW..",
+    "..WWWLLLLLLLWLLLW.",
+    ".WLLLLLLLLLLLLLLLW",
+    "WLLLLLLLLLLLLLLLLL",
+    "MMLLLLLLLLLLLLLLMM",
+    ".SMMMMMMMMMMMMMMS.",
+    "...SSSSSSSSSSSS...",
+  ],
+  "cloud-b": [
+    "....WWW.....",
+    "..WWLLLWWW..",
+    ".WLLLLLLLLW.",
+    "WLLLLLLLLLLW",
+    "MMMLLLLLLMMM",
+    ".SSSSSSSSSS.",
+  ],
+  "cloud-c": [
+    "..........WWWW............",
+    "...WWW..WWLLLLWW..........",
+    "..WLLLWWLLLLLLLLW...WWW...",
+    ".WLLLLLLLLLLLLLLLWWWLLLWW.",
+    "WLLLLLLLLLLLLLLLLLLLLLLLLW",
+    "MLLLLLLLLLLLLLLLLLLLLLLLLM",
+    "MMMMLLLLLLLLLLLLLLLLLLMMMM",
+    ".SSMMMMMMMMMMMMMMMMMMMMSS.",
+    "...SSSSSSSSSSSSSSSSSSSS...",
+  ],
+};
+const STAR_KEY = { W: S.starWarm, C: S.starCool, d: S.starDim };
+const STARS = {
+  "star-warm": ["W"],
+  "star-cool": ["C"],
+  "star-big": [".d.", "dCd", ".d."],
+};
+const FLY = [".g.", "gFg", ".g."];
+
 const dewdrop = [
+  ...Object.entries(CLOUDS).map(([n, rows]) => grid(n, rows, 1, CLOUD_KEY)),
+  ...Object.entries(STARS).map(([n, rows]) => grid(n, rows, 1, STAR_KEY)),
+  grid("firefly", FLY, 1, { F: S.fly, g: S.flyGlow }),
   grid("window", WINDOW, 1, { K: S.frame, B: S.glass, R: S.lightRed, Y: S.lightGold, G: S.lightGreen, D: S.screen, W: S.text }),
   grid("window-night", WINDOW, 1, { K: S.frame, B: S.glassNight, R: S.lightRed, Y: S.lightGold, G: S.lightGreen, D: S.screen, W: S.text }),
   grid("sun", SUN, 1, SUN_KEY),

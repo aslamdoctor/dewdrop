@@ -24,7 +24,7 @@ function cell(a, i, on, close) {
     .child(div().flex_none().w(46).h(46).border_2().border_color(on ? GOLD_LINE : INK).opacity(on ? 1 : 0.88)
       .child(image(pic(a.file)).size_full()))
     .child(v_flex().flex_1().min_w(0).gap(4)
-      .child(div().min_w(0).truncate().whitespace_nowrap().text_size(11).text_color(on ? "#f4de8e" : "#f3e2b8").child(a.name))
+      .child(div().min_w(0).truncate().whitespace_nowrap().text_size(11).font_weight(600).text_color(on ? "#f4de8e" : "#f3e2b8").child(a.name))
       .child(h_flex().child(div().min_w(0).truncate().whitespace_nowrap().px(5).py(2).text_size(9.5)
         .bg(on ? GOLD_LINE : INK).text_color(on ? INK : GOLD_LINE).child(a.role))));
 }

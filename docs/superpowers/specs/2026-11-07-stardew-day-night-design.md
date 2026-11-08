@@ -105,7 +105,7 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
 - One pixel scale: pictures are shown with nearest-neighbour scaling at whole device-pixel steps only (48px grid shown at 24, 48 or 72 CSS px on a 2x screen). The supplied pictures (the user's portrait and the 24 farmhands) are the exception and scale smoothly.
 - The choice persists (`setState`).
 - Agent faces: one farmhand face per app, not per agent (user's decision), so every agent of the same app shares a picture in the agents popup, the pane header and the peek. Defaults (my call): claude-code is Orion Vale, codex is Unit K-47, opencode is BEEP-09, and any other app is Milo Patches. The farmhand name follows the face. Helpers keep the chicken icon.
-- The working chip and the clock box never wrap, even when the tab strip is full.
+- The working chip and the clock box never wrap or shrink, even when the tab strip is full. To make room, the tabs shrink instead (down to 52px each, labels cut with an ellipsis); the "more" tab and the "+" button keep their size.
 
 ### Pet chooser
 

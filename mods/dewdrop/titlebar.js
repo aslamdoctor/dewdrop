@@ -6,6 +6,7 @@ import { h_flex } from "gpui-base";
 import { agents } from "herdr";
 import { C } from "./palette.js";
 import { art } from "./art.js";
+import { syncLook } from "./look.js";
 import { clockText, workingCount, msToNextMinute, CLOCK } from "./logic.js";
 
 export const FONT = "Pixelify Sans";
@@ -15,9 +16,11 @@ export default class Titlebar {
     // Re-aim at the next minute boundary on every tick, so the clock never
     // drifts and catches up on its first tick after the laptop wakes.
     const tick = (cx) => {
+      syncLook();
       cx.notify();
       cx.timer.after(msToNextMinute(new Date()), tick);
     };
+    syncLook();
     cx.timer.after(msToNextMinute(new Date()), tick);
   }
 

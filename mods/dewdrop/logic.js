@@ -125,7 +125,8 @@ export function lookOfLayout(tree) {
 // A deep copy of the tree wearing the day or night look. Only the valley scene and the
 // pane colors of "main" change. null when the tree has no valley or no main node.
 export function layoutFor(tree, look) {
-  const copy = structuredClone(tree);
+  // The mod runtime has no structuredClone, and the tree is plain JSON.
+  const copy = JSON.parse(JSON.stringify(tree));
   const valley = findNode(copy, "valley");
   const main = findNode(copy, "main");
   const pane = main?.content?.pane;
@@ -136,4 +137,12 @@ export function layoutFor(tree, look) {
   pane.border = { ...(pane.border ?? {}), color: L.border };
   pane.focus = { ...(pane.focus ?? {}), color: L.focus };
   return copy;
+}
+
+// The look to switch to, or null when the tree already wears lookOf(now) or isn't Dewdrop's.
+export function needsSwap(tree, now) {
+  const wearing = lookOfLayout(tree);
+  if (!wearing) return null;
+  const want = lookOf(now);
+  return wearing === want ? null : want;
 }

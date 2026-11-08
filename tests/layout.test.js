@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import layout from "../layouts/dewdrop.json";
-import { layoutFor, lookOfLayout } from "../mods/dewdrop/logic.js";
+import { layoutFor, lookOfLayout, needsSwap } from "../mods/dewdrop/logic.js";
 
 const find = (n, id) => n.id === id ? n : (n.children ?? []).map((c) => find(c, id)).find(Boolean);
 
@@ -33,4 +33,13 @@ test("layoutFor keeps everything else", () => {
 test("layoutFor on a foreign tree", () => {
   expect(layoutFor({ id: "root", type: "column", children: [] }, "night")).toBeNull();
   expect(lookOfLayout({ id: "root" })).toBeNull();
+});
+
+test("needsSwap writes only when the look changes", () => {
+  const night = layoutFor(layout, "night");
+  expect(needsSwap(layout, new Date(2026, 10, 8, 19, 0))).toBe("night");
+  expect(needsSwap(night, new Date(2026, 10, 8, 19, 1))).toBeNull();
+  expect(needsSwap(night, new Date(2026, 10, 9, 6, 0))).toBe("day");
+  expect(needsSwap(layout, new Date(2026, 10, 8, 12, 0))).toBeNull();
+  expect(needsSwap({ id: "root" }, new Date(2026, 10, 8, 19, 0))).toBeNull();
 });

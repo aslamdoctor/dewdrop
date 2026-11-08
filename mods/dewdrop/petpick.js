@@ -24,7 +24,7 @@ function cell(k, on, close) {
     .child(div().flex_none().w(56).h(48).flex().items_center().justify_center().border_2().border_color(on ? GOLD_LINE : INK)
       .bg("#2b1a1238")
       .child(image(k ? petFrame(k, "a") : png("doghouse")).w(48).h(40)))
-    .child(div().font_family(FONT).text_size(12).text_color(on ? "#f4de8e" : "#f3e2b8").child(name))
+    .child(div().font_family(FONT).text_size(12).font_weight(600).text_color(on ? "#f4de8e" : "#f3e2b8").child(name))
     .child(div().w_full().text_size(9).opacity(0.8).text_center().child(trait));
 }
 

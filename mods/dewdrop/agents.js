@@ -15,7 +15,8 @@ const W = 360;
 const SCROLL_ID = "dewdrop-agents";
 const HEAD_H = 22, AGENT_H = 34, HELPER_H = 26, PAD = 16;
 
-// Rough content height, to decide whether the scroll bar strip is needed.
+// Rough content height, to decide whether the scroll bar strip is needed. The popup's
+// own 2px borders take 4px of MAX_H, so callers compare against MAX_H - 4.
 export function contentHeight(groups) {
   let h = PAD;
   for (const g of groups) {
@@ -43,7 +44,7 @@ export default class Agents {
     const agentRow = (a, n) => h_flex().id(`dewdrop-agent-${a.address}`).h(AGENT_H - 4).mb(4).items_center().gap(6).px(6)
       .bg(L.slot).border_2().border_color("#000000").cursor_pointer().text_size(12)
       .on_click(() => { run("tab.select", { id: a.tab }); run("agent.focus", { terminal: a.address }); close(); })
-      .child(image(pic(faceOf(a.app).file)).w(22).h(22).flex_none())
+      .child(div().flex_none().w(24).h(24).border_2().border_color(INK).child(image(pic(faceOf(a.app).file)).size_full()))
       .child(div().flex_1().min_w(0).truncate().child(a.title || a.address))
       .child(div().flex_none().text_size(10).opacity(0.7).child(`${a.app ?? "agent"} / ${faceOf(a.app).name}`))
       .when(n > 0, (el) => el.child(div().flex_none().text_size(10).opacity(0.85).child(`${n} helper${n === 1 ? "" : "s"}`)))
@@ -52,7 +53,7 @@ export default class Agents {
     const helperRow = (h) => h_flex().id(`dewdrop-helper-${h.address}`).h(HELPER_H - 4).mb(4).ml(20).items_center().gap(6).px(6)
       .bg(L.slot).border_1().border_color("#000000").cursor_pointer().text_size(11)
       .on_click(() => (h.pane ? run("pane.focus", { pane: h.pane }) : run("terminal.peek", { terminal: h.address })))
-      .child(image(petFrame("chicken", "a")).w(16).h(13).flex_none())
+      .child(div().flex_none().w(20).h(17).border_2().border_color(INK).child(image(petFrame("chicken", "a")).size_full()))
       .child(div().flex_1().min_w(0).truncate().child(h.title))
       .when(Boolean(h.pane), (el) => el.child(div().flex_none().text_size(10).opacity(0.7).child("in a pane")))
       .when(!h.pane, (el) => el.child(div().id(`dewdrop-keep-${h.address}`).flex_none().px(5).text_size(10)
@@ -69,7 +70,7 @@ export default class Agents {
           .child(div().h(HEAD_H - 4).mb(4).text_size(10).opacity(0.8).truncate().child(`${g.space_name} / ${g.tab_index} ${g.tab_name}`))
           .children(g.rows.flatMap((r) => [agentRow(r.agent, r.helpers.length), ...r.helpers.map(helperRow)]))));
 
-    const long = contentHeight(groups) > MAX_H;
+    const long = contentHeight(groups) > MAX_H - 4;
     return h_flex().w(W).max_h(MAX_H).font_family(FONT).bg(L.bar).text_color(L.text).border_2().border_color("#000000")
       .child(body)
       .when(long, (el) => el.child(div().flex_none().w(8).bg("#0000004d").child(Scrollbar.vertical(SCROLL_ID).size_full().viewport_from_layout())));

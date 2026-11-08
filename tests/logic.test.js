@@ -203,6 +203,9 @@ test("the sky is laid out the same every time and stays in the strip", () => {
     for (const f of skyFireflies(width)) {
       expect(f.top[0]).toBeGreaterThanOrEqual(0);
       expect(f.top[1] + f.h).toBeLessThanOrEqual(SKY_H);
+      // Its whole swing stays on screen.
+      expect(f.left).toBeGreaterThanOrEqual(0);
+      expect(f.left + f.dx + f.w).toBeLessThanOrEqual(width);
     }
   }
 });
@@ -219,7 +222,7 @@ test("the sky spreads over the width and nothing moves in lockstep", () => {
   expect(new Set(clouds.map((c) => c.period)).size).toBe(clouds.length);
   expect(new Set(clouds.map((c) => c.top)).size).toBeGreaterThan(1);
   expect(new Set(clouds.map((c) => c.name)).size).toBe(3);
-  // Some head right, some left, and they start spread out.
+  // Some swing out right, some left, from spots spread over the width.
   expect(new Set(clouds.map((c) => c.to > c.from))).toEqual(new Set([true, false]));
   const xs = clouds.map((c) => c.from).sort((a, b) => a - b);
   for (let i = 1; i < xs.length; i++) expect(xs[i] - xs[i - 1]).toBeGreaterThan(100);

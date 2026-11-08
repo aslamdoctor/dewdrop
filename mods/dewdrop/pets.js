@@ -14,7 +14,7 @@ export const PET_WALK = {
   rabbit: { speed: 70, ms: 300 }, turtle: { speed: 14, ms: 300 }, frog: { speed: 60, ms: 300 },
 };
 
-export const PET_KEYS =["chicken", "duck", "cat", "dog", "rabbit", "turtle", "frog"];
+export const PET_KEYS = ["chicken", "duck", "cat", "dog", "rabbit", "turtle", "frog"];
 
 const INFO = {
   chicken: ["Chicken", "Wanders about and pecks. Click for a heart."],

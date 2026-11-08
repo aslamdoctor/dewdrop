@@ -272,8 +272,9 @@ export const SKY_ART = { "cloud-a": [18, 8], "cloud-b": [12, 6], "cloud-c": [26,
 export const skySize = (name) => SKY_ART[name].map((n) => n * SKY_PX);
 
 // Things that drift: each starts at x0, spread over the width, and swings out to the far
-// edge and back (a loop ping-pongs). Starting in the left half it heads right, else left,
-// so a fresh window shows them spread out and moving both ways.
+// edge and back (a loop ping-pongs). One in the left half swings out right, else left.
+// Loops share one native clock, so where each sits on first draw isn't up to us; the
+// different periods keep them from moving in lockstep.
 function drifters(width, n, seed, names, speeds, tops) {
   const r = seeded(seed);
   return Array.from({ length: n }, (_, i) => {
@@ -319,13 +320,18 @@ export function skyFireflies(width) {
   const r = seeded(41);
   const n = Math.max(4, Math.round(width / 320));
   const [w, h] = skySize("firefly");
-  return Array.from({ length: n }, (_, i) => ({
-    w, h,
-    left: Math.round(((i + 0.2 + r() * 0.6) / n) * width),
-    dx: 40 + Math.round(r() * 50), dxPeriod: 7000 + Math.round(r() * 6000),
-    top: [6, SKY_H - 6 - h], topPeriod: 3500 + Math.round(r() * 3000),
-    blinkPeriod: 1400 + Math.round(r() * 1600),
-  }));
+  return Array.from({ length: n }, (_, i) => {
+    const spot = Math.round(((i + 0.2 + r() * 0.6) / n) * width);
+    const dx = 40 + Math.round(r() * 50);
+    return {
+      w, h,
+      // Kept far enough from the right edge that the whole swing stays on screen.
+      left: Math.max(0, Math.min(spot, width - dx - w)),
+      dx, dxPeriod: 7000 + Math.round(r() * 6000),
+      top: [6, SKY_H - 6 - h], topPeriod: 3500 + Math.round(r() * 3000),
+      blinkPeriod: 1400 + Math.round(r() * 1600),
+    };
+  });
 }
 
 // ---- Road pet (roadpet.js) ----

@@ -8,7 +8,11 @@ test("the shipped layout is the day look", () => {
   expect(lookOfLayout(layout)).toBe("day");
   expect(find(layout, "hotbar").background).toBeUndefined();
   expect(find(layout, "peek-spacer").hidden).toBe(true);
-  expect(layout.terminal_opacity).toBe(0.85);
+  // The pane background carries the mock's alpha, so the terminal paints none of its own
+  // and the scene shows through the pane as in the mock.
+  expect(layout.terminal_opacity).toBe(0);
+  expect(find(layout, "main").content.pane.background).toBe("#20160fdb");
+  expect(find(layout, "main").content.pane.header.height).toBe(28);
   expect(layoutFor(layout, "day")).toEqual(layout);
 });
 
@@ -17,7 +21,7 @@ test("layoutFor night swaps the scene and pane colors only", () => {
   const n = layoutFor(layout, "night");
   expect(layout).toEqual(before);
   expect(find(n, "valley").background.image).toBe("mods/dewdrop/art/scene-night.png");
-  expect(find(n, "main").content.pane).toMatchObject({ background: "#0b0b1a", border: { width: 3, color: "#2b1d14" }, focus: { width: 3, color: "#f2c14e" } });
+  expect(find(n, "main").content.pane).toMatchObject({ background: "#0b0b1ad6", border: { width: 3, color: "#2b1d14" }, focus: { width: 3, color: "#f2c14e" } });
   expect(find(n, "peek-spacer")).toEqual(find(layout, "peek-spacer"));
   expect(lookOfLayout(n)).toBe("night");
 });

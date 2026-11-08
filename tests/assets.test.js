@@ -6,8 +6,8 @@ import { CAST } from "../mods/dewdrop/cast.js";
 import theme from "../themes/dewdrop.json";
 
 test("day and night palettes match the mock", () => {
-  expect(LOOK.day).toMatchObject({ bar: "#8a5a2b", barLight: "#c58b4e", border: "#6b4420", focus: "#f2c14e", trim: "#c58b4e", ring: "#d9534f", pane: "#20160f" });
-  expect(LOOK.night).toMatchObject({ bar: "#3a2718", barLight: "#5a3c25", border: "#2b1d14", focus: "#f2c14e", trim: "#f2c14e", ring: "#f2c14e", pane: "#0b0b1a" });
+  expect(LOOK.day).toMatchObject({ bar: "#8a5a2b", barLight: "#c58b4e", border: "#6b4420", focus: "#f2c14e", trim: "#c58b4e", ring: "#d9534f", pane: "#20160fdb" });
+  expect(LOOK.night).toMatchObject({ bar: "#3a2718", barLight: "#5a3c25", border: "#2b1d14", focus: "#f2c14e", trim: "#f2c14e", ring: "#f2c14e", pane: "#0b0b1ad6" });
   expect(Object.keys(LOOK.day).sort()).toEqual(Object.keys(LOOK.night).sort());
   expect([INK, GOLD_LINE]).toEqual(["#3b2418", "#e8c65a"]);
 });

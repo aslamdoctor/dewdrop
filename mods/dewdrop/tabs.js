@@ -15,12 +15,21 @@ export function dot(status, size = 8) {
   return status === "working" ? d.loop("opacity", { from: 0.45, to: 1, period: 800 }) : d;
 }
 
-// One tab chip. Used in the strip (fixed 86px, shrinking) and as a popup row (dim for settled).
+// The mock's inset bevel inside a title bar chip: a light top line on the chosen tab,
+// a dark bottom line on every chip. The parent must be relative().
+export function bevel(el, on) {
+  return el
+    .when(on, (e) => e.child(div().absolute().top(0).left(0).right(0).h(2).bg("#ffffff73")))
+    .child(div().absolute().bottom(0).left(0).right(0).h(3).bg(on ? "#0000002e" : "#00000040"));
+}
+
+// One tab chip in the strip (fixed 86px, shrinking).
 export function tabChip(tab, look, onSelect) {
   const [bg, fg] = tab.active ? LOOK[look].tabOn : LOOK[look].tabOff;
-  return h_flex().id(`dewdrop-tab-${tab.id}`).flex_shrink(1).w(86).min_w(52).h(28).overflow_hidden()
+  const chip = h_flex().id(`dewdrop-tab-${tab.id}`).relative().flex_shrink(1).w(86).min_w(52).h(28).overflow_hidden()
     .items_center().gap(6).px(7).bg(bg).text_color(fg).text_size(12).border_2().border_color("#000000")
-    .cursor_pointer().whitespace_nowrap()
+    .cursor_pointer().whitespace_nowrap();
+  return bevel(chip, tab.active)
     .on_mouse_down("left", stop).on_click(() => onSelect(tab))
     .child(div().flex_none().opacity(0.7).child(String(tab.index)))
     .child(div().flex_1().min_w(0).truncate().child(tab.name))

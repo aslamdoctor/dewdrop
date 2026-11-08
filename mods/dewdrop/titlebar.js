@@ -9,7 +9,7 @@ import { C, LOOK } from "./palette.js";
 import { art } from "./art.js";
 import { syncLook } from "./look.js";
 import { clockText, agentCounts, helpersOf, lookOf, tabStrip, msToNextMinute } from "./logic.js";
-import { FONT, stop, dot, tabChip } from "./tabs.js";
+import { FONT, stop, dot, tabChip, bevel } from "./tabs.js";
 
 export { FONT };
 
@@ -40,8 +40,8 @@ export default class Titlebar {
     const space = (spaces() ?? []).find((s) => s.active);
     const { strip, hidden, settled } = tabStrip(space?.tabs ?? []);
     const [offBg, offFg] = L.tabOff;
-    const small = (id, label, onClick) => h_flex().id(id).flex_none().h(28).items_center().justify_center().gap(4).px(8)
-      .bg(offBg).text_color(offFg).text_size(12).border_2().border_color("#000000").whitespace_nowrap()
+    const small = (id, label, onClick) => bevel(h_flex().id(id).relative().flex_none().h(28).items_center().justify_center().gap(4).px(8)
+      .bg(offBg).text_color(offFg).text_size(12).border_2().border_color("#000000").whitespace_nowrap(), false)
       .on_mouse_down("left", stop)
       .when(Boolean(onClick), (el) => el.cursor_pointer().on_click(onClick))
       .when(!onClick, (el) => el.opacity(0.5))
@@ -57,17 +57,21 @@ export default class Titlebar {
       .children(strip.map((x) => tabChip(x, look, (tab) => run("tab.select", { id: tab.id }))));
 
     const { working, blocked } = agentCounts(agents() ?? [], helpersOf(terminals() ?? [], panes() ?? []));
-    const chip = h_flex().id("dewdrop-working").flex_none().h(28).items_center().gap(6).px(10).whitespace_nowrap()
+    // The mock's plank boxes: a black border with a light wood ring just inside it.
+    const ring = () => div().absolute().top(0).left(0).right(0).bottom(0).border_2().border_color(L.barLight);
+    const chip = h_flex().id("dewdrop-working").relative().flex_none().h(28).items_center().gap(6).px(10).whitespace_nowrap()
       .bg(C.soil).border_2().border_color("#000000").text_size(13).text_color(C.gold)
+      .child(ring())
       .cursor_pointer().on_mouse_down("left", stop)
       .on_click(() => openOverlay({ mod: "dewdrop", props: { role: "agents" }, kind: "popup", frame: "none" }))
       .child(dot("working"))
       .child(`${working} working`)
-      .when(blocked > 0, (el) => el.child(div().ml(4)).child(dot("blocked")).child(String(blocked)));
+      .child(div().ml(4)).child(dot("blocked")).child(String(blocked));
 
     const bg = night ? C.soil : C.parchment, fg = night ? C.parchment : C.soil, sub = night ? C.idle : C.wood;
-    const clock = h_flex().flex_none().h(28).items_center().gap(8).px(10).whitespace_nowrap()
+    const clock = h_flex().relative().flex_none().h(28).items_center().gap(8).px(10).whitespace_nowrap()
       .bg(bg).border_2().border_color("#000000")
+      .child(ring())
       .child(image(art(night ? "moon" : "sun")).w(16).h(16).flex_none())
       .child(text(t.time, 14, fg))
       .child(text(t.day, 11, sub))
@@ -75,8 +79,10 @@ export default class Titlebar {
       .child(image(art("season-" + t.season.toLowerCase())).w(16).h(16).flex_none())
       .child(text(t.season, 12, fg));
 
-    return h_flex().id("dewdrop-titlebar").size_full().font_family(FONT).items_center().gap(8).pl(80).pr(8)
+    return h_flex().id("dewdrop-titlebar").relative().size_full().font_family(FONT).items_center().gap(8).pl(80).pr(8).pb(3)
       .bg(L.bar).border_t_2().border_color(L.barLight)
+      // The 3px black line under the bar, as in the mock.
+      .child(div().absolute().left(0).right(0).bottom(0).h(3).bg("#000000"))
       .child(tabs)
       .children(moreChip ? [moreChip] : [])
       .child(plus)

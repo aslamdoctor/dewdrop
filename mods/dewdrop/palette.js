@@ -11,3 +11,20 @@ export const C = {
   gold: "#f2c14e",
   idle: "#9c7b5b",
 };
+
+export const INK = "#3b2418";
+export const GOLD_LINE = "#e8c65a";
+
+export const STATUS = { working: "#5fa8d3", blocked: "#d9534f", done: "#f2c14e", idle: "#9c7b5b" };
+
+// pane is a hex here; the alpha comes from terminal_opacity.
+export const LOOK = {
+  day: { bar: "#8a5a2b", barLight: "#c58b4e", text: "#f3e2b8", tabOn: ["#f3e2b8", "#2b1d14"], tabOff: ["#6b4420", "#f3e2b8"], plank: "#9a6a36", plankLight: "#d29a5c", plankText: "#fff4d6", plankDim: "#2b1d14",
+    border: "#6b4420", focus: "#f2c14e", pane: "#20160f", trim: "#c58b4e", ring: "#d9534f", slot: "#2b1d14", slotOn: "#5a3a20" },
+  night: { bar: "#3a2718", barLight: "#5a3c25", text: "#f3e2b8", tabOn: ["#f2c14e", "#2b1d14"], tabOff: ["#4a3220", "#c9b48a"], plank: "#4a3220", plankLight: "#6b4a30", plankText: "#f2c14e", plankDim: "#9c7b5b",
+    border: "#2b1d14", focus: "#f2c14e", pane: "#0b0b1a", trim: "#f2c14e", ring: "#f2c14e", slot: "#1f160f", slotOn: "#3d2a1a" },
+};
+
+export function dotColor(status) {
+  return STATUS[status ?? "idle"] ?? STATUS.idle;
+}

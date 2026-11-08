@@ -95,3 +95,9 @@ export const CLOCK = { w: 176, h: 36, split: 120 };
 export function msToNextMinute(now) {
   return (60 - now.getSeconds()) * 1000 - now.getMilliseconds() + 50;
 }
+
+// Day look from 6:00 to 17:59, night otherwise.
+export function lookOf(date) {
+  const h = date.getHours();
+  return h >= 6 && h < 18 ? "day" : "night";
+}

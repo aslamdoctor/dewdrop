@@ -1,6 +1,14 @@
 import { test, expect } from "bun:test";
 import { seasonOf, clockText, workingCount, statusLook, HOTBAR_KEYS, slotLabel, hotbarSlots,
-  slotTooltip, headerTitle, chickenMood, msToNextMinute, CLOCK } from "../mods/dewdrop/logic.js";
+  slotTooltip, headerTitle, chickenMood, msToNextMinute, CLOCK, lookOf } from "../mods/dewdrop/logic.js";
+
+test("lookOf flips at 6:00 and 18:00", () => {
+  expect(lookOf(new Date(2026, 10, 8, 5, 59))).toBe("night");
+  expect(lookOf(new Date(2026, 10, 8, 6, 0))).toBe("day");
+  expect(lookOf(new Date(2026, 10, 8, 17, 59))).toBe("day");
+  expect(lookOf(new Date(2026, 10, 8, 18, 0))).toBe("night");
+  expect(lookOf(new Date(2026, 10, 8, 0, 0))).toBe("night");
+});
 
 test("seasonOf flips on month boundaries", () => {
   expect(seasonOf(new Date(2026, 1, 28))).toBe("winter");

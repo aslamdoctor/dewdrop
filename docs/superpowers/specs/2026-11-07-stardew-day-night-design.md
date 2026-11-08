@@ -103,7 +103,9 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
 - Borders: every picture (hotbar portrait, picker cells, agents popup rows, pane header) has a plain 2px dark brown (`#3b2418`) border. No wood frame (user said it looked comical) and no black. The chosen picker cell gets a gold (`#e8c65a`) border. Pictures never move: no hover lift and no lift on the chosen one (user's decision).
 - The 24 farmhand pictures are supplied by the user as one sheet (6x4 cells, made with Gemini). Each cell is cropped to a square from just inside its frame, keeping the head and shoulders, and shipped as its own PNG. Like the user's portrait they scale smoothly, not snapped to the palette. The farmhand name in the agents popup and pane header comes from this list.
 - One pixel scale: pictures are shown with nearest-neighbour scaling at whole device-pixel steps only (48px grid shown at 24, 48 or 72 CSS px on a 2x screen). The supplied pictures (the user's portrait and the 24 farmhands) are the exception and scale smoothly.
-- The choice persists (`setState`), and agents get the remaining pictures as their farmhand faces, in order.
+- The choice persists (`setState`).
+- Agent faces: one farmhand face per app, not per agent (user's decision), so every agent of the same app shares a picture in the agents popup, the pane header and the peek. Defaults (my call): claude-code is Orion Vale, codex is Unit K-47, opencode is BEEP-09, and any other app is Milo Patches. The farmhand name follows the face. Helpers keep the chicken icon.
+- The working chip and the clock box never wrap, even when the tab strip is full.
 
 ### Pet chooser
 

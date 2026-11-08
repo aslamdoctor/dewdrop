@@ -351,3 +351,13 @@ export function walkLeg(plan, n) {
 export function msToLeg(t0, leg, n, now) {
   return Math.max(0, t0 + n * leg - now);
 }
+
+// The leg to walk when the turn timer fires, worked out from the clock so a sleep or a
+// forward clock jump skips straight to the current leg (one repaint, not one per missed
+// leg). It always moves on at least one leg. If the clock went back, t0 is re-anchored so
+// the next turn is never more than one leg away.
+export function nextLeg(t0, leg, prevN, now) {
+  const due = Math.floor((now - t0) / leg);
+  const n = Math.max(prevN + 1, due);
+  return due < prevN ? { n, t0: now - n * leg } : { n, t0 };
+}

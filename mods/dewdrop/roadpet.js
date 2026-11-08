@@ -8,7 +8,7 @@
 import { div, image } from "gpui-kit";
 import { agents, run, shared } from "herdr";
 import { art, petWalk } from "./art.js";
-import { chickenMood, walkPlan, walkLeg, msToLeg, PET_W, PET_H } from "./logic.js";
+import { chickenMood, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, PET_H } from "./logic.js";
 import { savedPet, PET_WALK } from "./pets.js";
 import { C, INK } from "./palette.js";
 import { FONT } from "./tabs.js";
@@ -35,7 +35,9 @@ export default class RoadPet {
     this.walk = walk;
     const turn = (cx) => {
       if (this.walk !== walk) return;
-      walk.n++;
+      const next = nextLeg(walk.t0, plan.leg, walk.n, Date.now());
+      walk.n = next.n;
+      walk.t0 = next.t0;
       cx.timer.after(msToLeg(walk.t0, plan.leg, walk.n + 1, Date.now()), turn);
       cx.notify();
     };

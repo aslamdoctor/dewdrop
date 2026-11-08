@@ -181,7 +181,7 @@ test("agentGroups groups by tab in order", () => {
   expect(agentGroups([], new Map())).toEqual([]);
 });
 
-import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, walkLeg, msToLeg, PET_W, ROAD_MARGIN } from "../mods/dewdrop/logic.js";
+import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, ROAD_MARGIN } from "../mods/dewdrop/logic.js";
 
 test("the sky is laid out the same every time and stays in the strip", () => {
   for (const width of [800, 1440, 2560]) {
@@ -259,4 +259,17 @@ test("msToLeg times every turn from the start", () => {
   // A timer that fired 40ms late makes the next wait 40ms shorter, not the same.
   expect(msToLeg(1000, 500, 2, 1540)).toBe(460);
   expect(msToLeg(1000, 500, 1, 9000)).toBe(0);
+});
+
+test("nextLeg skips missed legs after a sleep and survives a clock going back", () => {
+  // On time: leg 2 fires at t0 + 2 legs.
+  expect(nextLeg(0, 1000, 1, 2000)).toEqual({ n: 2, t0: 0 });
+  // A hair early still moves on one leg.
+  expect(nextLeg(0, 1000, 1, 1999)).toEqual({ n: 2, t0: 0 });
+  // Ten hours asleep: one jump to the current leg, not 36,000 turns.
+  expect(nextLeg(0, 1000, 1, 36_000_500)).toEqual({ n: 36_000, t0: 0 });
+  // Clock went back an hour: move on one leg and re-anchor so the next turn is one leg away.
+  const r = nextLeg(10_000_000, 1000, 50, 6_400_000);
+  expect(r.n).toBe(51);
+  expect(msToLeg(r.t0, 1000, r.n + 1, 6_400_000)).toBe(1000);
 });

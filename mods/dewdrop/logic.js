@@ -455,3 +455,15 @@ export function petPoke(pet, r, acting) {
     default: return p;
   }
 }
+
+// Where the titlebar's popups open, as in the mock: 44 down (just under the 40px bar),
+// the agents panel 12 in from the right edge, the more-tabs menu under its chip and
+// kept inside the window. `vw` is the window width.
+export const POPUP_TOP = 44;
+export const POPUP_EDGE = 12;
+export function agentsAt(vw, w) {
+  return { x: Math.max(POPUP_EDGE, vw - POPUP_EDGE - w), y: POPUP_TOP };
+}
+export function moreAt(chipLeft, vw, w) {
+  return { x: Math.max(POPUP_EDGE, Math.min(chipLeft, vw - POPUP_EDGE - w)), y: POPUP_TOP };
+}

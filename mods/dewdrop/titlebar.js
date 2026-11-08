@@ -8,13 +8,16 @@ import { agents, terminals, panes, spaces, run, openOverlay } from "herdr";
 import { C, LOOK } from "./palette.js";
 import { art } from "./art.js";
 import { syncLook, noteValley } from "./look.js";
-import { clockText, agentCounts, helpersOf, lookOf, tabStrip, msToNextMinute } from "./logic.js";
+import { openAgents, noteWidth } from "./agents.js";
+import { clockText, agentCounts, helpersOf, lookOf, tabStrip, msToNextMinute, moreAt } from "./logic.js";
 import { FONT, stop, dot, tabChip, bevel } from "./tabs.js";
 
 export { FONT };
 
 // The bar's height in layouts/dewdrop.json.
 const TITLEBAR_H = 40;
+// The more-tabs menu's width (tabs.js).
+const MORE_W = 210;
 
 export default class Titlebar {
   init(_p, cx) {
@@ -37,7 +40,9 @@ export default class Titlebar {
     // The valley is the window under this bar. A new size that wants another scene height
     // swaps the scene right after this render (layout.set can't run inside one). The first
     // render always does, which also covers the look on start.
-    if (noteValley(window.viewport_size().height - TITLEBAR_H)) cx.timer.after(1, () => this.safeSync());
+    const view = window.viewport_size();
+    noteWidth(view.width);
+    if (noteValley(view.height - TITLEBAR_H)) cx.timer.after(1, () => this.safeSync());
     const now = new Date();
     const look = lookOf(now);
     const L = LOOK[look];
@@ -55,8 +60,14 @@ export default class Titlebar {
       .child(label);
 
     const more = hidden.length + settled.length;
+    // The menu opens under the chip, as in the mock: the press notes where the chip starts.
     const moreChip = more === 0 ? null : small("dewdrop-tabmore", `\u25BE ${more} more`, () =>
-      openOverlay({ mod: "dewdrop", props: { role: "tabmore" }, kind: "popup", frame: "none" }))
+      openOverlay({ mod: "dewdrop", props: { role: "tabmore" }, kind: "popup", frame: "none",
+        ...(this.moreLeft == null ? {} : { at: moreAt(this.moreLeft, view.width, MORE_W) }) }))
+      .on_mouse_down("left", (e, cx) => {
+        cx.stop_propagation();
+        if (e.position && e.local_position) this.moreLeft = e.position.x - e.local_position.x;
+      })
       .children(hidden.map((x) => dot(x.status, 6)));
     const plus = small("dewdrop-tabnew", "+", space ? () => run("tab.new", { space: space.id }) : null);
 
@@ -70,7 +81,7 @@ export default class Titlebar {
       .bg(C.soil).border_2().border_color("#000000").text_size(13).text_color(C.gold)
       .child(ring())
       .cursor_pointer().on_mouse_down("left", stop)
-      .on_click(() => openOverlay({ mod: "dewdrop", props: { role: "agents" }, kind: "popup", frame: "none" }))
+      .on_click(() => openAgents())
       .child(dot("working"))
       .child(`${working} working`)
       .when(blocked > 0, (c) => c.child(div().ml(4)).child(dot("blocked")).child(String(blocked)));

@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { PET_ACTS, PET_KEYS } from "../mods/dewdrop/pets.js";
 import { clockText, HOTBAR_KEYS, slotLabel, hotbarSlots,
-  slotTooltip, cropOf, CROPS, msToNextLook, headerTitle, chickenMood, msToNextMinute, lookOf, tabStrip, agentCounts, helpersOf, agentGroups } from "../mods/dewdrop/logic.js";
+  slotTooltip, cropOf, CROPS, msToNextLook, headerTitle, chickenMood, msToNextMinute, lookOf, tabStrip, agentCounts, helpersOf, agentGroups, agentsAt, moreAt } from "../mods/dewdrop/logic.js";
 
 test("lookOf flips at 6:00 and 18:00", () => {
   expect(lookOf(new Date(2026, 10, 8, 5, 59))).toBe("night");
@@ -331,4 +331,15 @@ test("petPoke gives each pet the preview's click reaction", () => {
   expect(petPoke("cat", 0.1, false)).toEqual(off);
   expect(petPoke("cat", 0.5, false)).toEqual({ ...none, heart: true, say: "purr", sayMs: 2000, state: "idle", dur: 2000 });
   expect(petPoke("nobody", 0.5, false)).toEqual(none);
+});
+
+test("the agents panel opens at the top right like the mock", () => {
+  expect(agentsAt(2560, 392)).toEqual({ x: 2156, y: 44 });
+  expect(agentsAt(300, 392)).toEqual({ x: 12, y: 44 });
+});
+
+test("the more-tabs menu opens under its chip and stays in the window", () => {
+  expect(moreAt(600, 2560, 210)).toEqual({ x: 600, y: 44 });
+  expect(moreAt(2500, 2560, 210)).toEqual({ x: 2338, y: 44 });
+  expect(moreAt(-5, 2560, 210)).toEqual({ x: 12, y: 44 });
 });

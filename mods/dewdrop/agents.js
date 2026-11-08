@@ -3,15 +3,25 @@
 // to peek at it, "keep" gives it a pane. Grows to 450px, then scrolls with a styled bar.
 import { div, image } from "gpui-kit";
 import { h_flex, v_flex, Scrollbar } from "gpui-base";
-import { agents, terminals, panes, run, closeOverlay, props } from "herdr";
+import { agents, terminals, panes, run, closeOverlay, openOverlay, props } from "herdr";
 import { INK, LOOK } from "./palette.js";
 import { petFrame, pic } from "./art.js";
 import { faceOf } from "./cast.js";
-import { helpersOf, agentGroups, lookOf, repaintOnLook } from "./logic.js";
+import { helpersOf, agentGroups, lookOf, repaintOnLook, agentsAt } from "./logic.js";
 import { FONT, stop, dot } from "./tabs.js";
 
 export const MAX_H = 450;
-const W = 360;
+
+// The window width, noted by the titlebar's render (a click handler can't read the window).
+let viewW = 0;
+export function noteWidth(w) { viewW = w; }
+
+// Opens the panel where the mock has it: under the titlebar, at the right edge.
+export function openAgents() {
+  const at = viewW > 0 ? agentsAt(viewW, W) : undefined;
+  openOverlay({ mod: "dewdrop", props: { role: "agents" }, kind: "popup", frame: "none", ...(at ? { at } : {}) });
+}
+const W = 392;
 const SCROLL_ID = "dewdrop-agents";
 const HEAD_H = 22, AGENT_H = 34, HELPER_H = 26, PAD = 16;
 

@@ -34,7 +34,7 @@ export default class Chicken {
       });
     }
 
-    const bird = div().id("stardew-chicken").relative().flex_none().w(32).h(32)
+    const bird = div().id("dewdrop-chicken").relative().flex_none().w(32).h(32)
       // Only swallow the press while a heart or "!" is up and a click means
       // something; otherwise the press drags the float out of the way.
       .when(Boolean(this.address), (el) => el.cursor_pointer()

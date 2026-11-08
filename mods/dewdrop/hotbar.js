@@ -31,7 +31,7 @@ export default class Hotbar {
     const list = spaces() ?? [];
     const all = agents() ?? [];
     const slots = hotbarSlots(list);
-    const row = h_flex().id("stardew-hotbar-scroll").max_w(STEP * 12).min_w(0).h_full().items_center().gap(4)
+    const row = h_flex().id("dewdrop-hotbar-scroll").max_w(STEP * 12).min_w(0).h_full().items_center().gap(4)
       .overflow_x_scrollbar().children(slots.map((s, i) => slot(s, list[i], all)));
     return h_flex().size_full().font_family(FONT).items_center().justify_center()
       .child(div().flex().items_center().h(SLOT + FRAME * 2 + 6).min_w(STEP * 2).px(4).bg(C.wood).border(3).border_color(C.woodLight).child(row));

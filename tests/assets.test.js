@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
-import { C } from "../mods/stardew/palette.js";
-import theme from "../themes/stardew.json";
+import { C } from "../mods/dewdrop/palette.js";
+import theme from "../themes/dewdrop.json";
 
 test("palette matches spec", () => {
   expect(C).toEqual({ soil: "#2b1d14", parchment: "#f3e2b8", wood: "#8a5a2b", woodLight: "#c58b4e",
@@ -16,18 +16,18 @@ test("theme uses the palette", () => {
 });
 
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
-import { art, ART } from "../mods/stardew/art.js";
-import { CLOCK } from "../mods/stardew/logic.js";
+import { art, ART } from "../mods/dewdrop/art.js";
+import { CLOCK } from "../mods/dewdrop/logic.js";
 
-const ART_DIR = new URL("../mods/stardew/art/", import.meta.url).pathname;
-const FONT_DIR = new URL("../mods/stardew/fonts/", import.meta.url).pathname;
+const ART_DIR = new URL("../mods/dewdrop/art/", import.meta.url).pathname;
+const FONT_DIR = new URL("../mods/dewdrop/fonts/", import.meta.url).pathname;
 const NAMES = ["plank", "clock", "slot", "can-0", "can-1", "bang", "star", "zzz", "heart",
   "chicken-0", "chicken-1", "btn-zoom", "btn-close"];
 const ALLOWED = new Set([...Object.values(C), "#000000", "#ffffff"]);
 
 test("art() builds mod-relative paths", () => {
-  expect(ART).toBe("mods/stardew/art");
-  expect(art("can-0")).toBe("mods/stardew/art/can-0.svg");
+  expect(ART).toBe("mods/dewdrop/art");
+  expect(art("can-0")).toBe("mods/dewdrop/art/can-0.svg");
 });
 
 test("every named sprite exists", () => {
@@ -64,14 +64,14 @@ test("clock.svg is as wide as the clock box", () => {
   expect(readFileSync(`${ART_DIR}clock.svg`, "utf8")).toContain(`width="${CLOCK.w}"`);
 });
 
-import { png } from "../mods/stardew/art.js";
-import layout from "../layouts/stardew.json";
+import { png } from "../mods/dewdrop/art.js";
+import layout from "../layouts/dewdrop.json";
 
 const PNG_NAMES = ["farm", "hotbar-field"];
 const pngSize = (f) => { const b = readFileSync(f); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
 
 test("png() builds mod-relative paths", () => {
-  expect(png("farm")).toBe("mods/stardew/art/farm.png");
+  expect(png("farm")).toBe("mods/dewdrop/art/farm.png");
 });
 
 test("PixelFarm backgrounds exist at 2x and are credited", () => {

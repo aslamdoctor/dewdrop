@@ -1,4 +1,4 @@
-// Pure helpers for the stardew mod. No imports, so bun can test them directly.
+// Pure helpers for the dewdrop mod. No imports, so bun can test them directly.
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 

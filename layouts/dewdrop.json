@@ -10,7 +10,7 @@
       },
       "window_drag": true,
       "content": {
-        "mod": "stardew",
+        "mod": "dewdrop",
         "props": {
           "role": "titlebar"
         }
@@ -24,7 +24,7 @@
         16
       ],
       "background": {
-        "image": "mods/stardew/art/farm.png",
+        "image": "mods/dewdrop/art/farm.png",
         "fit": "cover"
       },
       "content": {
@@ -44,7 +44,7 @@
           "lone": true,
           "header": {
             "content": {
-              "mod": "stardew",
+              "mod": "dewdrop",
               "props": {
                 "role": "header"
               }
@@ -59,7 +59,7 @@
         {
           "id": "chicken",
           "content": {
-            "mod": "stardew",
+            "mod": "dewdrop",
             "props": {
               "role": "chicken"
             }
@@ -76,18 +76,18 @@
         "px": 64
       },
       "content": {
-        "mod": "stardew",
+        "mod": "dewdrop",
         "props": {
           "role": "hotbar"
         }
       },
       "background": {
-        "image": "mods/stardew/art/hotbar-field.png",
+        "image": "mods/dewdrop/art/hotbar-field.png",
         "fit": "cover"
       }
     }
   ],
-  "theme": "stardew",
+  "theme": "dewdrop",
   "font": "Geist Mono",
   "font_size": 14,
   "ui_font": "Pixelify Sans",
@@ -101,6 +101,5 @@
   "traffic_lights": [
     14,
     11
-  ],
-  "preview": "layouts/stardew.svg"
+  ]
 }

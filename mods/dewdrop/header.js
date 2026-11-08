@@ -30,13 +30,13 @@ export default class Header {
     const id = props()?.pane;
     const p = panes().find((x) => x.pane === id);
     if (!p) return div().size_full().bg(C.wood);
-    return h_flex().id(`stardew-header-${id}`).size_full().font_family(FONT).items_center().gap(6).px(6)
+    return h_flex().id(`dewdrop-header-${id}`).size_full().font_family(FONT).items_center().gap(6).px(6)
       .bg(C.wood).border_t_2().border_color(C.woodLight)
       .on_click((e) => run(e.click_count >= 2 ? "pane.zoom" : "pane.focus", { pane: id }))
       .child(icon(p.status))
       .child(div().flex_1().min_w(0).truncate().text_size(13).text_color(p.focused ? C.parchment : C.soil)
         .child(headerTitle(p, home() ?? "")))
-      .child(button(`stardew-zoom-${id}`, "btn-zoom", p.zoomed ? "Restore" : "Zoom", () => run("pane.zoom", { pane: id })))
-      .child(button(`stardew-close-${id}`, "btn-close", "Close", () => run("pane.close", { pane: id })));
+      .child(button(`dewdrop-zoom-${id}`, "btn-zoom", p.zoomed ? "Restore" : "Zoom", () => run("pane.zoom", { pane: id })))
+      .child(button(`dewdrop-close-${id}`, "btn-close", "Close", () => run("pane.close", { pane: id })));
   }
 }

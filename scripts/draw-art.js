@@ -1,10 +1,10 @@
-// Draws the stardew mod's pixel art as SVG. Run: bun scripts/draw-art.js
+// Draws the dewdrop mod's pixel art as SVG. Run: bun scripts/draw-art.js
 // Every sprite is original: small grids drawn by hand below, scenery drawn by code.
 import { mkdirSync, writeFileSync } from "node:fs";
-import { C } from "../mods/stardew/palette.js";
-import { CLOCK } from "../mods/stardew/logic.js";
+import { C } from "../mods/dewdrop/palette.js";
+import { CLOCK } from "../mods/dewdrop/logic.js";
 
-const OUT = new URL("../mods/stardew/art/", import.meta.url).pathname;
+const OUT = new URL("../mods/dewdrop/art/", import.meta.url).pathname;
 const KEY = {
   K: "#000000", w: "#ffffff", S: C.soil, P: C.parchment, W: C.wood, L: C.woodLight,
   G: C.grass, D: C.grassDark, B: C.sky, R: C.red, Y: C.gold, I: C.idle,

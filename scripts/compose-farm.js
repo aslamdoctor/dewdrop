@@ -4,7 +4,7 @@
 const ROOT = new URL("../", import.meta.url).pathname;
 const SET = `${ROOT}assets/pixelfarm/FreeTileSet.png`;
 const TREES = `${ROOT}assets/pixelfarm/FreeTreeTiles.png`;
-const OUT = `${ROOT}mods/stardew/art/`;
+const OUT = `${ROOT}mods/dewdrop/art/`;
 const T = 16;
 
 // Source rectangles [x, y, w, h] in the tile sheets.

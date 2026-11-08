@@ -1,4 +1,4 @@
-// Stardew layout: one mod, drawn by role. The layout gives each copy props { role }:
+// Dewdrop layout: one mod, drawn by role. The layout gives each copy props { role }:
 //   titlebar  wooden title bar with the clock box
 //   header    a pane's plank header
 //   hotbar    spaces as inventory slots
@@ -13,7 +13,7 @@ import Chicken from "./chicken.js";
 
 const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar, chicken: Chicken };
 
-export default class Stardew extends View {
+export default class Dewdrop extends View {
   init(p, cx) {
     const pr = props() ?? p ?? {};
     const R = ROLES[pr.role];
@@ -22,7 +22,7 @@ export default class Stardew extends View {
   }
 
   render(cx) {
-    if (!this.role) return div().text_color("#f3e2b8").child(`stardew: no role "${props()?.role}" yet`);
+    if (!this.role) return div().text_color("#f3e2b8").child(`dewdrop: no role "${props()?.role}" yet`);
     return this.role.render(cx);
   }
 }

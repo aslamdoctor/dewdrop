@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { seasonOf, clockText, workingCount, statusLook, HOTBAR_KEYS, slotLabel, hotbarSlots,
-  slotTooltip, headerTitle, chickenMood, msToNextMinute, CLOCK } from "../mods/stardew/logic.js";
+  slotTooltip, headerTitle, chickenMood, msToNextMinute, CLOCK } from "../mods/dewdrop/logic.js";
 
 test("seasonOf flips on month boundaries", () => {
   expect(seasonOf(new Date(2026, 1, 28))).toBe("winter");

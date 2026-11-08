@@ -38,9 +38,9 @@ export default class Titlebar {
       .child(h_flex().absolute().top(6).left(split + 2).w(w - split - 8).h(24).items_center().justify_center()
         .child(text(t.season, 12, C.wood)));
 
-    return h_flex().id("stardew-titlebar").size_full().font_family(FONT).items_center().gap(8).pl(80).pr(8)
+    return h_flex().id("dewdrop-titlebar").size_full().font_family(FONT).items_center().gap(8).pl(80).pr(8)
       .bg(C.wood).border_t_2().border_color(C.woodLight)
-      .child(div().flex_1().min_w(0).child(text("Stardew Herdr", 14, C.parchment)))
+      .child(div().flex_1().min_w(0).child(text("Dewdrop", 14, C.parchment)))
       .child(gold)
       .child(box);
   }

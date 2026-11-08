@@ -23,21 +23,6 @@ export function clockText(date) {
   };
 }
 
-export function workingCount(agents) {
-  return agents.filter((a) => a.status === "working").length;
-}
-
-const LOOKS = {
-  working: { icon: "can", color: "sky" },
-  blocked: { icon: "bang", color: "red" },
-  done: { icon: "star", color: "gold" },
-  idle: { icon: "zzz", color: "idle" },
-};
-
-export function statusLook(status) {
-  return LOOKS[status] ?? null;
-}
-
 // Herdr binds ctrl-1..ctrl-9 to space.select, so only the first nine slots get a key.
 export const HOTBAR_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
@@ -105,9 +90,6 @@ export function chickenMood(prev, agents) {
   return { mood: null, address: null, next };
 }
 
-// Clock box geometry, shared by the title bar and scripts/draw-art.js.
-export const CLOCK = { w: 176, h: 36, split: 120 };
-
 // Delay to 50ms past the next minute, so a tick never lands just before the boundary.
 export function msToNextMinute(now) {
   return (60 - now.getSeconds()) * 1000 - now.getMilliseconds() + 50;
@@ -132,7 +114,7 @@ export function msToNextLook(now) {
 // The shipped layout and the live swap (Task 6) share these two helpers.
 const sceneLook = (image) => /scene-(day|night)\.png$/.exec(image ?? "")?.[1] ?? null;
 
-function findNode(n, id) {
+export function findNode(n, id) {
   if (!n || typeof n !== "object") return null;
   if (n.id === id) return n;
   for (const c of n.children ?? []) {
@@ -172,21 +154,32 @@ export function needsSwap(tree, now) {
   return wearing === want ? null : want;
 }
 
+// How long a written look may stay unconfirmed before the syncer tries again.
+export const PENDING_MS = 90000;
+
 // A look swapper with its own pending guard. read() gives the current layout tree,
 // write(tree) applies one. pending holds the look last written until the layout shows it,
-// so a second tick before the reload doesn't write again. A throwing write frees the guard.
+// so a second tick before the reload doesn't write again. A throwing write frees the guard,
+// and so does a layout that already matches or a pending older than PENDING_MS (a write
+// that did nothing), which lets the next tick retry.
 export function makeSyncer() {
   let pending = null;
+  let pendingAt = 0;
   return function syncWith(now, read, write) {
     const tree = read();
     if (!tree) return;
     const wearing = lookOfLayout(tree);
-    if (pending && (wearing === pending || wearing === null)) pending = null;
+    if (pending && (wearing === pending || wearing === null || now - pendingAt > PENDING_MS)) pending = null;
     const look = needsSwap(tree, now);
-    if (!look || pending === look) return;
+    if (!look) {
+      pending = null;
+      return;
+    }
+    if (pending === look) return;
     const next = layoutFor(tree, look);
     if (!next) return;
     pending = look;
+    pendingAt = +now;
     try {
       write(next);
     } catch (e) {
@@ -252,4 +245,16 @@ export function agentGroups(agents, helpers) {
     g.rows.push({ agent: a, helpers: helpers.get(a.address) ?? [] });
   }
   return [...groups.values()];
+}
+
+// Repaints a role when the look flips at 6:00 and 18:00. Each wait is capped at 10 minutes,
+// so a laptop that slept through the flip catches up soon after waking. The next timer is
+// armed before notify, which could throw.
+export const MAX_LOOK_WAIT = 600000;
+export function repaintOnLook(cx) {
+  const tick = (cx) => {
+    cx.timer.after(Math.min(msToNextLook(new Date()), MAX_LOOK_WAIT), tick);
+    cx.notify();
+  };
+  cx.timer.after(Math.min(msToNextLook(new Date()), MAX_LOOK_WAIT), tick);
 }

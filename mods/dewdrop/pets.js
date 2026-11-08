@@ -1,5 +1,5 @@
 // The pet cast: seven pets, their frames and the line shown in the picker.
-// The saved choice lives in the shared key "dewdrop.pet": a pet key, or null for no pet.
+// The saved choice lives in the shared key "dewdrop.pet": a pet key, or the word NO_PET for no pet (unset means chicken).
 
 // Each pet's frames: a walk pair and one action (art/pets/<pet>-<frame>.png).
 export const PET_FRAMES = {

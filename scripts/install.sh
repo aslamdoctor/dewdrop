@@ -10,7 +10,7 @@ ITEMS=(layouts/dewdrop.json themes/dewdrop.json mods/dewdrop)
 OLD=(layouts/stardew.json layouts/stardew.svg themes/stardew.json mods/stardew)
 
 for item in "${OLD[@]}"; do
-  if [[ -e "$HOME_DIR/$item" ]]; then rm -rf "${HOME_DIR:?}/$item"; echo "removed old $item"; fi
+  if [[ -e "$HOME_DIR/$item" || -L "$HOME_DIR/$item" ]]; then rm -rf "${HOME_DIR:?}/$item"; echo "removed old $item"; fi
 done
 
 for item in "${ITEMS[@]}"; do

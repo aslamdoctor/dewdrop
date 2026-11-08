@@ -82,3 +82,27 @@ test("a matching look writes nothing", () => {
   sync(new Date(2026, 10, 8, 19, 0), () => layoutFor(layout, "night"), () => n++);
   expect(n).toBe(0);
 });
+
+test("a write that did nothing retries after 90 seconds", () => {
+  const sync = makeSyncer();
+  let n = 0;
+  const t = new Date(2026, 10, 8, 19, 0, 0);
+  sync(t, () => layout, () => n++);
+  sync(new Date(+t + 30000), () => layout, () => n++);
+  expect(n).toBe(1);
+  sync(new Date(+t + 91000), () => layout, () => n++);
+  expect(n).toBe(2);
+});
+
+test("a look that already matches clears pending", () => {
+  const sync = makeSyncer();
+  let n = 0;
+  const t = new Date(2026, 10, 8, 19, 0, 0);
+  sync(t, () => layout, () => n++);
+  expect(n).toBe(1);
+  // The layout now wears night, so pending clears. If it is reset to day soon after
+  // (inside the 90s window), the syncer writes again instead of waiting.
+  sync(new Date(+t + 10000), () => layoutFor(layout, "night"), () => n++);
+  sync(new Date(+t + 20000), () => layout, () => n++);
+  expect(n).toBe(2);
+});

@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
-import { seasonOf, clockText, workingCount, statusLook, HOTBAR_KEYS, slotLabel, hotbarSlots,
-  slotTooltip, cropOf, CROPS, msToNextLook, headerTitle, chickenMood, msToNextMinute, CLOCK, lookOf, tabStrip, agentCounts, helpersOf, agentGroups } from "../mods/dewdrop/logic.js";
+import { seasonOf, clockText, HOTBAR_KEYS, slotLabel, hotbarSlots,
+  slotTooltip, cropOf, CROPS, msToNextLook, headerTitle, chickenMood, msToNextMinute, lookOf, tabStrip, agentCounts, helpersOf, agentGroups } from "../mods/dewdrop/logic.js";
 
 test("lookOf flips at 6:00 and 18:00", () => {
   expect(lookOf(new Date(2026, 10, 8, 5, 59))).toBe("night");
@@ -22,20 +22,6 @@ test("clockText formats day, 12-hour time and season", () => {
   expect(clockText(new Date(2026, 10, 7, 18, 5))).toEqual({ day: "Sat. 7", time: "6:05 pm", season: "Fall" });
   expect(clockText(new Date(2026, 10, 7, 0, 0)).time).toBe("12:00 am");
   expect(clockText(new Date(2026, 10, 7, 12, 0)).time).toBe("12:00 pm");
-});
-
-test("workingCount counts working agents", () => {
-  expect(workingCount([{ status: "working" }, { status: "idle" }, { status: "working" }])).toBe(2);
-  expect(workingCount([])).toBe(0);
-});
-
-test("statusLook maps the four states and nothing else", () => {
-  expect(statusLook("working")).toEqual({ icon: "can", color: "sky" });
-  expect(statusLook("blocked")).toEqual({ icon: "bang", color: "red" });
-  expect(statusLook("done")).toEqual({ icon: "star", color: "gold" });
-  expect(statusLook("idle")).toEqual({ icon: "zzz", color: "idle" });
-  expect(statusLook(null)).toBeNull();
-  expect(statusLook("unknown")).toBeNull();
 });
 
 test("slotLabel takes four characters", () => {
@@ -102,12 +88,6 @@ test("msToNextMinute lands just past the next minute boundary", () => {
   expect(msToNextMinute(new Date(2026, 10, 7, 19, 4, 0, 0))).toBe(60050);
   expect(msToNextMinute(new Date(2026, 10, 7, 19, 4, 59, 990))).toBe(60);
   expect(msToNextMinute(new Date(2026, 10, 7, 19, 4, 30, 0))).toBe(30050);
-});
-
-// Widest text in Pixelify Sans: "Wed. 30  12:59 pm" at 13px is 103.1px, "Summer" at 12px is 46.5px.
-test("clock box leaves room for the widest day, time and season", () => {
-  expect(CLOCK.split - 8 - 2).toBeGreaterThanOrEqual(104);
-  expect(CLOCK.w - CLOCK.split - 2 - 6).toBeGreaterThanOrEqual(48);
 });
 
 const T = (i, o = {}) => ({ id: `t${i}`, index: i, name: `tab${i}`, active: false, status: null, settled: false, ...o });

@@ -26,17 +26,18 @@ export const SPRITE = {
   tool: C.parchment,
 };
 
-export const STATUS ={ working: "#5fa8d3", blocked: "#d9534f", done: "#f2c14e", idle: "#9c7b5b" };
+export const STATUS = { working: "#5fa8d3", blocked: "#d9534f", done: "#f2c14e", idle: "#9c7b5b" };
 
 // pane carries the mock's alpha (0.86 day, 0.84 night). The layout sets terminal_opacity
 // to 0, so this pane fill is the only thing between a terminal and the scene.
 export const LOOK = {
   day: { bar: "#8a5a2b", barLight: "#c58b4e", text: "#f3e2b8", tabOn: ["#f3e2b8", "#2b1d14"], tabOff: ["#6b4420", "#f3e2b8"], plank: "#9a6a36", plankLight: "#d29a5c", plankText: "#fff4d6", plankDim: "#2b1d14",
-    border: "#6b4420", focus: "#f2c14e", pane: "#20160fdb", trim: "#c58b4e", ring: "#d9534f", slot: "#2b1d14", slotOn: "#5a3a20" },
+    border: "#6b4420", focus: "#f2c14e", pane: "#20160fdb", trim: "#c58b4e", slot: "#2b1d14", slotOn: "#5a3a20" },
   night: { bar: "#3a2718", barLight: "#5a3c25", text: "#f3e2b8", tabOn: ["#f2c14e", "#2b1d14"], tabOff: ["#4a3220", "#c9b48a"], plank: "#4a3220", plankLight: "#6b4a30", plankText: "#f2c14e", plankDim: "#9c7b5b",
-    border: "#2b1d14", focus: "#f2c14e", pane: "#0b0b1ad6", trim: "#f2c14e", ring: "#f2c14e", slot: "#1f160f", slotOn: "#3d2a1a" },
+    border: "#2b1d14", focus: "#f2c14e", pane: "#0b0b1ad6", trim: "#f2c14e", slot: "#1f160f", slotOn: "#3d2a1a" },
 };
 
 export function dotColor(status) {
-  return STATUS[status ?? "idle"] ?? STATUS.idle;
+  const s = status ?? "idle";
+  return Object.hasOwn(STATUS, s) ? STATUS[s] : STATUS.idle;
 }

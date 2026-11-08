@@ -1,12 +1,12 @@
 // Petpick role: a dialog with the seven pets and "No pet" in a 4-column grid.
-// Click one to save it as "dewdrop.pet" (a pet key, or null) and close.
+// Click one to save it as "dewdrop.pet" (a pet key, or the word "none" for no pet) and close.
 import { div, image } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { shared, setShared, closeOverlay, props } from "herdr";
 import { INK, GOLD_LINE, LOOK } from "./palette.js";
 import { petFrame, png } from "./art.js";
 import { PET_KEYS, PETS, NO_PET, savedPet } from "./pets.js";
-import { lookOf, msToNextLook } from "./logic.js";
+import { lookOf, repaintOnLook } from "./logic.js";
 import { FONT } from "./tabs.js";
 
 const COLS = 4;
@@ -30,11 +30,7 @@ function cell(k, on, close) {
 
 export default class PetPick {
   init(_p, cx) {
-    const tick = (cx) => {
-      cx.timer.after(msToNextLook(new Date()), tick);
-      cx.notify();
-    };
-    cx.timer.after(msToNextLook(new Date()), tick);
+    repaintOnLook(cx);
   }
 
   render() {

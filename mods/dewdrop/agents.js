@@ -65,7 +65,7 @@ export default class Agents {
       .children(groups.length === 0
         ? [div().text_size(12).opacity(0.8).child("No farmhands at work.")]
         : groups.map((g) => v_flex()
-          .child(div().h(HEAD_H - 4).mb(4).text_size(10).opacity(0.8).truncate().child(`${g.space_name} / ${g.tab_index} ${g.tab_name}`))
+          .child(div().h(HEAD_H - 4).mb(4).text_size(10).opacity(0.8).truncate().child(`${g.space_name} / ${g.tab_name || g.tab_index}`))
           .children(g.rows.flatMap((r) => [agentRow(r.agent, r.helpers.length), ...r.helpers.map(helperRow)]))));
 
     const long = contentHeight(groups) > MAX_H - 4;

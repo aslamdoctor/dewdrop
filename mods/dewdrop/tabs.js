@@ -1,10 +1,11 @@
 // Tab pieces for the title bar: the status dot, the chips, and the "tabmore" popup
 // that lists the tabs which didn't fit (live first, then settled ones, dimmed).
-import { div } from "gpui-kit";
+import { div, image } from "gpui-kit";
 import { h_flex, v_flex, Scrollbar } from "gpui-base";
 import { spaces, run, closeOverlay, props } from "herdr";
 import { LOOK, dotColor } from "./palette.js";
 import { lookOf, tabStrip } from "./logic.js";
+import { art } from "./art.js";
 
 export const FONT = "Pixelify Sans";
 export const stop = (_e, cx) => cx.stop_propagation();
@@ -17,6 +18,20 @@ export function dot(status, size = 8) {
 
 // The mock's inset bevel inside a title bar chip: a light top line on the chosen tab,
 // a dark bottom line on every chip. The parent must be relative().
+// The tab's name, or its number when it has none. Herdr shows the number as the
+// default name, so the chip never prints both.
+export const tabLabel = (tab) => (tab.name ? tab.name : String(tab.index));
+
+// A small close button. It takes the press so the chip isn't selected and the title
+// bar doesn't start a window drag.
+export function closeTab(tab, size = 12) {
+  return div().id(`dewdrop-tabclose-${tab.id}`).flex_none().w(size).h(size).cursor_pointer().opacity(0.8)
+    .tooltip("Close tab")
+    .on_mouse_down("left", stop)
+    .on_click((_e, cx) => { cx.stop_propagation(); run("tab.close", { id: tab.id }); })
+    .child(image(art("btn-close")).w(size).h(size));
+}
+
 export function bevel(el, on) {
   return el
     .when(on, (e) => e.child(div().absolute().top(0).left(0).right(0).h(2).bg("#ffffff73")))
@@ -31,9 +46,9 @@ export function tabChip(tab, look, onSelect) {
     .cursor_pointer().whitespace_nowrap();
   return bevel(chip, tab.active)
     .on_mouse_down("left", stop).on_click(() => onSelect(tab))
-    .child(div().flex_none().opacity(0.7).child(String(tab.index)))
-    .child(div().flex_1().min_w(0).truncate().child(tab.name))
-    .child(dot(tab.status));
+    .child(div().flex_1().min_w(0).truncate().child(tabLabel(tab)))
+    .child(dot(tab.status))
+    .child(closeTab(tab));
 }
 
 const MORE_ID = "dewdrop-tabmore";
@@ -57,9 +72,9 @@ export default class TabMore {
         .bg(bg).text_color(fg).border_2().border_color("#000000").cursor_pointer()
         .when(dim, (el) => el.opacity(0.55))
         .on_click(() => pick(tab))
-        .child(div().flex_none().w(16).opacity(0.7).child(String(tab.index)))
-        .child(div().flex_1().min_w(0).truncate().child(tab.name))
-        .child(dot(tab.status));
+        .child(div().flex_1().min_w(0).truncate().child(tabLabel(tab)))
+        .child(dot(tab.status))
+        .child(closeTab(tab));
     };
     const body = v_flex().id(MORE_ID).flex_1().min_w(0).min_h(0).overflow_y_scroll().p(8)
       .children(hidden.map((t) => row(t, false)))

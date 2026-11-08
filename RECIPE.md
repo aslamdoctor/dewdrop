@@ -25,7 +25,7 @@ Top to bottom:
 - **Title bar, 40px.** It leaves 80px on the left for the traffic lights (placed at 14, 11), then the tabs of the shown space, then on the right a working chip and a clock box. The whole bar drags the window.
   - Tabs: up to five fit, each a 28px chip (86px wide, shrinking to 52px) with its index, name and a status dot. A "+" chip opens a new tab. Settled tabs and tabs past the fifth fold into a "more" chip that opens a popup, with the settled ones dimmed at the bottom. The selected tab always stays in the strip.
   - Working chip: a pulsing blue dot and "N working" (helpers count too). A red dot and a count appear next to it only when at least one agent or helper is blocked. Clicking the chip opens the agents popup.
-  - Clock box: a sun dial by day or a crescent moon at night, the time, the day and date ("Sun. 8"), a divider, then the season icon and name. The chip and the clock never shrink or wrap.
+  - Clock box: a sun dial by day or a crescent moon at night, the time, and the day and date ("Sun. 8"). The chip and the clock never shrink or wrap.
 - **Valley.** The tab area is a column with the scene as its background (`cover` fit, 5120x3008) and 16px padding. Panes have square corners, 10px gaps, a 3px border and a 3px focus ring. A lone pane keeps its frame. `terminal_opacity` is 0, so the see-through look comes from the pane fill alone (alpha `db` by day, `d6` at night), and the scene shows faintly behind the text.
 - **Pane header, 28px, always shown.** A plank holding a window icon (or, for an agent pane, the agent's face with a status dot), the pane title, a "N helpers" chip when the agent started helpers, and 18px zoom and close buttons. The title is the program name, plus the terminal title when it differs ("claude - fix tests"); shells show the working directory with home written as `~`.
 - **Pet.** A 56x48 floating box at the bottom-right of the window, drawn with 48x40 sprites.
@@ -43,7 +43,6 @@ The theme matches: soil background, parchment text, wood chrome, dark wood `#3a2
 | idle (and no status) | idle brown `#9c7b5b` |
 
 - **Day and night.** The mod reads the layout and calls `layout.set` with the scene and pane colors swapped, once at 6:00 and once at 18:00 and when it starts, never on every tick. Only colors and images change, so nothing moves under the mouse. The clock text updates on the minute.
-- **Season** comes from the month: March to May spring, June to August summer, September to November fall, the rest winter.
 - **Tabs.** A click selects the tab (`tab.select`), "+" runs `tab.new` in the shown space.
 - **Hotbar.** A click on a slot switches to that space. A slot's crop is picked by a hash of the space id, so a space keeps its crop when others close. Hovering shows the space name and one line per agent ("Claude Code: working"), or "no agents". Past nine spaces the row scrolls sideways and the extra slots have no key number. "New space" asks for a folder with `pickFolder` and then runs `space.new`; cancelling does nothing. "Hide panes" peeks at the scene: it hides the panes and shows an empty spacer in their place, and a second click brings them back.
 - **Header.** A click focuses the pane, a double-click zooms it. The zoom button zooms or restores, the close button closes the pane.
@@ -93,7 +92,7 @@ One mod, `mods/dewdrop/`, drawn by role (`props.role`, picked from `ROLES` in `m
 | `agents` | `agents.js` | agents popup; `tab.select`, `agent.focus`, `pane.focus`, `terminal.peek`, `terminal.keep` |
 | `empty` | `main.js` | paints nothing (the hidden `peek-spacer`) |
 
-Other files: `logic.js` (pure helpers: clock text, season, look, layout swap, tab strip, agent groups, pet mood, tested with `bun test`), `look.js` (runs `layout.set` at the flip), `palette.js` (the only place hex values live, plus the day and night tables), `cast.js` (the 25 pictures and the app faces), `pets.js` (the seven pets), `art.js` (`art(name)`, `png(name)`, `pic(name)`, `petFrame(pet, frame)` path helpers).
+Other files: `logic.js` (pure helpers: clock text, look, layout swap, tab strip, agent groups, pet mood, tested with `bun test`), `look.js` (runs `layout.set` at the flip), `palette.js` (the only place hex values live, plus the day and night tables), `cast.js` (the 25 pictures and the app faces), `pets.js` (the seven pets), `art.js` (`art(name)`, `png(name)`, `pic(name)`, `petFrame(pet, frame)` path helpers).
 
 Shared keys: `dewdrop.picture` (index 0 to 24), `dewdrop.pet` (a pet key, or the word for "no pet").
 
@@ -101,7 +100,7 @@ Art, all in `mods/dewdrop/art/`:
 
 | Art | Made by | Rerun with |
 |-----|---------|------------|
-| 21 SVG sprites (window icons, sun and moon, season icons, crops, tool icons, zoom and close buttons, heart), `shape-rendering="crispEdges"`, palette colors only (plus black and white) | `scripts/draw-art.js` | `bun scripts/draw-art.js` |
+| 17 SVG sprites (window icons, sun and moon, crops, tool icons, zoom and close buttons, heart), `shape-rendering="crispEdges"`, palette colors only (plus black and white) | `scripts/draw-art.js` | `bun scripts/draw-art.js` |
 | `scene-day.png` and `scene-night.png` (5120x3008), drawn in code with point filtering | `scripts/draw-scenes.js` | `bun scripts/draw-scenes.js` |
 | 21 pet frames in `pets/` (96x80, shown at 48x40), `doghouse.png`, and the cropped `portrait.png` and `cast/01.png` to `cast/24.png` (192x192) | `scripts/render-pictures.js` (needs the author's source sheets and ImageMagick, `magick`) | only the author can rerun it |
 

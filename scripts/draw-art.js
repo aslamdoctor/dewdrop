@@ -101,9 +101,6 @@ const TOOL_KEY = { W: S.tool };
 const WINDOW = ["KKKKKKKKKKKK", "KBBBBBBBRYGK", "KKKKKKKKKKKK", "KDDDDDDDDDDK", "KDWDDDDDDDDK", "KDDWDDDDDDDK", "KDWDDWWWWDDK", "KDDDDDDDDDDK", "KKKKKKKKKKKK"];
 const SUN = ["....Y....", ".Y..Y..Y.", "..YOOOY..", "..OOOOO..", "YYOOOOOYY", "..OOOOO..", "..YOOOY..", ".Y..Y..Y.", "....Y...."];
 const MOON = ["...MMM...", ".MMMM....", ".MMM.....", "MMMM.....", "MMMM.....", "MMMM.....", ".MMMM..M.", ".MMMMMMM.", "...MMM..."];
-const LEAF = [".......KK", ".....KOOK", "...KOOOOK", "..KOOYOOK", ".KOOYOOK.", ".KOYOOK..", "KOYOOK...", "KYKKK....", "K........"];
-const BLOSSOM = ["...PPP...", "..PWWWP..", ".PPWWWPP.", "PWWPYPWWP", "PWWYYYWWP", "PWWPYPWWP", ".PPWWWPP.", "..PWWWP..", "...PPP..."];
-const SNOWFLAKE = ["....W....", ".W..W..W.", "..W.W.W..", "...WWW...", "WWWWWWWWW", "...WWW...", "..W.W.W..", ".W..W..W.", "....W...."];
 const CROPS = {
   carrot: ["................", "......o...o.....", ".....oGo.oGo....", "......oGogGo....", ".......oGGo.....", ".....ooooooo....", "....oPPOOOOro...", "....oPOOOOOro...", ".....oPOrOro....", ".....oPOOOro....", "......oOOro.....", "......oOOro.....", ".......oOo......", ".......oro......", "........o.......", "................"],
   pumpkin: ["................", "................", "........oo......", ".......odo..oo..", ".......oGo.oGGo.", "...oooooGooooo..", "..oPPOoOOOoOOro.", ".oPPOOoOOOOoOrro", ".oPOOOoOOOOoOrro", ".oPOOOoOOOOoOrro", ".oOOOOoOOOOoOrro", ".oOOOroOOOroOrro", "..oOrroOOrroOro.", "...oooooooooo...", "................", "................"],
@@ -122,10 +119,6 @@ const dewdrop = [
   grid("window-night", WINDOW, 1, { K: S.frame, B: S.glassNight, R: S.lightRed, Y: S.lightGold, G: S.lightGreen, D: S.screen, W: S.text }),
   grid("sun", SUN, 1, SUN_KEY),
   grid("moon", MOON, 1, { M: S.moon }),
-  grid("season-spring", BLOSSOM, 1, { P: S.petal, W: S.petalLight, Y: S.sunRay }),
-  grid("season-summer", SUN, 1, SUN_KEY),
-  grid("season-fall", LEAF, 1, { K: S.leafEdge, O: S.leaf, Y: S.leafVein }),
-  grid("season-winter", SNOWFLAKE, 1, { W: S.snow }),
   ...Object.entries(CROPS).map(([n, rows]) => grid(`crop-${n}`, rows, 1, CROP)),
   grid("tool-plus", PLUS, 1, TOOL_KEY),
   grid("tool-folder", FOLDER, 1, TOOL_KEY),

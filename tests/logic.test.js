@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { seasonOf, clockText, HOTBAR_KEYS, slotLabel, hotbarSlots,
+import { clockText, HOTBAR_KEYS, slotLabel, hotbarSlots,
   slotTooltip, cropOf, CROPS, msToNextLook, headerTitle, chickenMood, msToNextMinute, lookOf, tabStrip, agentCounts, helpersOf, agentGroups } from "../mods/dewdrop/logic.js";
 
 test("lookOf flips at 6:00 and 18:00", () => {
@@ -10,16 +10,8 @@ test("lookOf flips at 6:00 and 18:00", () => {
   expect(lookOf(new Date(2026, 10, 8, 0, 0))).toBe("night");
 });
 
-test("seasonOf flips on month boundaries", () => {
-  expect(seasonOf(new Date(2026, 1, 28))).toBe("winter");
-  expect(seasonOf(new Date(2026, 2, 1))).toBe("spring");
-  expect(seasonOf(new Date(2026, 5, 1))).toBe("summer");
-  expect(seasonOf(new Date(2026, 10, 30))).toBe("fall");
-  expect(seasonOf(new Date(2026, 11, 1))).toBe("winter");
-});
-
-test("clockText formats day, 12-hour time and season", () => {
-  expect(clockText(new Date(2026, 10, 7, 18, 5))).toEqual({ day: "Sat. 7", time: "6:05 pm", season: "Fall" });
+test("clockText formats day and 12-hour time", () => {
+  expect(clockText(new Date(2026, 10, 7, 18, 5))).toEqual({ day: "Sat. 7", time: "6:05 pm" });
   expect(clockText(new Date(2026, 10, 7, 0, 0)).time).toBe("12:00 am");
   expect(clockText(new Date(2026, 10, 7, 12, 0)).time).toBe("12:00 pm");
 });

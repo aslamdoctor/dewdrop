@@ -4,22 +4,12 @@ import { png } from "./art.js";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export function seasonOf(date) {
-  const m = date.getMonth();
-  if (m >= 2 && m <= 4) return "spring";
-  if (m >= 5 && m <= 7) return "summer";
-  if (m >= 8 && m <= 10) return "fall";
-  return "winter";
-}
-
 export function clockText(date) {
   const h = date.getHours();
   const mm = String(date.getMinutes()).padStart(2, "0");
-  const s = seasonOf(date);
   return {
     day: `${DAYS[date.getDay()]}. ${date.getDate()}`,
     time: `${h % 12 || 12}:${mm} ${h < 12 ? "am" : "pm"}`,
-    season: s[0].toUpperCase() + s.slice(1),
   };
 }
 

@@ -1,5 +1,5 @@
 // Title bar role: a wooden strip with room for the traffic lights, the shown
-// space's tabs, a working chip and a clock box (time, day, season).
+// space's tabs, a working chip and a clock box (time and day).
 // Colors come from lookOf(new Date()) at render time; the minute tick repaints
 // the bar, so it changes look by itself at 6:00 and 18:00.
 import { div, image } from "gpui-kit";
@@ -74,10 +74,7 @@ export default class Titlebar {
       .child(ring())
       .child(image(art(night ? "moon" : "sun")).w(16).h(16).flex_none())
       .child(text(t.time, 14, fg))
-      .child(text(t.day, 11, sub))
-      .child(div().flex_none().w(2).h(18).bg("#000000").opacity(0.35))
-      .child(image(art("season-" + t.season.toLowerCase())).w(16).h(16).flex_none())
-      .child(text(t.season, 12, fg));
+      .child(text(t.day, 11, sub));
 
     return h_flex().id("dewdrop-titlebar").relative().size_full().font_family(FONT).items_center().gap(8).pl(80).pr(8).pb(3)
       .bg(L.bar).border_t_2().border_color(L.barLight)

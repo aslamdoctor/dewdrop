@@ -36,7 +36,7 @@ const ART_DIR = new URL("../mods/dewdrop/art/", import.meta.url).pathname;
 const FONT_DIR = new URL("../mods/dewdrop/fonts/", import.meta.url).pathname;
 const pngSize = (f) => { const b = readFileSync(f); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
 
-const SVGS = ["window", "window-night", "sun", "moon", "season-spring", "season-summer", "season-fall", "season-winter",
+const SVGS = ["window", "window-night", "sun", "moon",
   "crop-carrot", "crop-pumpkin", "crop-wheat", "crop-sprout", "crop-tomato", "crop-corn",
   "tool-plus", "tool-folder", "tool-eye", "tool-eye-off", "heart", "btn-zoom", "btn-close"];
 const ALLOWED = new Set([...Object.values(C), ...Object.values(SPRITE), ...Object.values(STATUS), INK, GOLD_LINE, "#000000", "#ffffff"]);

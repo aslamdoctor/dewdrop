@@ -7,7 +7,7 @@ import { panes, terminals, props, home, run, openOverlay } from "herdr";
 import { INK, LOOK, dotColor } from "./palette.js";
 import { art, pic, petFrame } from "./art.js";
 import { faceOf } from "./cast.js";
-import { headerTitle, helpersOf, lookOf, msToNextLook } from "./logic.js";
+import { headerTitle, helpersOf, lookOf, repaintOnLook } from "./logic.js";
 import { FONT, stop } from "./tabs.js";
 
 // The pane's picture: an agent shows its farmhand's face with a status dot on the
@@ -29,12 +29,7 @@ function button(id, name, tip, onClick) {
 
 export default class Header {
   init(_p, cx) {
-    // Repaint when the look flips at 6:00 and 18:00. Arm the next timer before anything that can throw.
-    const tick = (cx) => {
-      cx.timer.after(msToNextLook(new Date()), tick);
-      cx.notify();
-    };
-    cx.timer.after(msToNextLook(new Date()), tick);
+    repaintOnLook(cx);
   }
 
   render() {
@@ -43,7 +38,7 @@ export default class Header {
     const look = lookOf(new Date());
     const L = LOOK[look];
     if (!p) return div().size_full().bg(L.plank);
-    const n = p.terminal ? (helpersOf(terminals() ?? [], panes()).get(p.terminal)?.length ?? 0) : 0;
+    const n = p.terminal && p.status != null ? (helpersOf(terminals() ?? [], panes()).get(p.terminal)?.length ?? 0) : 0;
     // As in the mock: a tab-colored chip with the chicken, right after the title.
     const chip = n === 0 ? null : h_flex().id(`dewdrop-helpers-${id}`).flex_none().items_center().gap(3).ml(2).pl(3).pr(5).py(1)
       .whitespace_nowrap().text_size(10).bg(L.tabOn[0]).text_color(L.tabOn[1]).border_2().border_color("#000000").cursor_pointer()

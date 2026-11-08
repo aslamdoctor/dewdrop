@@ -1,7 +1,7 @@
 // Tab pieces for the title bar: the status dot, the chips, and the "tabmore" popup
 // that lists the tabs which didn't fit (live first, then settled ones, dimmed).
 import { div } from "gpui-kit";
-import { h_flex, v_flex } from "gpui-base";
+import { h_flex, v_flex, Scrollbar } from "gpui-base";
 import { spaces, run, closeOverlay, props } from "herdr";
 import { LOOK, dotColor } from "./palette.js";
 import { lookOf, tabStrip } from "./logic.js";
@@ -36,6 +36,8 @@ export function tabChip(tab, look, onSelect) {
     .child(dot(tab.status));
 }
 
+const MORE_ID = "dewdrop-tabmore";
+const MORE_MAX_H = 400;
 const select = (tab) => run("tab.select", { id: tab.id });
 
 // Popup role: hidden live tabs, then a "settled" heading and the settled ones.
@@ -48,7 +50,7 @@ export default class TabMore {
     const space = (spaces() ?? []).find((s) => s.active);
     const { hidden, settled } = tabStrip(space?.tabs ?? []);
     const overlay = props()?.overlay;
-    const pick = (tab) => { select(tab); if (overlay) closeOverlay(overlay); };
+    const pick = (tab) => { try { select(tab); } finally { if (overlay) closeOverlay(overlay); } };
     const row = (tab, dim) => {
       const [bg, fg] = L.tabOff;
       return h_flex().id(`dewdrop-more-${tab.id}`).items_center().gap(6).px(6).py(4).mb(3).text_size(12)
@@ -59,9 +61,14 @@ export default class TabMore {
         .child(div().flex_1().min_w(0).truncate().child(tab.name))
         .child(dot(tab.status));
     };
-    return v_flex().w(210).font_family(FONT).p(8).bg(L.bar).text_color(L.text).border_2().border_color("#000000")
+    const body = v_flex().id(MORE_ID).flex_1().min_w(0).min_h(0).overflow_y_scroll().p(8)
       .children(hidden.map((t) => row(t, false)))
       .when(settled.length > 0, (el) => el.child(div().text_size(10).opacity(0.75).mt(6).mb(3).child("settled")))
       .children(settled.map((t) => row(t, true)));
+    // Rough height: 8px padding twice, a 29px row each, and the "settled" heading.
+    const long = 16 + (hidden.length + settled.length) * 29 + (settled.length > 0 ? 25 : 0) > MORE_MAX_H - 4;
+    return h_flex().w(210).max_h(MORE_MAX_H).items_stretch().font_family(FONT).bg(L.bar).text_color(L.text).border_2().border_color("#000000")
+      .child(body)
+      .when(long, (el) => el.child(div().flex_none().w(8).bg("#0000004d").child(Scrollbar.vertical(MORE_ID).size_full().viewport_from_layout())));
   }
 }

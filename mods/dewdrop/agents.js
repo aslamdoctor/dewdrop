@@ -7,7 +7,7 @@ import { agents, terminals, panes, run, closeOverlay, props } from "herdr";
 import { INK, LOOK } from "./palette.js";
 import { petFrame, pic } from "./art.js";
 import { faceOf } from "./cast.js";
-import { helpersOf, agentGroups, lookOf, msToNextLook } from "./logic.js";
+import { helpersOf, agentGroups, lookOf, repaintOnLook } from "./logic.js";
 import { FONT, stop, dot } from "./tabs.js";
 
 export const MAX_H = 450;
@@ -28,22 +28,20 @@ export function contentHeight(groups) {
 
 export default class Agents {
   init(_p, cx) {
-    const tick = (cx) => {
-      cx.timer.after(msToNextLook(new Date()), tick);
-      cx.notify();
-    };
-    cx.timer.after(msToNextLook(new Date()), tick);
+    repaintOnLook(cx);
   }
 
   render() {
     const L = LOOK[lookOf(new Date())];
     const overlay = props()?.overlay;
     const close = () => { if (overlay) closeOverlay(overlay); };
+    // Close in a finally so a failing run never leaves the popup stuck open.
+    const then = (fn) => { try { fn(); } finally { close(); } };
     const groups = agentGroups(agents() ?? [], helpersOf(terminals() ?? [], panes() ?? []));
 
     const agentRow = (a, n) => h_flex().id(`dewdrop-agent-${a.address}`).h(AGENT_H - 4).mb(4).items_center().gap(6).px(6)
       .bg(L.slot).border_2().border_color("#000000").cursor_pointer().text_size(12)
-      .on_click(() => { run("tab.select", { id: a.tab }); run("agent.focus", { terminal: a.address }); close(); })
+      .on_click(() => then(() => { run("tab.select", { id: a.tab }); run("agent.focus", { terminal: a.address }); }))
       .child(div().flex_none().w(24).h(24).border_2().border_color(INK).child(image(pic(faceOf(a.app).file)).size_full()))
       .child(div().flex_1().min_w(0).truncate().child(a.title || a.address))
       .child(div().flex_none().text_size(10).opacity(0.7).child(`${a.app ?? "agent"} / ${faceOf(a.app).name}`))
@@ -52,7 +50,7 @@ export default class Agents {
 
     const helperRow = (h) => h_flex().id(`dewdrop-helper-${h.address}`).h(HELPER_H - 4).mb(4).ml(20).items_center().gap(6).px(6)
       .bg(L.slot).border_1().border_color("#000000").cursor_pointer().text_size(11)
-      .on_click(() => (h.pane ? run("pane.focus", { pane: h.pane }) : run("terminal.peek", { terminal: h.address })))
+      .on_click(() => then(() => (h.pane ? run("pane.focus", { pane: h.pane }) : run("terminal.peek", { terminal: h.address }))))
       .child(div().flex_none().w(20).h(17).border_2().border_color(INK).child(image(petFrame("chicken", "a")).size_full()))
       .child(div().flex_1().min_w(0).truncate().child(h.title))
       .when(Boolean(h.pane), (el) => el.child(div().flex_none().text_size(10).opacity(0.7).child("in a pane")))
@@ -71,7 +69,7 @@ export default class Agents {
           .children(g.rows.flatMap((r) => [agentRow(r.agent, r.helpers.length), ...r.helpers.map(helperRow)]))));
 
     const long = contentHeight(groups) > MAX_H - 4;
-    return h_flex().w(W).max_h(MAX_H).font_family(FONT).bg(L.bar).text_color(L.text).border_2().border_color("#000000")
+    return h_flex().w(W).max_h(MAX_H).items_stretch().font_family(FONT).bg(L.bar).text_color(L.text).border_2().border_color("#000000")
       .child(body)
       .when(long, (el) => el.child(div().flex_none().w(8).bg("#0000004d").child(Scrollbar.vertical(SCROLL_ID).size_full().viewport_from_layout())));
   }

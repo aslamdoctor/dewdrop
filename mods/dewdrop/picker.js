@@ -6,7 +6,7 @@ import { shared, setShared, closeOverlay, props } from "herdr";
 import { INK, GOLD_LINE, LOOK } from "./palette.js";
 import { pic } from "./art.js";
 import { CAST, pictureIndex } from "./cast.js";
-import { lookOf, msToNextLook } from "./logic.js";
+import { lookOf, repaintOnLook } from "./logic.js";
 import { FONT } from "./tabs.js";
 
 const COLS = 5;
@@ -31,11 +31,7 @@ function cell(a, i, on, close) {
 
 export default class Picker {
   init(_p, cx) {
-    const tick = (cx) => {
-      cx.timer.after(msToNextLook(new Date()), tick);
-      cx.notify();
-    };
-    cx.timer.after(msToNextLook(new Date()), tick);
+    repaintOnLook(cx);
   }
 
   render() {

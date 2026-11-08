@@ -4,12 +4,12 @@
 // its own; a timer armed to the next 6:00 or 18:00 repaints it when the look flips.
 import { div, image } from "gpui-kit";
 import { h_flex, v_flex, Scrollbar } from "gpui-base";
-import { agents, spaces, layout, run, shared, setShared, openOverlay, pickFolder } from "herdr";
+import { agents, spaces, layout, run, shared, openOverlay, pickFolder } from "herdr";
 import { C, INK, GOLD_LINE, LOOK, dotColor } from "./palette.js";
 import { art, pic, png, petFrame } from "./art.js";
 import { CAST, pictureIndex } from "./cast.js";
 import { savedPet } from "./pets.js";
-import { hotbarSlots, slotTooltip, lookOf, msToNextLook } from "./logic.js";
+import { hotbarSlots, slotTooltip, lookOf, repaintOnLook, findNode } from "./logic.js";
 import { FONT, stop } from "./tabs.js";
 
 const SLOT = 46, GAP = 6, SHOWN = 9;
@@ -21,8 +21,7 @@ const alpha = (hex, a) => hex + Math.round(a * 255).toString(16).padStart(2, "0"
 function slot(s, space, all, look) {
   const L = LOOK[look];
   const on = s.active;
-  const keyOn = look === "night" ? LOOK.night.ring : C.gold;
-  const dot = div().absolute().top(3).right(3).w(7).h(7).rounded_full().border_1().border_color("#000000").bg(dotColor(s.status));
+    const dot = div().absolute().top(3).right(3).w(7).h(7).rounded_full().border_1().border_color("#000000").bg(dotColor(s.status));
   return v_flex().id(`dewdrop-slot-${s.id}`).relative().flex_none().w(SLOT).h(SLOT).items_center().justify_center().gap(1).pt(6)
     .bg(on ? L.slotOn : alpha(L.slot, 0.72)).border_2().border_color(INK)
     .text_size(10).text_color(C.parchment).cursor_pointer().whitespace_nowrap()
@@ -30,7 +29,7 @@ function slot(s, space, all, look) {
     .on_click(() => run("space.select", { id: s.id }))
     .when(on, (el) => el.child(div().absolute().top(0).left(0).right(0).bottom(0).border_2().border_color(GOLD_LINE)))
     .when(!on, (el) => el.child(div().absolute().top(0).left(0).right(0).h(3).bg("#f4e2bc38")))
-    .when(Boolean(s.key), (el) => el.child(div().absolute().top(1).left(4).text_size(9).text_color(on ? keyOn : C.woodLight).child(s.key)))
+    .when(Boolean(s.key), (el) => el.child(div().absolute().top(1).left(4).text_size(9).text_color(on ? C.gold : C.woodLight).child(s.key)))
     .child(s.status === "working" ? dot.loop("opacity", { from: 0.45, to: 1, period: 800 }) : dot)
     .child(image(art(`crop-${s.crop}`)).w(24).h(24).flex_none())
     .child(div().child(s.label));
@@ -43,16 +42,6 @@ function tool(id, tip, icon, look, onClick) {
     .child(icon);
 }
 
-function findNode(n, id) {
-  if (!n || typeof n !== "object") return null;
-  if (n.id === id) return n;
-  for (const c of n.children ?? []) {
-    const f = findNode(c, id);
-    if (f) return f;
-  }
-  return null;
-}
-
 // Peek state comes from the live layout, not from the saved flag (which outlives a restart).
 const panesHiddenIn = (tree) => findNode(tree, "main")?.hidden === true;
 
@@ -60,12 +49,7 @@ const sep = () => div().flex_none().w(2).h(40).bg("#000000").opacity(0.35);
 
 export default class Hotbar {
   init(_p, cx) {
-    // Aim at the next look change. Arm the next timer before anything that can throw.
-    const tick = (cx) => {
-      cx.timer.after(msToNextLook(new Date()), tick);
-      cx.notify();
-    };
-    cx.timer.after(msToNextLook(new Date()), tick);
+    repaintOnLook(cx);
   }
 
   render() {
@@ -107,7 +91,6 @@ export default class Hotbar {
         try { run(undo[first[0]], { id: first[1] }); } catch (_e2) { /* nothing more to do */ }
         return;
       }
-      setShared("dewdrop.panesHidden", !now);
     };
     const addSpace = () => {
       pickFolder({ prompt: "Pick a folder for the new space" })

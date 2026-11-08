@@ -1,1 +1,0 @@
-Dewdrop is a cozy 16-bit farm layout for Herdr, inspired by farm games. The valley behind your terminals is a morning scene from 6 am and a starry night from 6 pm. Each space is a crop slot on the hotbar, and agents show up as farmhands while a small pet keeps an eye on them from the corner.

@@ -4,16 +4,20 @@
 import { div, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { panes, props, home, run } from "herdr";
-import { C } from "./palette.js";
-import { art } from "./art.js";
-import { headerTitle, statusLook } from "./logic.js";
-import { FONT } from "./titlebar.js";
+import { INK, LOOK, dotColor } from "./palette.js";
+import { art, pic } from "./art.js";
+import { faceOf } from "./cast.js";
+import { headerTitle, lookOf, msToNextLook } from "./logic.js";
+import { FONT } from "./tabs.js";
 
-function icon(status) {
-  const look = statusLook(status);
-  if (!look) return div().w(16).h(16).flex_none();
-  const img = image(art(look.icon === "can" ? "can-1" : look.icon)).w(16).h(16).flex_none();
-  return look.icon === "can" ? img.loop("opacity", { from: 0.45, to: 1, period: 800 }) : img;
+// The pane's picture: an agent shows its farmhand's face with a status dot on the
+// corner, any other pane shows the window sprite.
+function icon(p, look) {
+  if (p.status == null) return image(art(look === "night" ? "window-night" : "window")).w(18).h(14).flex_none();
+  const dot = div().absolute().right(-3).bottom(-3).w(9).h(9).rounded_full().border_1().border_color("#000000").bg(dotColor(p.status));
+  return div().relative().flex_none().w(24).h(24).border_2().border_color(INK)
+    .child(image(pic(faceOf(p.app).file)).size_full())
+    .child(p.status === "working" ? dot.loop("opacity", { from: 0.45, to: 1, period: 800 }) : dot);
 }
 
 function button(id, name, tip, onClick) {
@@ -24,17 +28,26 @@ function button(id, name, tip, onClick) {
 }
 
 export default class Header {
-  init() {}
+  init(_p, cx) {
+    // Repaint when the look flips at 6:00 and 18:00. Arm the next timer before anything that can throw.
+    const tick = (cx) => {
+      cx.timer.after(msToNextLook(new Date()), tick);
+      cx.notify();
+    };
+    cx.timer.after(msToNextLook(new Date()), tick);
+  }
 
   render() {
     const id = props()?.pane;
     const p = panes().find((x) => x.pane === id);
-    if (!p) return div().size_full().bg(C.wood);
+    const look = lookOf(new Date());
+    const L = LOOK[look];
+    if (!p) return div().size_full().bg(L.plank);
     return h_flex().id(`dewdrop-header-${id}`).size_full().font_family(FONT).items_center().gap(6).px(6)
-      .bg(C.wood).border_t_2().border_color(C.woodLight)
+      .bg(L.plank).border_t_2().border_color(L.plankLight)
       .on_click((e) => run(e.click_count >= 2 ? "pane.zoom" : "pane.focus", { pane: id }))
-      .child(icon(p.status))
-      .child(div().flex_1().min_w(0).truncate().text_size(13).text_color(p.focused ? C.parchment : C.soil)
+      .child(icon(p, look))
+      .child(div().flex_1().min_w(0).truncate().text_size(13).text_color(p.focused ? L.plankText : L.plankDim)
         .child(headerTitle(p, home() ?? "")))
       .child(button(`dewdrop-zoom-${id}`, "btn-zoom", p.zoomed ? "Restore" : "Zoom", () => run("pane.zoom", { pane: id })))
       .child(button(`dewdrop-close-${id}`, "btn-close", "Close", () => run("pane.close", { pane: id })));

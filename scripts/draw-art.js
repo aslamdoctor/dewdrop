@@ -156,6 +156,7 @@ const EYE_OFF = ["..WWWW.W", ".W....W.", "W..WWW.W", "W.WWW..W", ".W....W.", "W.
 
 const dewdrop = [
   grid("window", WINDOW, 1, { K: S.frame, B: S.glass, R: S.lightRed, Y: S.lightGold, G: S.lightGreen, D: S.screen, W: S.text }),
+  grid("window-night", WINDOW, 1, { K: S.frame, B: S.glassNight, R: S.lightRed, Y: S.lightGold, G: S.lightGreen, D: S.screen, W: S.text }),
   grid("sun", SUN, 1, SUN_KEY),
   grid("moon", MOON, 1, { M: S.moon }),
   grid("season-spring", BLOSSOM, 1, { P: S.petal, W: S.petalLight, Y: S.sunRay }),

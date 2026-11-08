@@ -84,7 +84,7 @@ export default class Hotbar {
 
     const portrait = div().id("dewdrop-portrait").flex_none().w(46).h(46).mx(2)
       .border_2().border_color(night ? L.trim : INK).cursor_pointer().tooltip("Change picture")
-      .on_click(() => openOverlay({ mod: "dewdrop", props: { role: "picker" }, kind: "dialog", frame: "none" }))
+      .on_click(() => openOverlay({ mod: "dewdrop", props: { role: "picker" }, kind: "dialog", frame: "none", width: 920, height: 396 }))
       .child(image(pic(CAST[pictureIndex(shared("dewdrop.picture"))].file)).w(42).h(42));
 
     const peek = () => {

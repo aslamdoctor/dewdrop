@@ -1,5 +1,6 @@
 // Hotbar role: one centered box along the bottom with the portrait, every space
-// as a crop slot (nine fit, more scroll sideways) and four tool buttons.
+// as a crop slot (nine fit, more scroll sideways) and four tool buttons. The pet
+// (roadpet.js) walks the road behind the box, so it is added before it.
 // Colors come from lookOf(new Date()) at render time. The hotbar has no clock of
 // its own; a timer armed to the next 6:00 or 18:00 repaints it when the look flips.
 import { div, image } from "gpui-kit";
@@ -11,6 +12,7 @@ import { CAST, pictureIndex } from "./cast.js";
 import { savedPet } from "./pets.js";
 import { hotbarSlots, slotTooltip, lookOf, repaintOnLook, findNode } from "./logic.js";
 import { FONT, stop } from "./tabs.js";
+import RoadPet from "./roadpet.js";
 
 const SLOT = 46, GAP = 6, SHOWN = 9;
 const SCROLL_ID = "dewdrop-slots";
@@ -49,10 +51,11 @@ const sep = () => div().flex_none().w(2).h(40).bg("#000000").opacity(0.35);
 
 export default class Hotbar {
   init(_p, cx) {
+    this.pet = new RoadPet();
     repaintOnLook(cx);
   }
 
-  render() {
+  render(cx) {
     const look = lookOf(new Date());
     const L = LOOK[look];
     const night = look === "night";
@@ -115,6 +118,8 @@ export default class Hotbar {
       .child(div().absolute().top(0).left(0).right(0).bottom(0).border_2().border_color(L.trim))
       .child(portrait).child(sep()).child(strip).child(sep()).child(tools);
 
-    return h_flex().size_full().font_family(FONT).items_end().justify_center().pb(1).child(box);
+    const walker = this.pet.view(cx);
+    return h_flex().relative().size_full().font_family(FONT).items_end().justify_center().pb(1)
+      .children(walker ? [walker] : []).child(box);
   }
 }

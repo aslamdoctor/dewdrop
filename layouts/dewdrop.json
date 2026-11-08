@@ -54,14 +54,6 @@
           "size": { "px": 64 },
           "content": { "mod": "dewdrop", "props": { "role": "hotbar" } }
         }
-      ],
-      "floating": [
-        {
-          "id": "pet",
-          "content": { "mod": "dewdrop", "props": { "role": "pet" } },
-          "edge": "bottom",
-          "align": "end"
-        }
       ]
     }
   ],

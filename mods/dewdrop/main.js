@@ -2,10 +2,9 @@
 //   titlebar  wooden title bar with the clock box
 //   header    a pane's plank header
 //   sky       the see-through strip above the panes: clouds and birds, or stars and fireflies
-//   hotbar    spaces as inventory slots
+//   hotbar    spaces as inventory slots, with the pet walking the road under the box
 //   picker    dialog to choose the portrait
 //   tabmore   popup listing the tabs the title bar had no room for
-//   pet       the floating critter
 //   petpick   dialog to choose the pet
 //   agents    popup listing the farmhands and their helpers
 //   empty     nothing (the hidden peek-spacer)
@@ -16,7 +15,6 @@ import Titlebar from "./titlebar.js";
 import Header from "./header.js";
 import Hotbar from "./hotbar.js";
 import Sky from "./sky.js";
-import Pet from "./pet.js";
 import TabMore from "./tabs.js";
 import Picker from "./picker.js";
 import PetPick from "./petpick.js";
@@ -29,7 +27,7 @@ class Empty {
   }
 }
 
-const ROLES = { titlebar: Titlebar, header: Header, sky: Sky, hotbar: Hotbar, pet: Pet, tabmore: TabMore, picker: Picker, petpick: PetPick, agents: Agents, empty: Empty };
+const ROLES = { titlebar: Titlebar, header: Header, sky: Sky, hotbar: Hotbar, tabmore: TabMore, picker: Picker, petpick: PetPick, agents: Agents, empty: Empty };
 
 export default class Dewdrop extends View {
   init(p, cx) {

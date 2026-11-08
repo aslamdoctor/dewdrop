@@ -327,3 +327,27 @@ export function skyFireflies(width) {
     blinkPeriod: 1400 + Math.round(r() * 1600),
   }));
 }
+
+// ---- Road pet (roadpet.js) ----
+// The pet walks the hotbar from ROAD_MARGIN to the width minus the sprite, at speed px/s.
+// leg is the ms for one way.
+export const PET_W = 48, PET_H = 40, ROAD_MARGIN = 8;
+export function walkPlan(width, speed) {
+  const from = ROAD_MARGIN;
+  const to = Math.max(from + 1, Math.round(width - ROAD_MARGIN - PET_W));
+  const leg = Math.max(50, Math.round(((to - from) / speed) * 1000));
+  return { from, to, leg };
+}
+
+// Where leg n heads and which way the pet faces. Before the first leg (n < 0) it stands
+// at the start facing right; even legs head right to `to`, odd legs head back to `from`.
+export function walkLeg(plan, n) {
+  if (n < 0) return { target: plan.from, right: true };
+  return n % 2 === 0 ? { target: plan.to, right: true } : { target: plan.from, right: false };
+}
+
+// Delay to the start of leg n (0 is the first leg), measured from t0, never negative.
+// Timing every turn from t0 keeps the timer's lateness from piling up.
+export function msToLeg(t0, leg, n, now) {
+  return Math.max(0, t0 + n * leg - now);
+}

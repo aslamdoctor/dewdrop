@@ -16,10 +16,12 @@ test("the shipped layout is the day look", () => {
   expect(layoutFor(layout, "day")).toEqual(layout);
 });
 
-test("the sky strip sits above the panes", () => {
+test("the sky strip sits above the panes and the pet has no float", () => {
   const valley = find(layout, "valley");
   expect(valley.children.map((c) => c.id)).toEqual(["sky", "main", "peek-spacer", "hotbar"]);
   expect(valley.children[0]).toEqual({ id: "sky", type: "block", size: { px: 48 }, content: { mod: "dewdrop", props: { role: "sky" } } });
+  expect(valley.floating).toBeUndefined();
+  expect(JSON.stringify(layout)).not.toContain("\"pet\"");
   // The look swap still finds its nodes and leaves the sky alone.
   const n = layoutFor(layout, "night");
   expect(lookOfLayout(n)).toBe("night");

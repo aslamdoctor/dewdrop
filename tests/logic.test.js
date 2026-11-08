@@ -181,7 +181,7 @@ test("agentGroups groups by tab in order", () => {
   expect(agentGroups([], new Map())).toEqual([]);
 });
 
-import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies } from "../mods/dewdrop/logic.js";
+import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, walkLeg, msToLeg, PET_W, ROAD_MARGIN } from "../mods/dewdrop/logic.js";
 
 test("the sky is laid out the same every time and stays in the strip", () => {
   for (const width of [800, 1440, 2560]) {
@@ -235,4 +235,28 @@ test("skySize is the art at 3px per pixel", () => {
   expect(skySize("cloud-a")).toEqual([54, 24]);
   expect(skySize("bird")).toEqual([27, 15]);
   expect(skySize("star-big")).toEqual([9, 9]);
+});
+
+test("walkPlan walks the road edge to edge at the pet's speed", () => {
+  expect(walkPlan(2560, 50)).toEqual({ from: ROAD_MARGIN, to: 2560 - ROAD_MARGIN - PET_W, leg: 49920 });
+  expect(walkPlan(1000, 100)).toEqual({ from: 8, to: 944, leg: 9360 });
+  // A tiny window still gives a valid walk.
+  const tiny = walkPlan(40, 90);
+  expect(tiny.to).toBeGreaterThan(tiny.from);
+  expect(tiny.leg).toBeGreaterThanOrEqual(50);
+});
+
+test("walkLeg heads right first, then turns back each leg", () => {
+  const plan = walkPlan(1000, 100);
+  expect(walkLeg(plan, -1)).toEqual({ target: 8, right: true });
+  expect(walkLeg(plan, 0)).toEqual({ target: 944, right: true });
+  expect(walkLeg(plan, 1)).toEqual({ target: 8, right: false });
+  expect(walkLeg(plan, 6)).toEqual({ target: 944, right: true });
+});
+
+test("msToLeg times every turn from the start", () => {
+  expect(msToLeg(1000, 500, 1, 1000)).toBe(500);
+  // A timer that fired 40ms late makes the next wait 40ms shorter, not the same.
+  expect(msToLeg(1000, 500, 2, 1540)).toBe(460);
+  expect(msToLeg(1000, 500, 1, 9000)).toBe(0);
 });

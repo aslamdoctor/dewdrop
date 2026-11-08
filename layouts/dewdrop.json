@@ -15,6 +15,12 @@
       "background": { "image": "mods/dewdrop/art/scene-day.png", "fit": "cover" },
       "children": [
         {
+          "id": "sky",
+          "type": "block",
+          "size": { "px": 48 },
+          "content": { "mod": "dewdrop", "props": { "role": "sky" } }
+        },
+        {
           "id": "main",
           "type": "block",
           "padding": [16, 16],

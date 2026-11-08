@@ -3,6 +3,7 @@ import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { C, INK, GOLD_LINE, LOOK, STATUS, SPRITE, dotColor } from "../mods/dewdrop/palette.js";
 import { art, png, pic, petFrame, petWalk, PET_FRAMES, ART } from "../mods/dewdrop/art.js";
 import { PET_KEYS } from "../mods/dewdrop/pets.js";
+import { SKY_ART } from "../mods/dewdrop/logic.js";
 import { CAST } from "../mods/dewdrop/cast.js";
 import theme from "../themes/dewdrop.json";
 
@@ -42,6 +43,7 @@ const webpInfo = (f) => {
   expect([b.toString("ascii", 0, 4), b.toString("ascii", 8, 12), b.toString("ascii", 12, 16)]).toEqual(["RIFF", "WEBP", "VP8X"]);
   return { animated: (b[20] & 0x02) !== 0, size: [b.readUIntLE(24, 3) + 1, b.readUIntLE(27, 3) + 1] };
 };
+const svgSize = (f) => /width="(\d+)" height="(\d+)"/.exec(readFileSync(f, "utf8")).slice(1).map(Number);
 
 const SVGS = ["window", "window-night", "sun", "moon",
   "crop-carrot", "crop-pumpkin", "crop-wheat", "crop-sprout", "crop-tomato", "crop-corn",
@@ -108,3 +110,9 @@ test("pet walks are animated WebPs at twice the shown 48x40", () => {
   }
 });
 
+test("sky sprites match their sizes in logic.js", () => {
+  for (const [name, [w, h]] of Object.entries(SKY_ART)) {
+    if (name === "bird") expect(webpInfo(`${ART_DIR}bird.webp`)).toEqual({ animated: true, size: [w * 6, h * 6] });
+    else expect(svgSize(`${ART_DIR}${name}.svg`)).toEqual([w, h]);
+  }
+});

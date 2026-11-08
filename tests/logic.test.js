@@ -180,3 +180,59 @@ test("agentGroups groups by tab in order", () => {
   expect(g[0].rows[1].helpers).toHaveLength(1);
   expect(agentGroups([], new Map())).toEqual([]);
 });
+
+import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies } from "../mods/dewdrop/logic.js";
+
+test("the sky is laid out the same every time and stays in the strip", () => {
+  for (const width of [800, 1440, 2560]) {
+    for (const f of [skyClouds, skyBirds, skyStars, skyFireflies]) expect(f(width)).toEqual(f(width));
+    for (const s of skyStars(width)) {
+      expect(s.left).toBeGreaterThanOrEqual(0);
+      expect(s.left + s.w).toBeLessThanOrEqual(width);
+      expect(s.top).toBeGreaterThanOrEqual(0);
+      expect(s.top + s.h).toBeLessThanOrEqual(SKY_H);
+      expect(s.low).toBeLessThan(1);
+    }
+    for (const c of [...skyClouds(width), ...skyBirds(width)]) {
+      expect(c.top).toBeGreaterThanOrEqual(0);
+      expect(c.top + c.h + (c.bob ?? 0)).toBeLessThanOrEqual(SKY_H);
+      expect(c.period).toBeGreaterThanOrEqual(100);
+      // Each one swings out to the far edge, off screen.
+      expect([width, -c.w]).toContain(c.to);
+    }
+    for (const f of skyFireflies(width)) {
+      expect(f.top[0]).toBeGreaterThanOrEqual(0);
+      expect(f.top[1] + f.h).toBeLessThanOrEqual(SKY_H);
+    }
+  }
+});
+
+test("the sky spreads over the width and nothing moves in lockstep", () => {
+  const W = 2560;
+  const stars = skyStars(W);
+  expect(stars.length).toBe(80);
+  expect(Math.min(...stars.map((s) => s.left))).toBeLessThan(W * 0.1);
+  expect(Math.max(...stars.map((s) => s.left))).toBeGreaterThan(W * 0.9);
+  expect(new Set(stars.map((s) => s.period)).size).toBeGreaterThan(60);
+  const clouds = skyClouds(W);
+  expect(clouds.length).toBe(5);
+  expect(new Set(clouds.map((c) => c.period)).size).toBe(clouds.length);
+  expect(new Set(clouds.map((c) => c.top)).size).toBeGreaterThan(1);
+  expect(new Set(clouds.map((c) => c.name)).size).toBe(3);
+  // Some head right, some left, and they start spread out.
+  expect(new Set(clouds.map((c) => c.to > c.from))).toEqual(new Set([true, false]));
+  const xs = clouds.map((c) => c.from).sort((a, b) => a - b);
+  for (let i = 1; i < xs.length; i++) expect(xs[i] - xs[i - 1]).toBeGreaterThan(100);
+  // Clouds drift slowly (6 to 12 px/s), birds faster (30 to 48 px/s).
+  for (const c of clouds) expect((2 * Math.abs(c.to - c.from)) / c.period * 1000).toBeWithin(5.9, 12.1);
+  const birds = skyBirds(W);
+  expect(birds.length).toBe(3);
+  for (const b of birds) expect((2 * Math.abs(b.to - b.from)) / b.period * 1000).toBeWithin(29.9, 48.1);
+  expect(skyFireflies(W).length).toBe(8);
+});
+
+test("skySize is the art at 3px per pixel", () => {
+  expect(skySize("cloud-a")).toEqual([54, 24]);
+  expect(skySize("bird")).toEqual([27, 15]);
+  expect(skySize("star-big")).toEqual([9, 9]);
+});

@@ -248,3 +248,82 @@ export function repaintOnLook(cx) {
   };
   cx.timer.after(Math.min(msToNextLook(new Date()), MAX_LOOK_WAIT), tick);
 }
+
+// ---- Sky strip (sky.js) ----
+// The strip is SKY_H px tall. Sprites show at SKY_PX px per art pixel.
+export const SKY_H = 48;
+export const SKY_PX = 3;
+
+// mulberry32: the same seed gives the same numbers, so the sky is laid out the same on
+// every render and in both looks.
+function seeded(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Art size in art pixels (art/<name>.svg, bird.webp) for the sky sprites.
+export const SKY_ART = { "cloud-a": [18, 8], "cloud-b": [12, 6], "cloud-c": [26, 9], bird: [9, 5], "star-warm": [1, 1], "star-cool": [1, 1], "star-big": [3, 3], firefly: [3, 3] };
+export const skySize = (name) => SKY_ART[name].map((n) => n * SKY_PX);
+
+// Things that drift: each starts at x0, spread over the width, and swings out to the far
+// edge and back (a loop ping-pongs). Starting in the left half it heads right, else left,
+// so a fresh window shows them spread out and moving both ways.
+function drifters(width, n, seed, names, speeds, tops) {
+  const r = seeded(seed);
+  return Array.from({ length: n }, (_, i) => {
+    const name = names[i % names.length];
+    const [w, h] = skySize(name);
+    const x0 = Math.round(((i + 0.25 + r() * 0.5) / n) * width) - Math.round(w / 2);
+    const to = x0 + w / 2 < width / 2 ? width : -w;
+    const speed = speeds[0] + r() * (speeds[1] - speeds[0]);
+    const top = Math.round(tops[0] + r() * Math.max(0, tops[1] - tops[0] - h));
+    return { name, w, h, top, from: x0, to, period: Math.max(100, Math.round((2 * Math.abs(to - x0)) / speed * 1000)) };
+  });
+}
+
+// Day: clouds (6 to 12 px/s) and birds (30 to 48 px/s, bobbing a few px).
+export function skyClouds(width) {
+  return drifters(width, Math.max(2, Math.round(width / 520)), 11, ["cloud-a", "cloud-c", "cloud-b"], [6, 12], [2, SKY_H - 2]);
+}
+export function skyBirds(width) {
+  const r = seeded(29);
+  return drifters(width, width < 900 ? 2 : 3, 23, ["bird"], [30, 48], [4, 30])
+    .map((b) => ({ ...b, bob: 3 + Math.round(r() * 3), bobPeriod: 1800 + Math.round(r() * 1400) }));
+}
+
+// Night: stars at fixed spots, each twinkling at its own pace, about one per 32px.
+export function skyStars(width) {
+  const r = seeded(7);
+  return Array.from({ length: Math.max(8, Math.round(width / 32)) }, () => {
+    const roll = r();
+    const name = roll < 0.12 ? "star-big" : roll < 0.45 ? "star-warm" : "star-cool";
+    const [w, h] = skySize(name);
+    return {
+      name, w, h,
+      left: Math.round(4 + r() * Math.max(0, width - 8 - w)),
+      top: Math.round(3 + r() * (SKY_H - 6 - h)),
+      low: Math.round((0.15 + r() * 0.25) * 100) / 100,
+      period: 1800 + Math.round(r() * 3400),
+    };
+  });
+}
+
+// Night: fireflies, each wandering a patch: across (dx px) and up and down, blinking.
+export function skyFireflies(width) {
+  const r = seeded(41);
+  const n = Math.max(4, Math.round(width / 320));
+  const [w, h] = skySize("firefly");
+  return Array.from({ length: n }, (_, i) => ({
+    w, h,
+    left: Math.round(((i + 0.2 + r() * 0.6) / n) * width),
+    dx: 40 + Math.round(r() * 50), dxPeriod: 7000 + Math.round(r() * 6000),
+    top: [6, SKY_H - 6 - h], topPeriod: 3500 + Math.round(r() * 3000),
+    blinkPeriod: 1400 + Math.round(r() * 1600),
+  }));
+}

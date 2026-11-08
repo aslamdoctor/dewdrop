@@ -16,6 +16,17 @@ test("the shipped layout is the day look", () => {
   expect(layoutFor(layout, "day")).toEqual(layout);
 });
 
+test("the sky strip sits above the panes", () => {
+  const valley = find(layout, "valley");
+  expect(valley.children.map((c) => c.id)).toEqual(["sky", "main", "peek-spacer", "hotbar"]);
+  expect(valley.children[0]).toEqual({ id: "sky", type: "block", size: { px: 48 }, content: { mod: "dewdrop", props: { role: "sky" } } });
+  // The look swap still finds its nodes and leaves the sky alone.
+  const n = layoutFor(layout, "night");
+  expect(lookOfLayout(n)).toBe("night");
+  expect(find(n, "sky")).toEqual(find(layout, "sky"));
+  expect(layoutFor(n, "day")).toEqual(layout);
+});
+
 test("layoutFor night swaps the scene and pane colors only", () => {
   const before = structuredClone(layout);
   const n = layoutFor(layout, "night");

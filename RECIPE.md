@@ -18,7 +18,7 @@ Two looks, picked by the local clock: day from 6:00 to 17:59, night the rest of 
 | Pane fill | `#20160fdb` | `#0b0b1ad6` |
 | Pane border | `#6b4420` | `#2b1d14` |
 | Focus ring | gold `#f2c14e` | gold `#f2c14e` |
-| Space frame | red `#d9534f` | gold `#f2c14e` |
+| Space frame | gold inner line `#e8c65a` | gold inner line `#e8c65a` |
 
 Top to bottom:
 
@@ -29,7 +29,7 @@ Top to bottom:
 - **Valley.** The tab area is a column with the scene as its background (`cover` fit, 5120x3008) and 16px padding. Panes have square corners, 10px gaps, a 3px border and a 3px focus ring. A lone pane keeps its frame. `terminal_opacity` is 0, so the see-through look comes from the pane fill alone (alpha `db` by day, `d6` at night), and the scene shows faintly behind the text.
 - **Pane header, 28px, always shown.** A plank holding a window icon (or, for an agent pane, the agent's face with a status dot), the pane title, a "N helpers" chip when the agent started helpers, and 18px zoom and close buttons. The title is the program name, plus the terminal title when it differs ("claude - fix tests"); shells show the working directory with home written as `~`.
 - **Pet.** A 56x48 floating box at the bottom-right of the window, drawn with 48x40 sprites.
-- **Hotbar, 64px.** On the road at the bottom, one wooden box holding, left to right: the portrait (46px), a divider, the space slots, a divider and four 22px tool buttons (new tab, new space, hide panes, choose a pet). Each slot is 46px square with a 24px crop icon, the first four letters of the space name, its number (1 to 9, matching Herdr's `ctrl-1` to `ctrl-9`) and a status dot. The shown space has a red frame by day and a gold one at night.
+- **Hotbar, 64px.** On the road at the bottom, one wooden box holding, left to right: the portrait (46px), a divider, the space slots, a divider and four 22px tool buttons (new tab, new space, hide panes, choose a pet). Each slot is 46px square with a 24px crop icon, the first four letters of the space name, its number (1 to 9, matching Herdr's `ctrl-1` to `ctrl-9`) and a status dot. The shown space has a gold inner line in both looks.
 
 The theme matches: soil background, parchment text, wood chrome, dark wood `#3a2718` surfaces, grass accent.
 
@@ -45,12 +45,11 @@ The theme matches: soil background, parchment text, wood chrome, dark wood `#3a2
 - **Day and night.** The mod reads the layout and calls `layout.set` with the scene and pane colors swapped, once at 6:00 and once at 18:00 and when it starts, never on every tick. Only colors and images change, so nothing moves under the mouse. The clock text updates on the minute.
 - **Season** comes from the month: March to May spring, June to August summer, September to November fall, the rest winter.
 - **Tabs.** A click selects the tab (`tab.select`), "+" runs `tab.new` in the shown space.
-- **Hotbar.** A click on a slot switches to that space. A slot's crop is picked by a hash of the space id, so a space keeps its crop when others close. Hovering shows the space name and one line per agent ("claude: working"), or "no agents". Past nine spaces the row scrolls sideways and the extra slots have no key number. "New space" asks for a folder with `pickFolder` and then runs `space.new`; cancelling does nothing. "Hide panes" peeks at the scene: it hides the panes and shows an empty spacer in their place, and a second click brings them back.
+- **Hotbar.** A click on a slot switches to that space. A slot's crop is picked by a hash of the space id, so a space keeps its crop when others close. Hovering shows the space name and one line per agent ("Claude Code: working"), or "no agents". Past nine spaces the row scrolls sideways and the extra slots have no key number. "New space" asks for a folder with `pickFolder` and then runs `space.new`; cancelling does nothing. "Hide panes" peeks at the scene: it hides the panes and shows an empty spacer in their place, and a second click brings them back.
 - **Header.** A click focuses the pane, a double-click zooms it. The zoom button zooms or restores, the close button closes the pane.
 - **Pictures.** Clicking the portrait opens "Pick a picture", a 5x5 grid with the author's portrait and 24 farmhands, each with a name and a role. The choice is kept in the shared key `dewdrop.picture`. Each app gets one farmhand face: claude-code is Orion Vale, codex is Unit K-47, opencode is BEEP-09, anything else is Milo Patches.
 - **Agents popup.** It lists agents grouped by space and tab, with helpers (terminals an agent started with `hc run`, no pane) nested under their agent. Clicking an agent selects its tab and focuses it (`agent.focus`). Clicking a helper opens a peek of its latest output (`terminal.peek`), or focuses its pane when it has one. "keep" gives a helper a pane (`terminal.keep`). The popup grows to 450px, then scrolls.
 - **Pet.** Chicken (the default), duck, cat, dog, rabbit, turtle, frog, or none (an empty doghouse). The pick is kept in the shared key `dewdrop.pet`. The pet walks in place and plays an action now and then (peck, nap, hide and so on). When an agent becomes blocked it stands still with a red "!"; when one finishes (goes to done, or from working to idle) it shows a heart. Either lasts 4 seconds, and a newer event restarts the count. While it shows, clicking the pet focuses that agent. Agents it sees for the first time (after a reload, or a new terminal) don't set it off. It plays no sounds.
-- **Peek state** is kept in the shared key `dewdrop.panesHidden`.
 
 ## Built from
 
@@ -96,7 +95,7 @@ One mod, `mods/dewdrop/`, drawn by role (`props.role`, picked from `ROLES` in `m
 
 Other files: `logic.js` (pure helpers: clock text, season, look, layout swap, tab strip, agent groups, pet mood, tested with `bun test`), `look.js` (runs `layout.set` at the flip), `palette.js` (the only place hex values live, plus the day and night tables), `cast.js` (the 25 pictures and the app faces), `pets.js` (the seven pets), `art.js` (`art(name)`, `png(name)`, `pic(name)`, `petFrame(pet, frame)` path helpers).
 
-Shared keys: `dewdrop.picture` (index 0 to 24), `dewdrop.pet` (a pet key, or the word for "no pet"), `dewdrop.panesHidden` (true while peeking).
+Shared keys: `dewdrop.picture` (index 0 to 24), `dewdrop.pet` (a pet key, or the word for "no pet").
 
 Art, all in `mods/dewdrop/art/`:
 
@@ -104,7 +103,7 @@ Art, all in `mods/dewdrop/art/`:
 |-----|---------|------------|
 | 21 SVG sprites (window icons, sun and moon, season icons, crops, tool icons, zoom and close buttons, heart), `shape-rendering="crispEdges"`, palette colors only (plus black and white) | `scripts/draw-art.js` | `bun scripts/draw-art.js` |
 | `scene-day.png` and `scene-night.png` (5120x3008), drawn in code with point filtering | `scripts/draw-scenes.js` | `bun scripts/draw-scenes.js` |
-| 21 pet frames in `pets/` (96x80, shown at 48x40), `doghouse.png`, and the cropped `portrait.png` and `cast/01.png` to `cast/24.png` (192x192) | `scripts/render-pictures.js` | `bun scripts/render-pictures.js` |
+| 21 pet frames in `pets/` (96x80, shown at 48x40), `doghouse.png`, and the cropped `portrait.png` and `cast/01.png` to `cast/24.png` (192x192) | `scripts/render-pictures.js` (needs the author's source sheets and ImageMagick, `magick`) | only the author can rerun it |
 
 `scripts/png.js` holds the PNG encoder and the nearest-neighbour scaler the scripts share. `mods/dewdrop/art/CREDITS.md` names the sources. The font is `mods/dewdrop/fonts/PixelifySans.ttf` with its `OFL.txt`; fonts in a mod's `fonts/` folder load on their own.
 

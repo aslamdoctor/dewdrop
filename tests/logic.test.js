@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { seasonOf, clockText, workingCount, statusLook, HOTBAR_KEYS, slotLabel, hotbarSlots,
-  slotTooltip, headerTitle, chickenMood, msToNextMinute, CLOCK, lookOf } from "../mods/dewdrop/logic.js";
+  slotTooltip, headerTitle, chickenMood, msToNextMinute, CLOCK, lookOf, tabStrip, agentCounts } from "../mods/dewdrop/logic.js";
 
 test("lookOf flips at 6:00 and 18:00", () => {
   expect(lookOf(new Date(2026, 10, 8, 5, 59))).toBe("night");
@@ -108,4 +108,35 @@ test("msToNextMinute lands just past the next minute boundary", () => {
 test("clock box leaves room for the widest day, time and season", () => {
   expect(CLOCK.split - 8 - 2).toBeGreaterThanOrEqual(104);
   expect(CLOCK.w - CLOCK.split - 2 - 6).toBeGreaterThanOrEqual(48);
+});
+
+const T = (i, o = {}) => ({ id: `t${i}`, index: i, name: `tab${i}`, active: false, status: null, settled: false, ...o });
+
+test("tabStrip with no tabs", () => {
+  expect(tabStrip([])).toEqual({ strip: [], hidden: [], settled: [] });
+});
+
+test("tabStrip keeps five live tabs and folds the rest", () => {
+  const tabs = [1, 2, 3, 4, 5, 6, 7].map((i) => T(i, { active: i === 1 }));
+  const r = tabStrip(tabs);
+  expect(r.strip.map((t) => t.index)).toEqual([1, 2, 3, 4, 5]);
+  expect(r.hidden.map((t) => t.index)).toEqual([6, 7]);
+});
+
+test("tabStrip moves settled tabs out and keeps the active one", () => {
+  const tabs = [T(1, { settled: true }), T(2), T(3), T(4), T(5), T(6), T(7, { active: true })];
+  const r = tabStrip(tabs);
+  expect(r.strip.map((t) => t.index)).toEqual([2, 3, 4, 5, 7]);
+  expect(r.hidden.map((t) => t.index)).toEqual([6]);
+  expect(r.settled.map((t) => t.index)).toEqual([1]);
+});
+
+test("tabStrip shows an active settled tab", () => {
+  const r = tabStrip([T(1), T(2, { settled: true, active: true })]);
+  expect(r.strip.map((t) => t.index)).toEqual([1, 2]);
+  expect(r.settled).toEqual([]);
+});
+
+test("agentCounts counts helpers", () => {
+  expect(agentCounts([{ status: "working" }, { status: "blocked" }], [{ status: "working" }])).toEqual({ working: 2, blocked: 1 });
 });

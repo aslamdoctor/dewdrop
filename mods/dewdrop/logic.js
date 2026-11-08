@@ -170,3 +170,29 @@ export function makeSyncer() {
     }
   };
 }
+
+export const MAX_TABS = 5;
+
+// Splits a space's tabs for the title bar. Settled tabs stay out of the strip unless
+// they are the active one. The strip is the first `max` of the rest; an active tab
+// that didn't fit takes the last slot. hidden: the other live tabs, settled: the other settled ones.
+export function tabStrip(tabs, max = MAX_TABS) {
+  const shown = tabs.filter((t) => !t.settled || t.active);
+  const strip = shown.slice(0, max);
+  const active = shown.find((t) => t.active);
+  if (active && !strip.includes(active)) strip[strip.length - 1] = active;
+  return {
+    strip,
+    hidden: tabs.filter((t) => !t.settled && !strip.includes(t)),
+    settled: tabs.filter((t) => t.settled && !strip.includes(t)),
+  };
+}
+
+// Working and blocked counts over agents and helpers (helpers count too).
+export function agentCounts(agents, helpers) {
+  const all = [...agents, ...helpers];
+  return {
+    working: all.filter((a) => a.status === "working").length,
+    blocked: all.filter((a) => a.status === "blocked").length,
+  };
+}

@@ -1,0 +1,58 @@
+// Tab pieces for the title bar: the status dot, the chips, and the "tabmore" popup
+// that lists the tabs which didn't fit (live first, then settled ones, dimmed).
+import { div } from "gpui-kit";
+import { h_flex, v_flex } from "gpui-base";
+import { spaces, run, closeOverlay, props } from "herdr";
+import { LOOK, dotColor } from "./palette.js";
+import { lookOf, tabStrip } from "./logic.js";
+
+export const FONT = "Pixelify Sans";
+export const stop = (_e, cx) => cx.stop_propagation();
+
+// A round status dot. A working one pulses.
+export function dot(status, size = 8) {
+  const d = div().flex_none().w(size).h(size).rounded_full().border_1().border_color("#000000").bg(dotColor(status));
+  return status === "working" ? d.loop("opacity", { from: 0.45, to: 1, period: 800 }) : d;
+}
+
+// One tab chip. Used in the strip (fixed 86px, shrinking) and as a popup row (dim for settled).
+export function tabChip(tab, look, onSelect) {
+  const [bg, fg] = tab.active ? LOOK[look].tabOn : LOOK[look].tabOff;
+  return h_flex().id(`dewdrop-tab-${tab.id}`).flex_shrink(1).w(86).min_w(52).h(28).overflow_hidden()
+    .items_center().gap(6).px(7).bg(bg).text_color(fg).text_size(12).border_2().border_color("#000000")
+    .cursor_pointer().whitespace_nowrap()
+    .on_mouse_down("left", stop).on_click(() => onSelect(tab))
+    .child(div().flex_none().opacity(0.7).child(String(tab.index)))
+    .child(div().flex_1().min_w(0).truncate().child(tab.name))
+    .child(dot(tab.status));
+}
+
+const select = (tab) => run("tab.select", { id: tab.id });
+
+// Popup role: hidden live tabs, then a "settled" heading and the settled ones.
+export default class TabMore {
+  init() {}
+
+  render() {
+    const look = lookOf(new Date());
+    const L = LOOK[look];
+    const space = (spaces() ?? []).find((s) => s.active);
+    const { hidden, settled } = tabStrip(space?.tabs ?? []);
+    const overlay = props()?.overlay;
+    const pick = (tab) => { select(tab); if (overlay) closeOverlay(overlay); };
+    const row = (tab, dim) => {
+      const [bg, fg] = L.tabOff;
+      return h_flex().id(`dewdrop-more-${tab.id}`).items_center().gap(6).px(6).py(4).mb(3).text_size(12)
+        .bg(bg).text_color(fg).border_2().border_color("#000000").cursor_pointer()
+        .when(dim, (el) => el.opacity(0.55))
+        .on_click(() => pick(tab))
+        .child(div().flex_none().w(16).opacity(0.7).child(String(tab.index)))
+        .child(div().flex_1().min_w(0).truncate().child(tab.name))
+        .child(dot(tab.status));
+    };
+    return v_flex().w(210).font_family(FONT).p(8).bg(L.bar).text_color(L.text).border_2().border_color("#000000")
+      .children(hidden.map((t) => row(t, false)))
+      .when(settled.length > 0, (el) => el.child(div().text_size(10).opacity(0.75).mt(6).mb(3).child("settled")))
+      .children(settled.map((t) => row(t, true)));
+  }
+}

@@ -2,6 +2,7 @@
 //   titlebar  wooden title bar with the clock box
 //   header    a pane's plank header
 //   hotbar    spaces as inventory slots
+//   tabmore   popup listing the tabs the title bar had no room for
 //   chicken   the floating critter
 //   pet       the same critter, as the layout names it
 //   empty     nothing (the hidden peek-spacer)
@@ -12,6 +13,7 @@ import Titlebar from "./titlebar.js";
 import Header from "./header.js";
 import Hotbar from "./hotbar.js";
 import Chicken from "./chicken.js";
+import TabMore from "./tabs.js";
 
 // A role that paints nothing (the hidden peek-spacer block).
 class Empty {
@@ -21,7 +23,7 @@ class Empty {
 }
 
 // "pet" is the chicken view until Task 10 brings the pet cast.
-const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar, chicken: Chicken, pet: Chicken, empty: Empty };
+const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar, chicken: Chicken, pet: Chicken, tabmore: TabMore, empty: Empty };
 
 export default class Dewdrop extends View {
   init(p, cx) {

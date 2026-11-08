@@ -1,15 +1,17 @@
-// Title bar role: a wooden strip with room for the traffic lights, the
-// layout's name, and a clock box (day, time, season) with the number of
-// working agents beside it, where a farm game would show your gold.
+// Title bar role: a wooden strip with room for the traffic lights, the shown
+// space's tabs, a working chip and a clock box (time, day, season).
+// Colors come from lookOf(new Date()) at render time; the minute tick repaints
+// the bar, so it changes look by itself at 6:00 and 18:00.
 import { div, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { agents } from "herdr";
-import { C } from "./palette.js";
+import { agents, spaces, run, openOverlay } from "herdr";
+import { C, LOOK } from "./palette.js";
 import { art } from "./art.js";
 import { syncLook } from "./look.js";
-import { clockText, workingCount, msToNextMinute, CLOCK } from "./logic.js";
+import { clockText, agentCounts, lookOf, tabStrip, msToNextMinute } from "./logic.js";
+import { FONT, stop, dot, tabChip } from "./tabs.js";
 
-export const FONT = "Pixelify Sans";
+export { FONT };
 
 export default class Titlebar {
   init(_p, cx) {
@@ -29,26 +31,57 @@ export default class Titlebar {
   }
 
   render() {
-    const t = clockText(new Date());
-    const working = workingCount(agents() ?? []);
-    const text = (s, size, color) => div().text_size(size).text_color(color).truncate().child(s);
+    const now = new Date();
+    const look = lookOf(now);
+    const L = LOOK[look];
+    const night = look === "night";
+    const t = clockText(now);
+    const text = (s, size, color) => div().text_size(size).text_color(color).whitespace_nowrap().child(s);
+    const space = (spaces() ?? []).find((s) => s.active);
+    const { strip, hidden, settled } = tabStrip(space?.tabs ?? []);
+    const [offBg, offFg] = L.tabOff;
+    const small = (id, label, onClick) => h_flex().id(id).flex_none().h(28).items_center().justify_center().gap(4).px(8)
+      .bg(offBg).text_color(offFg).text_size(12).border_2().border_color("#000000").whitespace_nowrap()
+      .on_mouse_down("left", stop)
+      .when(Boolean(onClick), (el) => el.cursor_pointer().on_click(onClick))
+      .when(!onClick, (el) => el.opacity(0.5))
+      .child(label);
 
-    const gold = h_flex().flex_none().gap(4).items_center().px(6).h(24).bg(C.soil).border_1().border_color(C.woodLight)
-      .child(image(art("can-0")).w(16).h(16).flex_none())
-      .child(text(String(working), 14, C.gold));
+    const more = hidden.length + settled.length;
+    const moreChip = more === 0 ? null : small("dewdrop-tabmore", `\u25BE ${more} more`, () =>
+      openOverlay({ mod: "dewdrop", props: { role: "tabmore" }, kind: "popup", frame: "none" }))
+      .children(hidden.map((x) => dot(x.status, 6)));
+    const plus = small("dewdrop-tabnew", "+", space ? () => run("tab.new", { space: space.id }) : null);
 
-    const { w, h, split } = CLOCK;
-    const box = div().relative().flex_none().w(w).h(h)
-      .child(image(art("clock")).absolute().top(0).left(0).w(w).h(h))
-      .child(h_flex().absolute().top(6).left(8).w(split - 10).h(24).items_center().gap(6)
-        .child(text(t.day, 13, C.soil)).child(text(t.time, 13, C.soil)))
-      .child(h_flex().absolute().top(6).left(split + 2).w(w - split - 8).h(24).items_center().justify_center()
-        .child(text(t.season, 12, C.wood)));
+    const tabs = h_flex().flex_shrink(1).min_w(0).overflow_hidden().items_center().gap(4)
+      .children(strip.map((x) => tabChip(x, look, (tab) => run("tab.select", { id: tab.id }))));
+
+    // Helper rows arrive with Task 11 (the agents popup); until then only agents count.
+    const { working, blocked } = agentCounts(agents() ?? [], []);
+    const chip = h_flex().id("dewdrop-working").flex_none().h(28).items_center().gap(6).px(10).whitespace_nowrap()
+      .bg(C.soil).border_2().border_color("#000000").text_size(13).text_color(C.gold)
+      .on_mouse_down("left", stop)
+      .child(dot("working"))
+      .child(`${working} working`)
+      .when(blocked > 0, (el) => el.child(div().ml(4)).child(dot("blocked")).child(String(blocked)));
+
+    const bg = night ? C.soil : C.parchment, fg = night ? C.parchment : C.soil, sub = night ? C.idle : C.wood;
+    const clock = h_flex().flex_none().h(28).items_center().gap(8).px(10).whitespace_nowrap()
+      .bg(bg).border_2().border_color("#000000")
+      .child(image(art(night ? "moon" : "sun")).w(16).h(16).flex_none())
+      .child(text(t.time, 14, fg))
+      .child(text(t.day, 11, sub))
+      .child(div().flex_none().w(2).h(18).bg("#000000").opacity(0.35))
+      .child(image(art("season-" + t.season.toLowerCase())).w(16).h(16).flex_none())
+      .child(text(t.season, 12, fg));
 
     return h_flex().id("dewdrop-titlebar").size_full().font_family(FONT).items_center().gap(8).pl(80).pr(8)
-      .bg(C.wood).border_t_2().border_color(C.woodLight)
-      .child(div().flex_1().min_w(0).child(text("Dewdrop", 14, C.parchment)))
-      .child(gold)
-      .child(box);
+      .bg(L.bar).border_t_2().border_color(L.barLight)
+      .child(tabs)
+      .children(moreChip ? [moreChip] : [])
+      .child(plus)
+      .child(div().flex_1().min_w(0))
+      .child(chip)
+      .child(clock);
   }
 }

@@ -26,9 +26,12 @@ export default class Pet {
     this.acting = 0;
     const tick = (cx) => {
       cx.timer.after(STEP_MS, tick);
+      // With no pet there is nothing to animate; keep the timer so a new pick starts walking.
+      const key = savedPet(shared("dewdrop.pet"));
+      if (!key) return;
       this.step++;
       if (this.acting > 0) this.acting--;
-      else if (Math.random() < ACT_CHANCE) this.acting = ACT_STEPS[PETS[savedPet(shared("dewdrop.pet"))]?.frames[2]] ?? 3;
+      else if (Math.random() < ACT_CHANCE) this.acting = ACT_STEPS[PETS[key].frames[2]] ?? 3;
       cx.notify();
     };
     cx.timer.after(STEP_MS, tick);

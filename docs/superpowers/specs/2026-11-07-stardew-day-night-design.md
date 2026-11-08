@@ -48,7 +48,7 @@ Success: the user switches to `stardew` and it reads as a cozy farm-game window 
 | "+ space" | Ask for a folder first, then create the space there |
 | Portrait | The user's own pixel portrait, first tile of the supplied grid, named "Aslam Doctor" |
 | Picture picker | 25 pictures in a 5x5 grid: the user's own plus 24 drawn farmhands, each with its own scenic background |
-| Art style | Cozy retro 16-bit pixel art for every picture, pet and space icon: crisp pixels, no anti-aliasing, one earthy palette (sage, forest green, beige, terracotta, golden yellow, dusty blue, browns), dark brown outlines, three or four flat tones per material. No frames or black borders around pictures, pets or space icons |
+| Art style | Cozy retro 16-bit pixel art for every picture, pet and space icon: crisp pixels, no anti-aliasing, one earthy palette (sage, forest green, beige, terracotta, golden yellow, dusty blue, browns), dark brown outlines, three or four flat tones per material. Pictures, pet icons, space slots and tool buttons get a 2px dark brown (`#3b2418`) border, never black or light wood |
 | Pets | Chicken, duck, cat, dog, rabbit, turtle, frog, or none (an empty doghouse) |
 | Agents view | Popup from the working chip: farmhands grouped by tab, helpers nested under them |
 | Busy spaces | Tabs past five fold into "more"; the agents popup scrolls; the hotbar scrolls sideways past nine spaces |
@@ -91,6 +91,7 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
   - Divider.
   - **Buttons**: "+ tab" (`tab.new`) and "+ space". "+ space" first asks for a folder with `pickFolder({prompt: "Pick a folder for the new space"})`, then creates the space in it (`space.new {folder}`). Cancelling the picker (it returns `null`) does nothing (user's decision). The new space is shown and its slot appended at the end of the hotbar. Settings stays out.
   - **Past nine spaces**: slots 10 and up have no ctrl key label (their tooltip says so). The slot strip has a fixed maximum width of nine slots and scrolls sideways (hotbar.js `overflow_x_scrollbar`, a visible thin wood-colored scrollbar); adding a space scrolls it to the end so the new slot is in view.
+  - Popups that scroll (the agents popup, the folder picker list, the tabs "more" list) use the same styled scrollbar: 8px wide, dark brown track, wood thumb with a light top-left and dark bottom-right edge. Never the native scrollbar.
 - Night: active slot frame is gold instead of red; box trim is gold.
 
 ## Pictures, pets and popups
@@ -99,13 +100,14 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
 
 - Clicking the portrait opens "Pick a picture": a 5x5 grid of 25 pictures. The first is the user's portrait, tooltip "Aslam Doctor" (no "you" anywhere). The other 24 are original drawn farmhands: Wizard, Pirate, Astronaut, Knight, Robot, Chef, Witch, Viking, Fisher, Scientist, Ninja, Punk, Explorer, Alien, Queen, Farmer, Painter, Detective, Firefighter, Sailor, Miner, Musician, Florist, Cowboy. The tooltip is the name.
 - Art style (user's brief): cozy retro 16-bit pixel art in the spirit of farming RPGs. Crisp, deliberately placed pixels with no anti-aliasing, blur, gradients or dithering; a warm, muted palette (sage and forest green, warm beige, terracotta, golden yellow, dusty blue, earthy brown) that every pixel snaps to; dark brown outlines (`#3b2418`), never pure black; three or four flat tones per material lit from the top left; cute proportions with expressive eyes and a distinct hairstyle, outfit or accessory each. Portraits are drawn on a 48x48 grid with a simple scenic background (valley, meadow, night, space, sea, castle, snow, sunset, city, desert). The user's own portrait is the supplied image and stays as it is.
-- No frames: pictures sit straight on the bar or popup with no wood frame and no black border (user said frames looked comical). The chosen picker cell is lifted 2px with a short gold bar under it.
+- Borders: every picture (hotbar portrait, picker cells, agents popup rows, pane header) has a plain 2px dark brown (`#3b2418`) border. No wood frame (user said it looked comical) and no black. The chosen picker cell gets a gold (`#e8c65a`) border and is lifted 2px.
+- The 24 farmhand pictures will be supplied by the user later as PNGs (user's decision); the drawn ones in the preview are placeholders. They are downscaled to 48x48 and snapped to the palette.
 - One pixel scale: pictures are shown with nearest-neighbour scaling at whole device-pixel steps only (48px grid shown at 24, 48 or 72 CSS px on a 2x screen). The supplied portrait is the one exception and scales smoothly.
 - The choice persists (`setState`), and agents get the remaining pictures as their farmhand faces, in order.
 
 ### Pet chooser
 
-- The pet button opens "Pick a pet": chicken, duck, cat, dog, rabbit, turtle, frog, and "No pet" (an empty doghouse icon). Each has a name and a one-line trait. Sprites are 24x20 in the same art style, shown at 2x (48x40 on screen) on no background box, with a walk pair and one action frame (peck, quack, nap, wag, hop, hide, croak). The pet roams the road; dragging and clicking behave as the chicken does today.
+- The pet button opens "Pick a pet": chicken, duck, cat, dog, rabbit, turtle, frog, and "No pet" (an empty doghouse icon). Each has a name and a one-line trait. Sprites are 24x20 in the same art style, shown at 2x (48x40 on screen) in a box with the same dark brown border, with a walk pair and one action frame (peck, quack, nap, wag, hop, hide, croak). The pet roams the road; dragging and clicking behave as the chicken does today.
 
 ### Agents popup
 
@@ -116,7 +118,7 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
 
 ### Space icons
 
-- Each hotbar space shows a 16x16 crop (carrot, pumpkin, wheat, sprout, tomato, corn) in the same art style, shown at 24px. Slots and tool buttons have no black border; the selected slot gets a gold inner line, a 3px lift and a gold bar under it.
+- Each hotbar space shows a 16x16 crop (carrot, pumpkin, wheat, sprout, tomato, corn) in the same art style, shown at 24px. Slots and the four tool buttons (plus, folder, peek, pet) have a 2px dark brown (`#3b2418`) inner border with a faint light line along the top, replacing the light wood border; the selected slot gets a gold inner line, a 3px lift and a gold bar under it.
 
 ### Busy spaces
 

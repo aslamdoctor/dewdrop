@@ -1,10 +1,10 @@
-// Draws the dewdrop mod's pixel art as SVG. Run: bun scripts/draw-art.js
-// Every sprite is original: small grids drawn by hand below, scenery drawn by code.
+// Draws the dewdrop mod's small sprites as SVG. Run: bun scripts/draw-art.js
+// Every sprite is original: small grids drawn by hand below, one string per row.
 import { mkdirSync, writeFileSync } from "node:fs";
-import { C } from "../mods/dewdrop/palette.js";
-import { CLOCK } from "../mods/dewdrop/logic.js";
+import { C, SPRITE as S } from "../mods/dewdrop/palette.js";
 
 const OUT = new URL("../mods/dewdrop/art/", import.meta.url).pathname;
+// The key for the older sprites (heart, buttons, chicken).
 const KEY = {
   K: "#000000", w: "#ffffff", S: C.soil, P: C.parchment, W: C.wood, L: C.woodLight,
   G: C.grass, D: C.grassDark, B: C.sky, R: C.red, Y: C.gold, I: C.idle,
@@ -15,17 +15,8 @@ const svg = (w, h, body) =>
 const rect = (x, y, w, h, c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
 
 // Grid sprite: one string per row, "." is transparent. Runs of a color merge into one rect.
-// Rings every colored pixel with black, so a sprite drawn in one color still reads on wood.
-function outlined(rows) {
-  const at = (x, y) => rows[y]?.[x] ?? ".";
-  return rows.map((row, y) => [...row].map((ch, x) => {
-    if (ch !== ".") return ch;
-    const near = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => ![".", "K"].includes(at(x + dx, y + dy)));
-    return near ? "K" : ".";
-  }).join(""));
-}
-
-function grid(name, rows, scale = 1) {
+// `key` maps each letter to a color; letters it doesn't know are an error.
+function grid(name, rows, scale = 1, key = KEY) {
   const width = rows[0].length;
   let body = "";
   rows.forEach((row, y) => {
@@ -35,8 +26,8 @@ function grid(name, rows, scale = 1) {
       let end = x;
       while (row[end] === ch) end++;
       if (ch !== ".") {
-        if (!KEY[ch]) throw new Error(`${name}: unknown pixel "${ch}"`);
-        body += rect(x * scale, y * scale, (end - x) * scale, scale, KEY[ch]);
+        if (!key[ch]) throw new Error(`${name}: unknown pixel "${ch}"`);
+        body += rect(x * scale, y * scale, (end - x) * scale, scale, key[ch]);
       }
       x = end;
     }
@@ -45,96 +36,6 @@ function grid(name, rows, scale = 1) {
 }
 
 const sprites = [
-  grid("can-0", [
-    "................",
-    "................",
-    "................",
-    ".....KKKKK......",
-    "....K.....K.....",
-    "....K.....K...KK",
-    "..KKKKKKKKKKK.KB",
-    ".KBBBBBBBBBBBKBK",
-    ".KBPBBBBBBBBBBK.",
-    ".KBPBBBBBBBBBK..",
-    ".KBBBBBBBBBBBK..",
-    ".KBBBBBBBBBBBK..",
-    ".KBBBBBBBBBBBK..",
-    "..KKKKKKKKKKK...",
-    "................",
-    "................",
-  ]),
-  grid("can-1", [
-    "................",
-    "................",
-    "....KKKKK.......",
-    "...K.....K......",
-    "...K.....K......",
-    ".KKKKKKKKKKK....",
-    "KBBBBBBBBBBBK...",
-    "KBPBBBBBBBBBKK..",
-    "KBPBBBBBBBBBBBK.",
-    "KBBBBBBBBBBBK.KK",
-    "KBBBBBBBBBBBK...",
-    ".KKKKKKKKKKK..B.",
-    "..............B.",
-    ".............B.B",
-    "..............B.",
-    "................",
-  ]),
-  grid("bang", [
-    "................",
-    "..KKKKKKKKKKKK..",
-    ".KRRRRRRRRRRRRK.",
-    ".KRRRRRwwRRRRRK.",
-    ".KRRRRRwwRRRRRK.",
-    ".KRRRRRwwRRRRRK.",
-    ".KRRRRRwwRRRRRK.",
-    ".KRRRRRwwRRRRRK.",
-    ".KRRRRRRRRRRRRK.",
-    ".KRRRRRwwRRRRRK.",
-    ".KRRRRRRRRRRRRK.",
-    "..KKKKRRKKKKKK..",
-    ".....KRK........",
-    "......K.........",
-    "................",
-    "................",
-  ]),
-  grid("star", [
-    "................",
-    ".......KK.......",
-    "......KYYK......",
-    "......KYYK......",
-    ".....KYYYYK.....",
-    ".KKKKKYYYYKKKKK.",
-    ".KYYYYYPYYYYYYK.",
-    "..KYYYYYYYYYYK..",
-    "...KYYYYYYYYK...",
-    "....KYYYYYYK....",
-    "...KYYYYYYYYK...",
-    "...KYYYKKYYYK...",
-    "..KYYYK..KYYYK..",
-    "..KYYK....KYYK..",
-    "..KKK......KKK..",
-    "................",
-  ]),
-  grid("zzz", outlined([
-    "................",
-    "........IIIIII..",
-    "...........II...",
-    "..........II....",
-    ".........II.....",
-    "........IIIIII..",
-    "................",
-    "..IIIIIIII......",
-    "........II......",
-    ".......II.......",
-    "......II........",
-    ".....II.........",
-    "....II..........",
-    "...II...........",
-    "..IIIIIIII......",
-    "................",
-  ])),
   grid("heart", [
     "................",
     "................",
@@ -228,30 +129,47 @@ const sprites = [
   ], 2),
 ];
 
-// Hotbar slot, 48x48: dark frame, wood border with a light top-left edge, soil well.
-function slot() {
-  return ["slot", svg(48, 48,
-    rect(0, 0, 48, 48, KEY.K) + rect(2, 2, 44, 44, C.wood) + rect(2, 2, 44, 2, C.woodLight) +
-    rect(2, 2, 2, 44, C.woodLight) + rect(6, 6, 36, 36, KEY.K) + rect(8, 8, 32, 32, C.soil) +
-    rect(8, 38, 32, 2, C.idle))];
-}
+// The new set, ported from the Dewdrop mock. Each one has its own letter key.
+const CROP = { o: S.o, G: S.G, g: S.g, d: S.d, O: S.O, P: S.P, r: S.r, Y: S.Y, y: S.y, b: S.b, B: S.B, n: S.n, R: S.R, L: S.L, D: S.D };
+const SUN_KEY = { Y: S.sunRay, O: S.sunCore };
+const TOOL_KEY = { W: S.tool };
 
-// Plank, 64x16, tiles horizontally: light top edge, grain lines, a nail near each end.
-function plank() {
-  return ["plank", svg(64, 16,
-    rect(0, 0, 64, 16, C.wood) + rect(0, 0, 64, 2, C.woodLight) + rect(0, 14, 64, 2, C.soil) +
-    rect(8, 6, 18, 1, C.soil) + rect(34, 9, 22, 1, C.soil) + rect(20, 11, 10, 1, C.soil) +
-    rect(3, 6, 2, 2, KEY.K) + rect(59, 6, 2, 2, KEY.K) + rect(62, 2, 2, 12, C.soil))];
-}
+// Pane header window icon: title strip with three lights over a prompt and a cursor line.
+const WINDOW = ["KKKKKKKKKKKK", "KBBBBBBBRYGK", "KKKKKKKKKKKK", "KDDDDDDDDDDK", "KDWDDDDDDDDK", "KDDWDDDDDDDK", "KDWDDWWWWDDK", "KDDDDDDDDDDK", "KKKKKKKKKKKK"];
+const SUN = ["....Y....", ".Y..Y..Y.", "..YOOOY..", "..OOOOO..", "YYOOOOOYY", "..OOOOO..", "..YOOOY..", ".Y..Y..Y.", "....Y...."];
+const MOON = ["...MMM...", ".MMMM....", ".MMM.....", "MMMM.....", "MMMM.....", "MMMM.....", ".MMMM..M.", ".MMMMMMM.", "...MMM..."];
+const LEAF = [".......KK", ".....KOOK", "...KOOOOK", "..KOOYOOK", ".KOOYOOK.", ".KOYOOK..", "KOYOOK...", "KYKKK....", "K........"];
+const BLOSSOM = ["...PPP...", "..PWWWP..", ".PPWWWPP.", "PWWPYPWWP", "PWWYYYWWP", "PWWPYPWWP", ".PPWWWPP.", "..PWWWP..", "...PPP..."];
+const SNOWFLAKE = ["....W....", ".W..W..W.", "..W.W.W..", "...WWW...", "WWWWWWWWW", "...WWW...", "..W.W.W..", ".W..W..W.", "....W...."];
+const CROPS = {
+  carrot: ["................", "......o...o.....", ".....oGo.oGo....", "......oGogGo....", ".......oGGo.....", ".....ooooooo....", "....oPPOOOOro...", "....oPOOOOOro...", ".....oPOrOro....", ".....oPOOOro....", "......oOOro.....", "......oOOro.....", ".......oOo......", ".......oro......", "........o.......", "................"],
+  pumpkin: ["................", "................", "........oo......", ".......odo..oo..", ".......oGo.oGGo.", "...oooooGooooo..", "..oPPOoOOOoOOro.", ".oPPOOoOOOOoOrro", ".oPOOOoOOOOoOrro", ".oPOOOoOOOOoOrro", ".oOOOOoOOOOoOrro", ".oOOOroOOOroOrro", "..oOrroOOrroOro.", "...oooooooooo...", "................", "................"],
+  wheat: ["................", "......o.o.o.....", ".....oYoYoYo....", ".....oyYyYyo....", "....oYyYyYyYo...", "....oyYbYbYyo...", ".....oYbYbYo....", "......obgbo.....", "......ogGgo.....", ".....oBnBnBo....", "......oGgGo.....", ".....oGoGoGo....", "....oGo.o.oGo...", "...oGo.....oGo..", "...oo.......oo..", "................"],
+  sprout: ["................", "................", "................", "....oo....oo....", "...ogGo..oGgo...", "...oggGooGggo...", "....ogGGGGgo....", ".....ooGGoo.....", ".......oGo......", ".......oGo......", "......ooGoo.....", "...ooooBnBoooo..", "..onnnBnnnBnnno.", "..oBBnBBBBnBBBo.", "...oooooooooooo.", "................"],
+  tomato: ["................", ".......oo.......", ".....oogdoo.....", "....odGgGGdo....", "...ooooGGoooo...", "..oLLRRooRRRDo..", ".oLLRRRRRRRRDDo.", ".oLRRRRRRRRRRDo.", ".oRRRRRRRRRRRDo.", ".oRRRRRRRRRRDDo.", ".oRRRRRRRRRDDDo.", "..oRRRRRRRDDDo..", "...ooDDDDDDoo...", ".....oooooo.....", "................", "................"],
+  corn: ["................", "........o.......", ".......oYo......", "......oYyYo.....", "......oyYbo.....", ".....oYyYbYo....", ".....oyYbYbo....", "....ooYyYbYoo...", "...oGoyYbYboGo..", "...oGgoYbYoGGo..", "....oGgoYoGGo...", ".....oGgoGGo....", "......oGgGo.....", ".......oGo......", "........o.......", "................"],
+};
+const PLUS = ["...WW...", "...WW...", "WWWWWWWW", "WWWWWWWW", "...WW...", "...WW..."];
+const FOLDER = ["WWW.....", "WWWWWWWW", "W......W", "W......W", "W......W", "WWWWWWWW"];
+const EYE = ["..WWWW..", ".W....W.", "W..WW..W", "W..WW..W", ".W....W.", "..WWWW.."];
+const EYE_OFF = ["..WWWW.W", ".W....W.", "W..WWW.W", "W.WWW..W", ".W....W.", "W.WWWW.."];
 
-// Clock box, CLOCK.w x 36: framed parchment panel with a divider before the season cell.
-function clock() {
-  const { w, h, split } = CLOCK;
-  return ["clock", svg(w, h,
-    rect(0, 0, w, h, KEY.K) + rect(2, 2, w - 4, h - 4, C.wood) + rect(2, 2, w - 4, 2, C.woodLight) +
-    rect(5, 5, w - 10, h - 10, KEY.K) + rect(6, 6, w - 12, h - 12, C.parchment) + rect(split, 6, 2, h - 12, C.wood))];
-}
+const dewdrop = [
+  grid("window", WINDOW, 1, { K: S.frame, B: S.glass, R: S.lightRed, Y: S.lightGold, G: S.lightGreen, D: S.screen, W: S.text }),
+  grid("sun", SUN, 1, SUN_KEY),
+  grid("moon", MOON, 1, { M: S.moon }),
+  grid("season-spring", BLOSSOM, 1, { P: S.petal, W: S.petalLight, Y: S.sunRay }),
+  grid("season-summer", SUN, 1, SUN_KEY),
+  grid("season-fall", LEAF, 1, { K: S.leafEdge, O: S.leaf, Y: S.leafVein }),
+  grid("season-winter", SNOWFLAKE, 1, { W: S.snow }),
+  ...Object.entries(CROPS).map(([n, rows]) => grid(`crop-${n}`, rows, 1, CROP)),
+  grid("tool-plus", PLUS, 1, TOOL_KEY),
+  grid("tool-folder", FOLDER, 1, TOOL_KEY),
+  grid("tool-eye", EYE, 1, TOOL_KEY),
+  grid("tool-eye-off", EYE_OFF, 1, TOOL_KEY),
+];
 
 mkdirSync(OUT, { recursive: true });
-for (const [name, src] of [...sprites, slot(), plank(), clock()]) writeFileSync(`${OUT}${name}.svg`, src);
-console.log("drew", sprites.length + 3, "sprites into", OUT);
+const all = [...sprites, ...dewdrop];
+for (const [name, src] of all) writeFileSync(`${OUT}${name}.svg`, src);
+console.log("drew", all.length, "sprites into", OUT);

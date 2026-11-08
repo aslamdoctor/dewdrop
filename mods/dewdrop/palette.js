@@ -15,7 +15,18 @@ export const C = {
 export const INK = "#3b2418";
 export const GOLD_LINE = "#e8c65a";
 
-export const STATUS = { working: "#5fa8d3", blocked: "#d9534f", done: "#f2c14e", idle: "#9c7b5b" };
+// Every color the SVG sprites use (scripts/draw-art.js). The one-letter keys are the
+// crop palette, as in the mock; the named keys cover the window, sky, season and tool icons.
+export const SPRITE = {
+  o: INK, G: "#5e8a48", g: "#a3c072", d: "#34502e", O: "#d0714c", P: "#e4966a", r: "#b4523a",
+  Y: GOLD_LINE, y: "#f4de8e", b: "#a8802c", B: "#74492c", n: "#96623a", R: "#c2583e", L: "#f0bc96", D: "#8a3a2e",
+  frame: "#000000", glass: C.sky, lightRed: C.red, lightGold: C.gold, lightGreen: C.grass, screen: C.soil, text: C.parchment,
+  sunRay: C.gold, sunCore: "#f7d774", moon: "#f3ecc8",
+  petal: "#f4a7c1", petalLight: "#ffffff", leaf: "#e07a2e", leafVein: C.gold, leafEdge: "#000000", snow: "#ffffff",
+  tool: C.parchment,
+};
+
+export const STATUS ={ working: "#5fa8d3", blocked: "#d9534f", done: "#f2c14e", idle: "#9c7b5b" };
 
 // pane is a hex here; the alpha comes from terminal_opacity.
 export const LOOK = {

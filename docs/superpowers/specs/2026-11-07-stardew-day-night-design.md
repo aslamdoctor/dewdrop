@@ -85,7 +85,7 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
 ### Main area
 
 - Background: the scenery image for the current look, `fit: cover`, replacing `farm.png`.
-- Panes: semi-transparent so the scenery shows through (`terminal_opacity` below 1; the mock uses about 0.85). Pane border and focus colors follow the look (day: dark wood border, gold focus; night: darker wood border, gold focus).
+- Panes: semi-transparent so the scenery shows through (`terminal_opacity` 0, with the alpha in the pane fill: about 0.86 by day, 0.84 at night). Pane border and focus colors follow the look (day: dark wood border, gold focus; night: darker wood border, gold focus).
 - Pane header plank: replaces the status icon with the **window icon** (a small pixel window: title strip with three dots, a dark body with a `>_` prompt) plus a **status dot** badge on its corner, colored by status, pulsing while working. Title, zoom and close buttons stay. Day and night use different plank colors.
 - Chicken: unchanged, bottom-right.
 

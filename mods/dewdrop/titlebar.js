@@ -66,7 +66,7 @@ export default class Titlebar {
       .on_click(() => openOverlay({ mod: "dewdrop", props: { role: "agents" }, kind: "popup", frame: "none" }))
       .child(dot("working"))
       .child(`${working} working`)
-      .child(div().ml(4)).child(dot("blocked")).child(String(blocked));
+      .when(blocked > 0, (c) => c.child(div().ml(4)).child(dot("blocked")).child(String(blocked)));
 
     const bg = night ? C.soil : C.parchment, fg = night ? C.parchment : C.soil, sub = night ? C.idle : C.wood;
     const clock = h_flex().relative().flex_none().h(28).items_center().gap(8).px(10).whitespace_nowrap()

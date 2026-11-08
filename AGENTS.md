@@ -1,13 +1,14 @@
-## Agent skills
+# Dewdrop
 
-### Issue tracker
+A Stardew-inspired layout mod for the Herdr desktop app. The mod is in `mods/dewdrop/`, the layout in `layouts/dewdrop.json`, the theme in `themes/dewdrop.json`.
 
-Issues are tracked in this repo's GitHub Issues via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+## Commands
 
-### Triage labels
+- `bun test` runs the tests.
+- `herdr-app check mods/dewdrop` checks the mod.
+- `bash scripts/install.sh` copies it into `~/.config/herdr-app`. Touch the installed `.js` files after that so Herdr reloads them.
+- `bun scripts/draw-scenes.js` redraws the valley backgrounds.
 
-Uses the five default labels: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+## Tools
 
-### Domain docs
-
-Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Use bun, rg, fd, sd and jq.

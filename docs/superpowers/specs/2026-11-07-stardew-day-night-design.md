@@ -48,7 +48,7 @@ Success: the user switches to `stardew` and it reads as a cozy farm-game window 
 | "+ space" | Ask for a folder first, then create the space there |
 | Portrait | The user's own pixel portrait, first tile of the supplied grid, named "Aslam Doctor" |
 | Picture picker | 25 pictures in a 5x5 grid: the user's own plus 24 drawn farmhands, each with its own scenic background |
-| Picture frames | Warm wood (`#d9a866`) with a dark brown rim (`#4a2e18`), not black; the chosen one glows gold |
+| Art style | Cozy retro 16-bit pixel art for every picture, pet and space icon: crisp pixels, no anti-aliasing, one earthy palette (sage, forest green, beige, terracotta, golden yellow, dusty blue, browns), dark brown outlines, three or four flat tones per material. No frames or black borders around pictures, pets or space icons |
 | Pets | Chicken, duck, cat, dog, rabbit, turtle, frog, or none (an empty doghouse) |
 | Agents view | Popup from the working chip: farmhands grouped by tab, helpers nested under them |
 | Busy spaces | Tabs past five fold into "more"; the agents popup scrolls; the hotbar scrolls sideways past nine spaces |
@@ -98,14 +98,14 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
 ### Picture picker
 
 - Clicking the portrait opens "Pick a picture": a 5x5 grid of 25 pictures. The first is the user's portrait, tooltip "Aslam Doctor" (no "you" anywhere). The other 24 are original drawn farmhands: Wizard, Pirate, Astronaut, Knight, Robot, Chef, Witch, Viking, Fisher, Scientist, Ninja, Punk, Explorer, Alien, Queen, Farmer, Painter, Detective, Firefighter, Sailor, Miner, Musician, Florist, Cowboy. The tooltip is the name.
-- Quality target is the user's portrait: 96x96, painterly shading, a dark outline, and a scenic background per character (valley, meadow, night, space, sea, castle, snow, sunset, city, desert). The preview's `art.js` draws them procedurally; the builder pre-renders them to PNGs in `mods/stardew/art/portraits/` with a script, so the mod does no drawing at run time (my call).
-- Frames everywhere a picture shows (hotbar portrait, picker cells, agents popup rows, pane header): a warm wood border `#d9a866` with a dark brown rim `#4a2e18` (user asked for anything but black). The selected picker cell gets a light border and a gold glow.
-- Pictures are scaled smoothly (not nearest-neighbour), since 96px art is shown at 20 to 64px.
+- Art style (user's brief): cozy retro 16-bit pixel art in the spirit of farming RPGs. Crisp, deliberately placed pixels with no anti-aliasing, blur, gradients or dithering; a warm, muted palette (sage and forest green, warm beige, terracotta, golden yellow, dusty blue, earthy brown) that every pixel snaps to; dark brown outlines (`#3b2418`), never pure black; three or four flat tones per material lit from the top left; cute proportions with expressive eyes and a distinct hairstyle, outfit or accessory each. Portraits are drawn on a 48x48 grid with a simple scenic background (valley, meadow, night, space, sea, castle, snow, sunset, city, desert). The user's own portrait is the supplied image and stays as it is.
+- No frames: pictures sit straight on the bar or popup with no wood frame and no black border (user said frames looked comical). The chosen picker cell is lifted 2px with a short gold bar under it.
+- One pixel scale: pictures are shown with nearest-neighbour scaling at whole device-pixel steps only (48px grid shown at 24, 48 or 72 CSS px on a 2x screen). The supplied portrait is the one exception and scales smoothly.
 - The choice persists (`setState`), and agents get the remaining pictures as their farmhand faces, in order.
 
 ### Pet chooser
 
-- The pet button opens "Pick a pet": chicken, duck, cat, dog, rabbit, turtle, frog, and "No pet" (an empty doghouse icon). Each has a name and a one-line trait. Sprites are 24x20 drawn at 2x (48x40 on screen), with a walk pair and one action frame (peck, quack, nap, wag, hop, hide, croak). The pet roams the road; dragging and clicking behave as the chicken does today.
+- The pet button opens "Pick a pet": chicken, duck, cat, dog, rabbit, turtle, frog, and "No pet" (an empty doghouse icon). Each has a name and a one-line trait. Sprites are 24x20 in the same art style, shown at 2x (48x40 on screen) on no background box, with a walk pair and one action frame (peck, quack, nap, wag, hop, hide, croak). The pet roams the road; dragging and clicking behave as the chicken does today.
 
 ### Agents popup
 
@@ -113,6 +113,10 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
 - Rows are grouped by tab. An agent row shows its picture, title, app, farmhand name, helper count and status. Clicking it selects that tab and focuses the agent (`agent.focus`).
 - Helpers are terminals an agent started with `hc run` (no pane). They are nested under their agent with a chicken icon. Clicking one opens a peek window with its latest output (`terminal.peek`). "keep" gives it a pane in its tab (`terminal.keep`), after which the row shows "in a pane" and clicking it focuses that pane.
 - The popup has a maximum height (about 450px at 960x600) and scrolls.
+
+### Space icons
+
+- Each hotbar space shows a 16x16 crop (carrot, pumpkin, wheat, sprout, tomato, corn) in the same art style, shown at 24px. Slots and tool buttons have no black border; the selected slot gets a gold inner line, a 3px lift and a gold bar under it.
 
 ### Busy spaces
 

@@ -1,4 +1,6 @@
-// Pure helpers for the dewdrop mod. No imports, so bun can test them directly.
+// Pure helpers for the dewdrop mod. Imports only pure modules, so bun can test them directly.
+import { LOOK } from "./palette.js";
+import { png } from "./art.js";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -100,4 +102,38 @@ export function msToNextMinute(now) {
 export function lookOf(date) {
   const h = date.getHours();
   return h >= 6 && h < 18 ? "day" : "night";
+}
+
+// The shipped layout and the live swap (Task 6) share these two helpers.
+const sceneLook = (image) => /scene-(day|night)\.png$/.exec(image ?? "")?.[1] ?? null;
+
+function findNode(n, id) {
+  if (!n || typeof n !== "object") return null;
+  if (n.id === id) return n;
+  for (const c of n.children ?? []) {
+    const f = findNode(c, id);
+    if (f) return f;
+  }
+  return null;
+}
+
+// Which look the tree is wearing, read from the valley scene path. null for a foreign tree.
+export function lookOfLayout(tree) {
+  return sceneLook(findNode(tree, "valley")?.background?.image);
+}
+
+// A deep copy of the tree wearing the day or night look. Only the valley scene and the
+// pane colors of "main" change. null when the tree has no valley or no main node.
+export function layoutFor(tree, look) {
+  const copy = structuredClone(tree);
+  const valley = findNode(copy, "valley");
+  const main = findNode(copy, "main");
+  const pane = main?.content?.pane;
+  if (!valley || !pane) return null;
+  const L = LOOK[look];
+  valley.background = { ...(valley.background ?? {}), image: png("scene-" + look) };
+  pane.background = L.pane;
+  pane.border = { ...(pane.border ?? {}), color: L.border };
+  pane.focus = { ...(pane.focus ?? {}), color: L.focus };
+  return copy;
 }

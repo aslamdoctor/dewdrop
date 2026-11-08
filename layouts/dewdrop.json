@@ -5,101 +5,67 @@
     {
       "id": "titlebar",
       "type": "block",
-      "size": {
-        "px": 40
-      },
+      "size": { "px": 40 },
       "window_drag": true,
-      "content": {
-        "mod": "dewdrop",
-        "props": {
-          "role": "titlebar"
-        }
-      }
+      "content": { "mod": "dewdrop", "props": { "role": "titlebar" } }
     },
     {
-      "id": "main",
-      "type": "block",
-      "padding": [
-        16,
-        16
-      ],
-      "background": {
-        "image": "mods/dewdrop/art/farm.png",
-        "fit": "cover"
-      },
-      "content": {
-        "tab": "active",
-        "pane": {
-          "gap": 10,
-          "radius": 0,
-          "background": "#2b1d14",
-          "border": {
-            "width": 3,
-            "color": "#8a5a2b"
-          },
-          "focus": {
-            "width": 3,
-            "color": "#c58b4e"
-          },
-          "lone": true,
-          "header": {
-            "content": {
-              "mod": "dewdrop",
-              "props": {
-                "role": "header"
+      "id": "valley",
+      "type": "column",
+      "background": { "image": "mods/dewdrop/art/scene-day.png", "fit": "cover" },
+      "children": [
+        {
+          "id": "main",
+          "type": "block",
+          "padding": [16, 16],
+          "content": {
+            "tab": "active",
+            "pane": {
+              "gap": 10,
+              "radius": 0,
+              "background": "#20160f",
+              "border": { "width": 3, "color": "#6b4420" },
+              "focus": { "width": 3, "color": "#f2c14e" },
+              "lone": true,
+              "header": {
+                "content": { "mod": "dewdrop", "props": { "role": "header" } },
+                "height": 26,
+                "position": "top",
+                "reveal": "always"
               }
-            },
-            "height": 26,
-            "position": "top",
-            "reveal": "always"
+            }
           }
+        },
+        {
+          "id": "peek-spacer",
+          "type": "block",
+          "hidden": true,
+          "content": { "mod": "dewdrop", "props": { "role": "empty" } }
+        },
+        {
+          "id": "hotbar",
+          "type": "block",
+          "size": { "px": 64 },
+          "content": { "mod": "dewdrop", "props": { "role": "hotbar" } }
         }
-      },
+      ],
       "floating": [
         {
-          "id": "chicken",
-          "content": {
-            "mod": "dewdrop",
-            "props": {
-              "role": "chicken"
-            }
-          },
-          "edge": "right",
+          "id": "pet",
+          "content": { "mod": "dewdrop", "props": { "role": "pet" } },
+          "edge": "bottom",
           "align": "end"
         }
       ]
-    },
-    {
-      "id": "hotbar",
-      "type": "block",
-      "size": {
-        "px": 64
-      },
-      "content": {
-        "mod": "dewdrop",
-        "props": {
-          "role": "hotbar"
-        }
-      },
-      "background": {
-        "image": "mods/dewdrop/art/hotbar-field.png",
-        "fit": "cover"
-      }
     }
   ],
   "theme": "dewdrop",
   "font": "Geist Mono",
   "font_size": 14,
   "ui_font": "Pixelify Sans",
-  "terminal_padding": [
-    8,
-    4
-  ],
-  "terminal_opacity": 1,
+  "terminal_padding": [8, 4],
+  "terminal_opacity": 0.85,
   "background": "#2b1d14",
   "titlebar": "none",
-  "traffic_lights": [
-    14,
-    11
-  ]
+  "traffic_lights": [14, 11]
 }

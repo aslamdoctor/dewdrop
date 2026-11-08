@@ -3,6 +3,8 @@
 //   header    a pane's plank header
 //   hotbar    spaces as inventory slots
 //   chicken   the floating critter
+//   pet       the same critter, as the layout names it
+//   empty     nothing (the hidden peek-spacer)
 
 import { View, div } from "gpui-kit";
 import { props } from "herdr";
@@ -11,7 +13,15 @@ import Header from "./header.js";
 import Hotbar from "./hotbar.js";
 import Chicken from "./chicken.js";
 
-const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar, chicken: Chicken };
+// A role that paints nothing (the hidden peek-spacer block).
+class Empty {
+  render() {
+    return div();
+  }
+}
+
+// "pet" is the chicken view until Task 10 brings the pet cast.
+const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar, chicken: Chicken, pet: Chicken, empty: Empty };
 
 export default class Dewdrop extends View {
   init(p, cx) {

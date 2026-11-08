@@ -6,6 +6,7 @@
 //   tabmore   popup listing the tabs the title bar had no room for
 //   pet       the floating critter
 //   petpick   dialog to choose the pet
+//   agents    popup listing the farmhands and their helpers
 //   empty     nothing (the hidden peek-spacer)
 
 import { View, div } from "gpui-kit";
@@ -17,6 +18,7 @@ import Pet from "./pet.js";
 import TabMore from "./tabs.js";
 import Picker from "./picker.js";
 import PetPick from "./petpick.js";
+import Agents from "./agents.js";
 
 // A role that paints nothing (the hidden peek-spacer block).
 class Empty {
@@ -25,7 +27,7 @@ class Empty {
   }
 }
 
-const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar, pet: Pet, tabmore: TabMore, picker: Picker, petpick: PetPick, empty: Empty };
+const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar, pet: Pet, tabmore: TabMore, picker: Picker, petpick: PetPick, agents: Agents, empty: Empty };
 
 export default class Dewdrop extends View {
   init(p, cx) {

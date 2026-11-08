@@ -221,3 +221,33 @@ export function agentCounts(agents, helpers) {
     blocked: all.filter((a) => a.status === "blocked").length,
   };
 }
+
+// Helper terminals (started with `hc run`), keyed by their parent's address.
+// A helper keeps its row only while it lives; one shown in a pane carries the pane id.
+export function helpersOf(terminals, panes) {
+  const paneOf = new Map();
+  for (const p of panes ?? []) if (p.terminal) paneOf.set(p.terminal, p.pane);
+  const out = new Map();
+  for (const t of terminals ?? []) {
+    if (!t.parent || t.state === "finished") continue;
+    const title = t.name || t.title || t.address;
+    const list = out.get(t.parent) ?? [];
+    list.push({ address: t.address, title, status: t.status ?? "idle", pane: paneOf.get(t.address) ?? null });
+    out.set(t.parent, list);
+  }
+  return out;
+}
+
+// Agents grouped by tab, in the order each tab first appears.
+export function agentGroups(agents, helpers) {
+  const groups = new Map();
+  for (const a of agents ?? []) {
+    let g = groups.get(a.tab);
+    if (!g) {
+      g = { tab: a.tab, tab_index: a.tab_index, tab_name: a.tab_name, space_name: a.space_name, rows: [] };
+      groups.set(a.tab, g);
+    }
+    g.rows.push({ agent: a, helpers: helpers.get(a.address) ?? [] });
+  }
+  return [...groups.values()];
+}

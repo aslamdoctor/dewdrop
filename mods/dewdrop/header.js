@@ -3,12 +3,12 @@
 // double-click zooms it.
 import { div, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { panes, props, home, run } from "herdr";
+import { panes, terminals, props, home, run, openOverlay } from "herdr";
 import { INK, LOOK, dotColor } from "./palette.js";
 import { art, pic } from "./art.js";
 import { faceOf } from "./cast.js";
-import { headerTitle, lookOf, msToNextLook } from "./logic.js";
-import { FONT } from "./tabs.js";
+import { headerTitle, helpersOf, lookOf, msToNextLook } from "./logic.js";
+import { FONT, stop } from "./tabs.js";
 
 // The pane's picture: an agent shows its farmhand's face with a status dot on the
 // corner, any other pane shows the window sprite.
@@ -43,12 +43,19 @@ export default class Header {
     const look = lookOf(new Date());
     const L = LOOK[look];
     if (!p) return div().size_full().bg(L.plank);
+    const n = p.terminal ? (helpersOf(terminals() ?? [], panes()).get(p.terminal)?.length ?? 0) : 0;
+    const chip = n === 0 ? null : div().id(`dewdrop-helpers-${id}`).flex_none().px(6).py(1).whitespace_nowrap().text_size(11)
+      .bg(L.plankLight).text_color(L.plankDim).border_1().border_color("#000000").cursor_pointer()
+      .on_mouse_down("left", stop)
+      .on_click((_e, cx) => { cx.stop_propagation(); openOverlay({ mod: "dewdrop", props: { role: "agents" }, kind: "popup", frame: "none" }); })
+      .child(`${n} helper${n === 1 ? "" : "s"}`);
     return h_flex().id(`dewdrop-header-${id}`).size_full().font_family(FONT).items_center().gap(6).px(6)
       .bg(L.plank).border_t_2().border_color(L.plankLight)
       .on_click((e) => run(e.click_count >= 2 ? "pane.zoom" : "pane.focus", { pane: id }))
       .child(icon(p, look))
       .child(div().flex_1().min_w(0).truncate().text_size(13).text_color(p.focused ? L.plankText : L.plankDim)
         .child(headerTitle(p, home() ?? "")))
+      .children(chip ? [chip] : [])
       .child(button(`dewdrop-zoom-${id}`, "btn-zoom", p.zoomed ? "Restore" : "Zoom", () => run("pane.zoom", { pane: id })))
       .child(button(`dewdrop-close-${id}`, "btn-close", "Close", () => run("pane.close", { pane: id })));
   }

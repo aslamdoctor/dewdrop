@@ -4,11 +4,11 @@
 // the bar, so it changes look by itself at 6:00 and 18:00.
 import { div, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { agents, spaces, run, openOverlay } from "herdr";
+import { agents, terminals, panes, spaces, run, openOverlay } from "herdr";
 import { C, LOOK } from "./palette.js";
 import { art } from "./art.js";
 import { syncLook } from "./look.js";
-import { clockText, agentCounts, lookOf, tabStrip, msToNextMinute } from "./logic.js";
+import { clockText, agentCounts, helpersOf, lookOf, tabStrip, msToNextMinute } from "./logic.js";
 import { FONT, stop, dot, tabChip } from "./tabs.js";
 
 export { FONT };
@@ -56,11 +56,12 @@ export default class Titlebar {
     const tabs = h_flex().flex_shrink(1).min_w(0).overflow_hidden().items_center().gap(4)
       .children(strip.map((x) => tabChip(x, look, (tab) => run("tab.select", { id: tab.id }))));
 
-    // Helper rows arrive with Task 11 (the agents popup); until then only agents count.
-    const { working, blocked } = agentCounts(agents() ?? [], []);
+    const helpers = [...helpersOf(terminals() ?? [], panes() ?? []).values()].flat();
+    const { working, blocked } = agentCounts(agents() ?? [], helpers);
     const chip = h_flex().id("dewdrop-working").flex_none().h(28).items_center().gap(6).px(10).whitespace_nowrap()
       .bg(C.soil).border_2().border_color("#000000").text_size(13).text_color(C.gold)
-      .on_mouse_down("left", stop)
+      .cursor_pointer().on_mouse_down("left", stop)
+      .on_click(() => openOverlay({ mod: "dewdrop", props: { role: "agents" }, kind: "popup", frame: "none" }))
       .child(dot("working"))
       .child(`${working} working`)
       .when(blocked > 0, (el) => el.child(div().ml(4)).child(dot("blocked")).child(String(blocked)));

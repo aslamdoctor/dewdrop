@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { seasonOf, clockText, workingCount, statusLook, HOTBAR_KEYS, slotLabel, hotbarSlots,
-  slotTooltip, cropOf, CROPS, msToNextLook, headerTitle, chickenMood, msToNextMinute, CLOCK, lookOf, tabStrip, agentCounts } from "../mods/dewdrop/logic.js";
+  slotTooltip, cropOf, CROPS, msToNextLook, headerTitle, chickenMood, msToNextMinute, CLOCK, lookOf, tabStrip, agentCounts, helpersOf, agentGroups } from "../mods/dewdrop/logic.js";
 
 test("lookOf flips at 6:00 and 18:00", () => {
   expect(lookOf(new Date(2026, 10, 8, 5, 59))).toBe("night");
@@ -167,4 +167,36 @@ test("msToNextLook aims 50ms past the next 6:00 or 18:00", () => {
 
 test("cropOf follows FNV-1a (hash of \"a\" is 0xe40c292c)", () => {
   expect(cropOf("a")).toBe(CROPS[4]);
+});
+
+test("helpersOf nests helpers under their parent and spots kept ones", () => {
+  const terms = [{ address: "t1" }, { address: "h1", parent: "t1", name: "tests", status: "working" }, { address: "h2", parent: "t1", name: "lint", status: "idle" }];
+  const h = helpersOf(terms, [{ pane: "p9", terminal: "h2" }]);
+  expect(h.get("t1")).toEqual([{ address: "h1", title: "tests", status: "working", pane: null }, { address: "h2", title: "lint", status: "idle", pane: "p9" }]);
+  expect(h.has("h1")).toBe(false);
+});
+
+test("helpersOf skips finished helpers, reads null status as idle and falls back for titles", () => {
+  const terms = [
+    { address: "t1" },
+    { address: "h1", parent: "t1", name: "gone", state: "finished", status: "working" },
+    { address: "h2", parent: "t1", name: null, title: "npm test", status: null },
+    { address: "h3", parent: "t1", name: "n", title: "t", state: "live" },
+    { address: "h4", parent: "t1", name: null, title: "" },
+  ];
+  const h = helpersOf(terms, [{ pane: "p1", terminal: null }]);
+  expect(h.get("t1")).toEqual([
+    { address: "h2", title: "npm test", status: "idle", pane: null },
+    { address: "h3", title: "n", status: "idle", pane: null },
+    { address: "h4", title: "h4", status: "idle", pane: null },
+  ]);
+});
+
+test("agentGroups groups by tab in order", () => {
+  const A = (address, tab, tab_index) => ({ address, tab, tab_index, tab_name: `n${tab_index}`, space_name: "farm", status: "idle" });
+  const g = agentGroups([A("t1", "x", 1), A("t2", "y", 2), A("t3", "x", 1)], new Map([["t3", [{ address: "h" }]]]));
+  expect(g.map((x) => x.tab)).toEqual(["x", "y"]);
+  expect(g[0].rows.map((r) => r.agent.address)).toEqual(["t1", "t3"]);
+  expect(g[0].rows[1].helpers).toHaveLength(1);
+  expect(agentGroups([], new Map())).toEqual([]);
 });

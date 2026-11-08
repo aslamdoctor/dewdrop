@@ -29,6 +29,7 @@ Success: the user switches to `stardew` and it reads as a cozy farm-game window 
 - No following macOS light/dark mode.
 - No changes to the chicken's behavior, status meanings, or the install script beyond new files.
 - No side panel, no seasons-specific scenery (the season shows as an icon only).
+- No sound effects in this phase. The user wants sounds on different events, but in the next phase, with its own spec.
 
 ## Anti-goals
 

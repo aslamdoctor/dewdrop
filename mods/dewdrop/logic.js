@@ -338,6 +338,8 @@ export function skyFireflies(width) {
 // The pet walks the hotbar from ROAD_MARGIN to the width minus the sprite, at speed px/s.
 // leg is the ms for one way.
 export const PET_W = 48, PET_H = 40, ROAD_MARGIN = 8;
+// The road is the whole 64px hotbar block; the pet rests in the middle of it.
+export const ROAD_H = 64, ROAD_TOP = (ROAD_H - PET_H) / 2;
 export function walkPlan(width, speed) {
   const from = ROAD_MARGIN;
   const to = Math.max(from + 1, Math.round(width - ROAD_MARGIN - PET_W));

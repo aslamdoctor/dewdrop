@@ -8,14 +8,12 @@
 import { div, image } from "gpui-kit";
 import { agents, run, shared } from "herdr";
 import { art, petWalk } from "./art.js";
-import { chickenMood, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, PET_H } from "./logic.js";
+import { chickenMood, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, PET_H, ROAD_H, ROAD_TOP } from "./logic.js";
 import { savedPet, PET_WALK } from "./pets.js";
 import { C, INK } from "./palette.js";
 import { FONT } from "./tabs.js";
 
 const SHOW_MS = 4000;
-// The hotbar block is 64px tall: the badge rides at the top, the pet stands on the bottom.
-const BLOCK_H = 64;
 // The pet is first drawn standing at the start; the first leg begins this long after.
 const START_MS = 100;
 
@@ -73,17 +71,19 @@ export default class RoadPet {
     const { target, right } = walkLeg(plan, w.n);
 
     // A render with the same target (a mood change, say) leaves the transition running.
-    const el = div().id(`dewdrop-pet-${w.id}`).absolute().top(0).left(target).w(PET_W).h(BLOCK_H)
+    const el = div().id(`dewdrop-pet-${w.id}`).absolute().top(0).left(target).w(PET_W).h(ROAD_H)
       .transition("left", { duration: plan.leg, easing: "linear" })
       .when(Boolean(this.address), (el) => el.cursor_pointer()
         .on_click(() => run("agent.focus", { terminal: this.address })))
-      .child(image(petWalk(pet, right ? "r" : "l")).absolute().left(0).top(BLOCK_H - PET_H).w(PET_W).h(PET_H));
+      .child(image(petWalk(pet, right ? "r" : "l")).absolute().left(0).top(ROAD_TOP).w(PET_W).h(PET_H));
 
     if (!this.mood) return el;
     const badge = this.mood === "alert"
       ? div().relative().flex().items_center().justify_center().w(16).h(16).bg(C.red).border_2().border_color(INK)
         .font_family(FONT).text_size(11).text_color("#ffffff").child("!")
       : image(art("heart")).w(16).h(16).relative();
-    return el.child(div().absolute().top(4).left((PET_W - 16) / 2).child(badge.loop("top", { from: 0, to: -4, period: 600 })));
+    // The badge bobs between 0 and 3 at the top of the block, over the pet's head, so the
+    // block never clips it.
+    return el.child(div().absolute().top(0).left((PET_W - 16) / 2).child(badge.loop("top", { from: 3, to: 0, period: 600 })));
   }
 }

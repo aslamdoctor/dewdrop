@@ -181,7 +181,7 @@ test("agentGroups groups by tab in order", () => {
   expect(agentGroups([], new Map())).toEqual([]);
 });
 
-import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, ROAD_MARGIN } from "../mods/dewdrop/logic.js";
+import { SKY_H, skySize, skyClouds, skyBirds, skyStars, skyFireflies, walkPlan, walkLeg, msToLeg, nextLeg, PET_W, PET_H, ROAD_MARGIN, ROAD_H, ROAD_TOP } from "../mods/dewdrop/logic.js";
 
 test("the sky is laid out the same every time and stays in the strip", () => {
   for (const width of [800, 1440, 2560]) {
@@ -275,4 +275,10 @@ test("nextLeg skips missed legs after a sleep and survives a clock going back", 
   const r = nextLeg(10_000_000, 1000, 50, 6_400_000);
   expect(r.n).toBe(51);
   expect(msToLeg(r.t0, 1000, r.n + 1, 6_400_000)).toBe(1000);
+});
+
+test("the road pet rests in the middle of the 64px hotbar block", () => {
+  expect(ROAD_H).toBe(64);
+  expect(ROAD_TOP).toBe(12);
+  expect(ROAD_TOP * 2 + PET_H).toBe(ROAD_H);
 });

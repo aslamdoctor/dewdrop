@@ -7,11 +7,14 @@ import { h_flex } from "gpui-base";
 import { agents, terminals, panes, spaces, run, openOverlay } from "herdr";
 import { C, LOOK } from "./palette.js";
 import { art } from "./art.js";
-import { syncLook } from "./look.js";
+import { syncLook, noteValley } from "./look.js";
 import { clockText, agentCounts, helpersOf, lookOf, tabStrip, msToNextMinute } from "./logic.js";
 import { FONT, stop, dot, tabChip, bevel } from "./tabs.js";
 
 export { FONT };
+
+// The bar's height in layouts/dewdrop.json.
+const TITLEBAR_H = 40;
 
 export default class Titlebar {
   init(_p, cx) {
@@ -26,11 +29,15 @@ export default class Titlebar {
     const safeSync = () => {
       try { syncLook(); } catch (_e) { /* retried on the next tick */ }
     };
+    this.safeSync = safeSync;
     cx.timer.after(msToNextMinute(new Date()), tick);
-    safeSync();
   }
 
-  render() {
+  render(cx) {
+    // The valley is the window under this bar. A new size that wants another scene height
+    // swaps the scene right after this render (layout.set can't run inside one). The first
+    // render always does, which also covers the look on start.
+    if (noteValley(window.viewport_size().height - TITLEBAR_H)) cx.timer.after(1, () => this.safeSync());
     const now = new Date();
     const look = lookOf(now);
     const L = LOOK[look];

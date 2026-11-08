@@ -12,7 +12,7 @@ Two looks, picked by the local clock: day from 6:00 to 17:59, night the rest of 
 
 | Part | Day | Night |
 |------|-----|-------|
-| Scene | `scene-day.png`, morning valley | `scene-night.png`, starry night |
+| Scene | `scene/day-<rows>.png`, morning valley | `scene/night-<rows>.png`, starry night |
 | Bar and plank | wood `#8a5a2b`, light line `#c58b4e` | dark wood `#3a2718`, light line `#5a3c25` |
 | Active tab | parchment chip | gold chip |
 | Pane fill | `#20160fdb` | `#0b0b1ad6` |
@@ -59,7 +59,7 @@ Layout `layouts/dewdrop.json`, a column (shown here without the repeated mod pro
   { "id": "titlebar", "type": "block", "size": { "px": 40 }, "window_drag": true,
     "content": { "mod": "dewdrop", "props": { "role": "titlebar" } } },
   { "id": "valley", "type": "column",
-    "background": { "image": "mods/dewdrop/art/scene-day.png", "fit": "cover" },
+    "background": { "image": "mods/dewdrop/art/scene/day-460.png", "fit": "cover" },
     "children": [
       { "id": "main", "type": "block", "padding": [16, 16],
         "content": { "tab": "active", "pane": {
@@ -101,7 +101,7 @@ Art, all in `mods/dewdrop/art/`:
 | Art | Made by | Rerun with |
 |-----|---------|------------|
 | 17 SVG sprites (window icons, sun and moon, crops, tool icons, zoom and close buttons, heart), `shape-rendering="crispEdges"`, palette colors only (plus black and white) | `scripts/draw-art.js` | `bun scripts/draw-art.js` |
-| `scene-day.png` and `scene-night.png` (5120x3008), drawn in code with point filtering | `scripts/draw-scenes.js` | `bun scripts/draw-scenes.js` |
+| `scene/day-<rows>.png` and `scene/night-<rows>.png`, one pair per height in `SCENE_ROWS` (240 to 560 rows at 6x), drawn in code with point filtering | `scripts/draw-scenes.js` | `bun scripts/draw-scenes.js` |
 | 21 pet frames in `pets/` (96x80, shown at 48x40), `doghouse.png`, and the cropped `portrait.png` and `cast/01.png` to `cast/24.png` (192x192) | `scripts/render-pictures.js` (needs the author's source sheets and ImageMagick, `magick`) | only the author can rerun it |
 
 `scripts/png.js` holds the PNG encoder and the nearest-neighbour scaler the scripts share. `mods/dewdrop/art/CREDITS.md` names the sources. The font is `mods/dewdrop/fonts/PixelifySans.ttf` with its `OFL.txt`; fonts in a mod's `fonts/` folder load on their own.

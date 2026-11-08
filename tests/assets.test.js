@@ -3,7 +3,7 @@ import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { C, INK, GOLD_LINE, LOOK, STATUS, SPRITE, dotColor } from "../mods/dewdrop/palette.js";
 import { art, png, pic, petFrame, petWalk, PET_FRAMES, ART } from "../mods/dewdrop/art.js";
 import { PET_KEYS } from "../mods/dewdrop/pets.js";
-import { SKY_ART } from "../mods/dewdrop/logic.js";
+import { SKY_ART, SCENE_ROWS, DEFAULT_ROWS } from "../mods/dewdrop/logic.js";
 import { CAST } from "../mods/dewdrop/cast.js";
 import theme from "../themes/dewdrop.json";
 
@@ -54,7 +54,7 @@ const ALLOWED = new Set([...Object.values(C), ...Object.values(SPRITE), ...Objec
 test("art helpers build mod-relative paths", () => {
   expect(ART).toBe("mods/dewdrop/art");
   expect(art("window")).toBe("mods/dewdrop/art/window.svg");
-  expect(png("scene-day")).toBe("mods/dewdrop/art/scene-day.png");
+  expect(png("scene/day-460")).toBe("mods/dewdrop/art/scene/day-460.png");
   expect(pic("cast/03")).toBe("mods/dewdrop/art/cast/03.png");
   expect(petFrame("dog", "wag")).toBe("mods/dewdrop/art/pets/dog-wag.png");
 });
@@ -83,8 +83,11 @@ test("Pixelify Sans and its license are bundled", () => {
   expect(existsSync(FONT_DIR + "OFL.txt")).toBe(true);
 });
 
-test("scenes cover the window at the pixel scale", () => {
-  for (const n of ["scene-day", "scene-night"]) expect(pngSize(`${ART_DIR}${n}.png`)).toEqual([5120, 3008]);
+test("every scene height is drawn for both looks at 6x, 2.4 times as wide as tall", () => {
+  for (const rows of SCENE_ROWS) for (const look of ["day", "night"]) {
+    expect(pngSize(`${ART_DIR}scene/${look}-${rows}.png`)).toEqual([Math.round(rows * 2.4) * 6, rows * 6]);
+  }
+  expect(SCENE_ROWS).toContain(DEFAULT_ROWS);
 });
 
 test("pictures and pet frames exist at their sizes", () => {

@@ -101,8 +101,30 @@ export function msToNextLook(now) {
   return 60000;
 }
 
-// The shipped layout and the live swap (Task 6) share these two helpers.
-const sceneLook = (image) => /scene-(day|night)\.png$/.exec(image ?? "")?.[1] ?? null;
+// The valley scene comes in several heights (art rows), drawn by scripts/draw-scenes.js.
+// Each keeps the mock's pixel size: about 3 points per art pixel. The mod wears the one
+// whose rows come closest to that on the current window.
+export const SCENE_ROWS = [240, 270, 300, 340, 380, 420, 460, 510, 560];
+export const DEFAULT_ROWS = 460;
+const SCENE_PT = 3;
+
+// The scene height for a valley `height` points tall: the one whose pixel size is
+// closest to SCENE_PT, compared as a ratio so 10% too big and 10% too small weigh the same.
+export function sceneRows(height) {
+  if (!(height > 0)) return DEFAULT_ROWS;
+  const want = height / SCENE_PT;
+  let best = SCENE_ROWS[0];
+  for (const r of SCENE_ROWS) if (Math.abs(Math.log(r / want)) < Math.abs(Math.log(best / want))) best = r;
+  return best;
+}
+
+export const scenePath = (look, rows) => png(`scene/${look}-${rows}`);
+// { look, rows } from a valley scene path, or null for a path that isn't one.
+function sceneOf(image) {
+  const m = /scene\/(day|night)-(\d+)\.png$/.exec(image ?? "");
+  return m ? { look: m[1], rows: Number(m[2]) } : null;
+}
+const sceneKey = (s) => (s ? `${s.look}-${s.rows}` : null);
 
 export function findNode(n, id) {
   if (!n || typeof n !== "object") return null;
@@ -114,14 +136,20 @@ export function findNode(n, id) {
   return null;
 }
 
-// Which look the tree is wearing, read from the valley scene path. null for a foreign tree.
-export function lookOfLayout(tree) {
-  return sceneLook(findNode(tree, "valley")?.background?.image);
+// The scene the tree is wearing, read from the valley background. null for a foreign tree.
+export function sceneOfLayout(tree) {
+  return sceneOf(findNode(tree, "valley")?.background?.image);
 }
 
-// A deep copy of the tree wearing the day or night look. Only the valley scene and the
-// pane colors of "main" change. null when the tree has no valley or no main node.
-export function layoutFor(tree, look) {
+// Which look the tree is wearing. null for a foreign tree.
+export function lookOfLayout(tree) {
+  return sceneOfLayout(tree)?.look ?? null;
+}
+
+// A deep copy of the tree wearing the day or night look at `rows` (the tree's own rows
+// when left out). Only the valley scene and the pane colors of "main" change. null when
+// the tree has no valley or no main node.
+export function layoutFor(tree, look, rows) {
   // The mod runtime has no structuredClone, and the tree is plain JSON.
   const copy = JSON.parse(JSON.stringify(tree));
   const valley = findNode(copy, "valley");
@@ -129,46 +157,49 @@ export function layoutFor(tree, look) {
   const pane = main?.content?.pane;
   if (!valley || !pane) return null;
   const L = LOOK[look];
-  valley.background = { ...(valley.background ?? {}), image: png("scene-" + look) };
+  const r = rows ?? sceneOf(valley.background?.image)?.rows ?? DEFAULT_ROWS;
+  valley.background = { ...(valley.background ?? {}), image: scenePath(look, r) };
   pane.background = L.pane;
   pane.border = { ...(pane.border ?? {}), color: L.border };
   pane.focus = { ...(pane.focus ?? {}), color: L.focus };
   return copy;
 }
 
-// The look to switch to, or null when the tree already wears lookOf(now) or isn't Dewdrop's.
-export function needsSwap(tree, now) {
-  const wearing = lookOfLayout(tree);
+// The scene to switch to, as { look, rows }, or null when the tree already wears
+// lookOf(now) at `rows` (its own rows when left out) or isn't Dewdrop's.
+export function needsSwap(tree, now, rows) {
+  const wearing = sceneOfLayout(tree);
   if (!wearing) return null;
-  const want = lookOf(now);
-  return wearing === want ? null : want;
+  const want = { look: lookOf(now), rows: rows ?? wearing.rows };
+  return sceneKey(want) === sceneKey(wearing) ? null : want;
 }
 
 // How long a written look may stay unconfirmed before the syncer tries again.
 export const PENDING_MS = 90000;
 
-// A look swapper with its own pending guard. read() gives the current layout tree,
-// write(tree) applies one. pending holds the look last written until the layout shows it,
+// A scene swapper (look and rows) with its own pending guard. read() gives the current layout tree,
+// write(tree) applies one, and rows is the scene height the window wants (left out keeps
+// the tree's). pending holds the scene last written until the layout shows it,
 // so a second tick before the reload doesn't write again. A throwing write frees the guard,
 // and so does a layout that already matches or a pending older than PENDING_MS (a write
 // that did nothing), which lets the next tick retry.
 export function makeSyncer() {
   let pending = null;
   let pendingAt = 0;
-  return function syncWith(now, read, write) {
+  return function syncWith(now, read, write, rows) {
     const tree = read();
     if (!tree) return;
-    const wearing = lookOfLayout(tree);
+    const wearing = sceneKey(sceneOfLayout(tree));
     if (pending && (wearing === pending || wearing === null || now - pendingAt > PENDING_MS)) pending = null;
-    const look = needsSwap(tree, now);
-    if (!look) {
+    const want = needsSwap(tree, now, rows);
+    if (!want) {
       pending = null;
       return;
     }
-    if (pending === look) return;
-    const next = layoutFor(tree, look);
+    if (pending === sceneKey(want)) return;
+    const next = layoutFor(tree, want.look, want.rows);
     if (!next) return;
-    pending = look;
+    pending = sceneKey(want);
     pendingAt = +now;
     try {
       write(next);

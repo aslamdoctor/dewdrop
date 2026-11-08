@@ -12,7 +12,7 @@
     {
       "id": "valley",
       "type": "column",
-      "background": { "image": "mods/dewdrop/art/scene-day.png", "fit": "cover" },
+      "background": { "image": "mods/dewdrop/art/scene/day-460.png", "fit": "cover" },
       "children": [
         {
           "id": "sky",

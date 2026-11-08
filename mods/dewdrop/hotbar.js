@@ -8,6 +8,7 @@ import { agents, spaces, layout, run, shared, setShared, openOverlay, pickFolder
 import { C, INK, GOLD_LINE, LOOK, dotColor } from "./palette.js";
 import { art, pic, png, petFrame } from "./art.js";
 import { CAST, pictureIndex } from "./cast.js";
+import { savedPet } from "./pets.js";
 import { hotbarSlots, slotTooltip, lookOf, msToNextLook } from "./logic.js";
 import { FONT, stop } from "./tabs.js";
 
@@ -76,9 +77,9 @@ export default class Hotbar {
     const active = list.find((s) => s.active);
     const slots = hotbarSlots(list);
     const hidden = panesHiddenIn(layout());
-    const petName = shared("dewdrop.pet");
-    const petIcon = typeof petName === "string" && petName
-      ? image(petFrame(petName, "a")).w(18).h(15).flex_none()
+    const pet = savedPet(shared("dewdrop.pet"));
+    const petIcon = pet
+      ? image(petFrame(pet, "a")).w(18).h(15).flex_none()
       : image(png("doghouse")).w(18).h(15).flex_none();
     const svg = (name) => image(art(name)).w(14).h(14).flex_none();
 
@@ -124,7 +125,7 @@ export default class Hotbar {
       .child(tool("dewdrop-tool-space", "New space (pick a folder)", svg("tool-folder"), look, addSpace))
       .child(tool("dewdrop-tool-peek", hidden ? "Show panes" : "Hide panes", svg(hidden ? "tool-eye-off" : "tool-eye"), look, peek))
       .child(tool("dewdrop-tool-pet", "Choose a pet", petIcon, look,
-        () => openOverlay({ mod: "dewdrop", props: { role: "petpick" }, kind: "dialog", frame: "none" })));
+        () => openOverlay({ mod: "dewdrop", props: { role: "petpick" }, kind: "dialog", frame: "none", width: 452, height: 320 })));
 
     const box = h_flex().relative().items_center().gap(GAP).px(8).py(2)
       .bg(alpha(L.bar, 0.55)).border(3).border_color("#000000")

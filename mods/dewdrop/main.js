@@ -4,8 +4,8 @@
 //   hotbar    spaces as inventory slots
 //   picker    dialog to choose the portrait
 //   tabmore   popup listing the tabs the title bar had no room for
-//   chicken   the floating critter
-//   pet       the same critter, as the layout names it
+//   pet       the floating critter
+//   petpick   dialog to choose the pet
 //   empty     nothing (the hidden peek-spacer)
 
 import { View, div } from "gpui-kit";
@@ -13,9 +13,10 @@ import { props } from "herdr";
 import Titlebar from "./titlebar.js";
 import Header from "./header.js";
 import Hotbar from "./hotbar.js";
-import Chicken from "./chicken.js";
+import Pet from "./pet.js";
 import TabMore from "./tabs.js";
 import Picker from "./picker.js";
+import PetPick from "./petpick.js";
 
 // A role that paints nothing (the hidden peek-spacer block).
 class Empty {
@@ -24,8 +25,7 @@ class Empty {
   }
 }
 
-// "pet" is the chicken view until Task 10 brings the pet cast.
-const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar, chicken: Chicken, pet: Chicken, tabmore: TabMore, picker: Picker, empty: Empty };
+const ROLES = { titlebar: Titlebar, header: Header, hotbar: Hotbar, pet: Pet, tabmore: TabMore, picker: Picker, petpick: PetPick, empty: Empty };
 
 export default class Dewdrop extends View {
   init(p, cx) {

@@ -21,3 +21,20 @@ test("pictureIndex clamps bad stored values to 0", () => {
   expect(pictureIndex(7)).toBe(7);
   for (const v of [undefined, null, -1, 25, 2.5, "3", {}]) expect(pictureIndex(v)).toBe(0);
 });
+
+import { PET_KEYS, PETS, PET_FRAMES, petKey, savedPet } from "../mods/dewdrop/pets.js";
+
+test("petKey keeps known pets and none, else chicken", () => {
+  expect(petKey("frog")).toBe("frog");
+  expect(petKey(null)).toBeNull();
+  for (const v of [undefined, "dragon", 3]) expect(petKey(v)).toBe("chicken");
+  expect(PET_KEYS.every((k) => PETS[k].frames === PET_FRAMES[k] && PETS[k].name && PETS[k].trait)).toBe(true);
+});
+
+test("savedPet: unset keeps the default, the word none means no pet", () => {
+  expect(savedPet(null)).toBe("chicken");
+  expect(savedPet(undefined)).toBe("chicken");
+  expect(savedPet("none")).toBeNull();
+  expect(savedPet("cat")).toBe("cat");
+  expect(savedPet(7)).toBe("chicken");
+});

@@ -6,8 +6,4 @@ export const png = (name) => `${ART}/${name}.png`;
 export const pic = (file) => png(file);
 export const petFrame = (pet, frame) => png(`pets/${pet}-${frame}`);
 
-// Each pet's frames: a walk pair and one action. Moves to pets.js in Task 10.
-export const PET_FRAMES = {
-  chicken: ["a", "b", "act"], duck: ["a", "b", "act"], cat: ["a", "b", "nap"], dog: ["a", "b", "wag"],
-  rabbit: ["a", "hop", "act"], turtle: ["a", "b", "hide"], frog: ["a", "hop", "act"],
-};
+export { PET_FRAMES } from "./pets.js";

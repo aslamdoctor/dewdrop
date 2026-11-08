@@ -4,7 +4,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { C, SPRITE as S } from "../mods/dewdrop/palette.js";
 
 const OUT = new URL("../mods/dewdrop/art/", import.meta.url).pathname;
-// The key for the older sprites (heart, buttons, chicken).
+// The key for the older sprites (heart, buttons).
 const KEY = {
   K: "#000000", w: "#ffffff", S: C.soil, P: C.parchment, W: C.wood, L: C.woodLight,
   G: C.grass, D: C.grassDark, B: C.sky, R: C.red, Y: C.gold, I: C.idle,
@@ -90,43 +90,6 @@ const sprites = [
     ".KKKKKKKKKKKKKK.",
     "................",
   ]),
-  // Chicken: drawn on a 16 grid at 2x, so it sits on a 32x32 canvas.
-  grid("chicken-0", [
-    "................",
-    "....RR..........",
-    "...RRR..........",
-    "...wwww.........",
-    "..wwKww.........",
-    "YYwwwww.........",
-    "..Rwwww.........",
-    "...wwww....ww...",
-    "...wwwwwwwwwww..",
-    "...wwwwwwwwwww..",
-    "...wwwPPPPwww...",
-    "....wwPPPwwww...",
-    ".....wwwwwww....",
-    ".......Y..Y.....",
-    ".......Y..Y.....",
-    "......YY.YY.....",
-  ], 2),
-  grid("chicken-1", [
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "...........ww...",
-    "....wwwwwwwwwww.",
-    "..wwwwwwwwwwwww.",
-    ".RwwwwPPPPwwww..",
-    "RRwKwwwPPPwwww..",
-    ".wwwwwwwwwwww...",
-    "YRwww..wwwww....",
-    "Y......Y..Y.....",
-    ".......Y..Y.....",
-    "......YY.YY.....",
-  ], 2),
 ];
 
 // The new set, ported from the Dewdrop mock. Each one has its own letter key.

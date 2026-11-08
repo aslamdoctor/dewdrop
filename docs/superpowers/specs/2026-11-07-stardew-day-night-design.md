@@ -120,7 +120,7 @@ Left to right: traffic-light gap (as now, `pl(80)`), tab strip, flexible space, 
 
 ### Space icons
 
-- Each hotbar space shows a 16x16 crop (carrot, pumpkin, wheat, sprout, tomato, corn) in the same art style, shown at 24px. Slots and the four tool buttons (plus, folder, peek, pet) have a 2px dark brown (`#3b2418`) inner border with a faint light line along the top, replacing the light wood border; the selected slot gets a gold inner line, a 3px lift and a gold bar under it.
+- Each hotbar space shows a 16x16 crop (carrot, pumpkin, wheat, sprout, tomato, corn) in the same art style, shown at 24px. Slots and the four tool buttons (plus, folder, peek, pet) have a 2px dark brown (`#3b2418`) inner border with a faint light line along the top, replacing the light wood border; the selected slot gets only a gold inner line and a gold key number. It does not move and has no bar under it (user's decision).
 
 ### Busy spaces
 

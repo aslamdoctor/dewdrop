@@ -59,7 +59,6 @@ export default class Hotbar {
   render(cx) {
     const look = lookOf(new Date());
     const L = LOOK[look];
-    const night = look === "night";
     const list = spaces() ?? [];
     const all = agents() ?? [];
     const active = list.find((s) => s.active);
@@ -73,10 +72,13 @@ export default class Hotbar {
     // Slot and tool clicks are skipped while the pet is carried or just dropped.
     const free = (fn) => (...args) => { if (!this.pet.busy()) fn(...args); };
 
-    const portrait = div().id("dewdrop-portrait").flex_none().w(46).h(46).mx(2)
-      .border_2().border_color(night ? L.trim : INK).cursor_pointer().tooltip("Change picture")
+    // The portrait has no border of its own: negative margins cancel the box padding so it
+    // sits flush against the box edge, and the box trim (painted last) frames it.
+    const face = slots.length > SHOWN ? SLOT + 10 : SLOT + 4;
+    const portrait = div().id("dewdrop-portrait").flex_none().w(face).h(face).ml(-8).my(-2)
+      .overflow_hidden().cursor_pointer().tooltip("Change picture")
       .on_click(free(() => openOverlay({ mod: "dewdrop", props: { role: "picker" }, kind: "dialog", frame: "none", width: 920, height: 396 })))
-      .child(image(pic(CAST[pictureIndex(shared("dewdrop.picture"))].file)).w(42).h(42));
+      .child(image(pic(CAST[pictureIndex(shared("dewdrop.picture"))].file)).size_full());
 
     const peek = () => {
       // Hiding main alone would pull the hotbar to the top, so the spacer fills in.
@@ -119,9 +121,9 @@ export default class Hotbar {
     // A press on the box stays with the box, so it never picks up the pet passing under it.
     const box = h_flex().id("dewdrop-box").relative().items_center().gap(GAP).px(8).py(2)
       .bg(alpha(L.bar, 0.55)).border(3).border_color("#000000")
-      .child(div().absolute().top(0).left(0).right(0).bottom(0).border_2().border_color(L.trim))
       .on_mouse_down("left", stop)
-      .child(portrait).child(sep()).child(strip).child(sep()).child(tools);
+      .child(portrait).child(sep()).child(strip).child(sep()).child(tools)
+      .child(div().absolute().top(0).left(0).right(0).bottom(0).border_2().border_color(L.trim));
 
     const walker = this.pet.view(cx);
     // The whole strip carries a held pet: moves go to it, and a release or the pointer

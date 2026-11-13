@@ -72,10 +72,10 @@ export default class Hotbar {
     // Slot and tool clicks are skipped while the pet is carried or just dropped.
     const free = (fn) => (...args) => { if (!this.pet.busy()) fn(...args); };
 
-    // The portrait has no border of its own: negative margins cancel the box padding so it
+    // The portrait has no border of its own: the box has no left or vertical padding, so it
     // sits flush against the box edge, and the box trim (painted last) frames it.
     const face = slots.length > SHOWN ? SLOT + 10 : SLOT + 4;
-    const portrait = div().id("dewdrop-portrait").flex_none().w(face).h(face).ml(-8).my(-2)
+    const portrait = div().id("dewdrop-portrait").flex_none().w(face).h(face)
       .overflow_hidden().cursor_pointer().tooltip("Change picture")
       .on_click(free(() => openOverlay({ mod: "dewdrop", props: { role: "picker" }, kind: "dialog", frame: "none", width: 920, height: 396 })))
       .child(image(pic(CAST[pictureIndex(shared("dewdrop.picture"))].file)).size_full());
@@ -107,11 +107,11 @@ export default class Hotbar {
     };
 
     const row = h_flex().id(SCROLL_ID).gap(GAP).overflow_x_scroll().children(slots.map((s, i) => slot(s, list[i], all, look, free)));
-    const strip = v_flex().flex_shrink(1).min_w(0).max_w(SLOT * SHOWN + GAP * (SHOWN - 1))
+    const strip = v_flex().my(2).flex_shrink(1).min_w(0).max_w(SLOT * SHOWN + GAP * (SHOWN - 1))
       .child(row)
       .when(slots.length > SHOWN, (el) => el.child(div().h(6).bg("#0000004d").child(Scrollbar.horizontal(SCROLL_ID).size_full().viewport_from_layout())));
 
-    const tools = div().flex_none().w(46).h(46).flex().flex_wrap().gap(2)
+    const tools = div().my(2).flex_none().w(46).h(46).flex().flex_wrap().gap(2)
       .child(tool("dewdrop-tool-tab", "New tab", svg("tool-plus"), look, free, () => active && run("tab.new", { space: active.id })))
       .child(tool("dewdrop-tool-space", "New space (pick a folder)", svg("tool-folder"), look, free, addSpace))
       .child(tool("dewdrop-tool-peek", hidden ? "Show panes" : "Hide panes", svg(hidden ? "tool-eye-off" : "tool-eye"), look, free, peek))
@@ -119,7 +119,7 @@ export default class Hotbar {
         () => openOverlay({ mod: "dewdrop", props: { role: "petpick" }, kind: "dialog", frame: "none", width: 452, height: 320 })));
 
     // A press on the box stays with the box, so it never picks up the pet passing under it.
-    const box = h_flex().id("dewdrop-box").relative().items_center().gap(GAP).px(8).py(2)
+    const box = h_flex().id("dewdrop-box").relative().items_center().gap(GAP).pr(8)
       .bg(alpha(L.bar, 0.55)).border(3).border_color("#000000")
       .on_mouse_down("left", stop)
       .child(portrait).child(sep()).child(strip).child(sep()).child(tools)

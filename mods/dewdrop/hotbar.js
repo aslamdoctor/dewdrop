@@ -9,7 +9,7 @@ import { h_flex, v_flex, Scrollbar } from "gpui-base";
 import { agents, spaces, layout, run, shared, openOverlay, pickFolder } from "herdr";
 import { C, INK, GOLD_LINE, LOOK, dotColor } from "./palette.js";
 import { art, pic, png, petFrame } from "./art.js";
-import { CAST, pictureIndex } from "./cast.js";
+import { CAST, avatarIndex } from "./cast.js";
 import { savedPet } from "./pets.js";
 import { hotbarSlots, slotTooltip, lookOf, repaintOnLook, findNode } from "./logic.js";
 import { FONT, stop } from "./tabs.js";
@@ -76,9 +76,9 @@ export default class Hotbar {
     // sits flush against the box edge, and the box trim (painted last) frames it.
     const face = slots.length > SHOWN ? SLOT + 10 : SLOT + 4;
     const portrait = div().id("dewdrop-portrait").flex_none().w(face).h(face)
-      .overflow_hidden().cursor_pointer().tooltip("Change picture")
-      .on_click(free(() => openOverlay({ mod: "dewdrop", props: { role: "picker" }, kind: "dialog", frame: "none", width: 920, height: 396 })))
-      .child(image(pic(CAST[pictureIndex(shared("dewdrop.picture"))].file)).size_full());
+      .overflow_hidden().cursor_pointer().tooltip(active ? `Change the avatar for ${active.name}` : "Change avatar")
+      .on_click(free(() => openOverlay({ mod: "dewdrop", props: { role: "picker", space: active?.id ?? null }, kind: "dialog", frame: "none", width: 920, height: 396 })))
+      .child(image(pic(CAST[avatarIndex(shared("dewdrop.avatars"), active?.id, shared("dewdrop.picture"))].file)).size_full());
 
     const peek = () => {
       // Hiding main alone would pull the hotbar to the top, so the spacer fills in.

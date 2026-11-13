@@ -24,3 +24,17 @@ export function faceOf(app) {
 export function pictureIndex(v) {
   return Number.isInteger(v) && v >= 0 && v <= 24 ? v : 0;
 }
+
+// Avatars are stored per space as { [spaceId]: castIndex } under "dewdrop.avatars".
+const isMap = (v) => v != null && typeof v === "object" && !Array.isArray(v);
+
+// The space's avatar, or the global picture when it has none (or a bad one).
+export function avatarIndex(map, spaceId, fallback) {
+  const v = isMap(map) && spaceId != null && Object.hasOwn(map, spaceId) ? map[spaceId] : null;
+  return Number.isInteger(v) && v >= 0 && v <= 24 ? v : pictureIndex(fallback);
+}
+
+// A copy of the map with this space's avatar set.
+export function withAvatar(map, spaceId, i) {
+  return { ...(isMap(map) ? map : {}), [spaceId]: i };
+}

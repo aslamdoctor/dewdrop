@@ -22,6 +22,27 @@ test("pictureIndex clamps bad stored values to 0", () => {
   for (const v of [undefined, null, -1, 25, 2.5, "3", {}]) expect(pictureIndex(v)).toBe(0);
 });
 
+import { avatarIndex, withAvatar } from "../mods/dewdrop/cast.js";
+
+test("avatarIndex reads the space's avatar, else the global picture", () => {
+  const map = { s1: 4, s2: 99 };
+  expect(avatarIndex(map, "s1", 7)).toBe(4);
+  expect(avatarIndex(map, "s2", 7)).toBe(7);
+  expect(avatarIndex(map, "s3", 7)).toBe(7);
+  expect(avatarIndex(map, null, 7)).toBe(7);
+  expect(avatarIndex(map, "toString", 7)).toBe(7);
+  for (const bad of [null, undefined, "x", 3, [1]]) expect(avatarIndex(bad, "s1", 2)).toBe(2);
+  expect(avatarIndex(null, "s1", undefined)).toBe(0);
+});
+
+test("withAvatar sets one space without touching the others", () => {
+  const before = { s1: 4 };
+  expect(withAvatar(before, "s2", 9)).toEqual({ s1: 4, s2: 9 });
+  expect(before).toEqual({ s1: 4 });
+  expect(withAvatar(undefined, "s1", 3)).toEqual({ s1: 3 });
+  expect(withAvatar([5], "s1", 3)).toEqual({ s1: 3 });
+});
+
 import { PET_KEYS, PETS, PET_FRAMES, petKey, savedPet } from "../mods/dewdrop/pets.js";
 
 test("petKey keeps known pets and none, else chicken", () => {

@@ -3,10 +3,10 @@
 // to peek at it, "keep" gives it a pane. Grows to 450px, then scrolls with a styled bar.
 import { div, image } from "gpui-kit";
 import { h_flex, v_flex, Scrollbar } from "gpui-base";
-import { agents, terminals, panes, run, closeOverlay, openOverlay, props } from "herdr";
+import { agents, terminals, panes, run, shared, closeOverlay, openOverlay, props } from "herdr";
 import { INK, LOOK } from "./palette.js";
 import { petFrame, pic } from "./art.js";
-import { faceOf } from "./cast.js";
+import { CAST, avatarIndex } from "./cast.js";
 import { helpersOf, agentGroups, lookOf, repaintOnLook, agentsAt } from "./logic.js";
 import { FONT, stop, dot } from "./tabs.js";
 
@@ -49,12 +49,16 @@ export default class Agents {
     const then = (fn) => { try { fn(); } finally { close(); } };
     const groups = agentGroups(agents() ?? [], helpersOf(terminals() ?? [], panes() ?? []));
 
+    // Each agent wears its space's avatar, the same one the hotbar shows for that space.
+    const avatars = shared("dewdrop.avatars"), picture = shared("dewdrop.picture");
+    const faceFor = (a) => CAST[avatarIndex(avatars, a.space, picture)];
+
     const agentRow = (a, n) => h_flex().id(`dewdrop-agent-${a.address}`).h(AGENT_H - 4).mb(4).items_center().gap(6).px(6)
       .bg(L.slot).border_2().border_color("#000000").cursor_pointer().text_size(12)
       .on_click(() => then(() => { run("tab.select", { id: a.tab }); run("agent.focus", { terminal: a.address }); }))
-      .child(div().flex_none().w(24).h(24).border_2().border_color(INK).child(image(pic(faceOf(a.app).file)).size_full()))
+      .child(div().flex_none().w(24).h(24).border_2().border_color(INK).child(image(pic(faceFor(a).file)).size_full()))
       .child(div().flex_1().min_w(0).truncate().child(a.title || a.address))
-      .child(div().flex_none().text_size(10).opacity(0.7).child(`${a.app ?? "agent"} / ${faceOf(a.app).name}`))
+      .child(div().flex_none().text_size(10).opacity(0.7).child(`${a.app ?? "agent"} / ${faceFor(a).name}`))
       .when(n > 0, (el) => el.child(div().flex_none().text_size(10).opacity(0.85).child(`${n} helper${n === 1 ? "" : "s"}`)))
       .child(dot(a.status));
 
